@@ -4,6 +4,9 @@ import "./App.css";
 import ForgotPassword from "./ForgotPassword";
 import Auth from "./Auth";
 import Login from "./Login";
+import SubscriptionStatus from "./features/subscription/SubscriptionStatus";
+import WatchPage from "./features/playback/WatchPage";
+import HistoryPage from "./features/playback/HistoryPage";
 
 const movies = [
   {
@@ -121,6 +124,7 @@ function App() {
   const [selectedGenre, setSelectedGenre] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [screen, setScreen] = useState("home");
+  const [watchTitleId, setWatchTitleId] = useState(null);
 
   const [currentUser, setCurrentUser] = useState(() => {
     try {
@@ -146,6 +150,16 @@ function App() {
     setScreen("home");
   }
 
+  // Open the video player (issue #3). Viewers must be logged in.
+  function playMovie(titleId) {
+    if (!currentUser) {
+      setScreen("login");
+      return;
+    }
+    setWatchTitleId(titleId);
+    setScreen("watch");
+  }
+
   function handleLogin(user) {
     if (user) {
       sessionStorage.setItem("streamhub_user", JSON.stringify(user));
@@ -160,6 +174,21 @@ function App() {
     sessionStorage.removeItem("streamhub_user");
     setCurrentUser(null);
     setScreen("home");
+  }
+
+  // Video player screen (issue #3)
+  if (screen === "watch") {
+    return <WatchPage titleId={watchTitleId} onBack={goHome} />;
+  }
+
+  // Watch history screen (issue #9)
+  if (screen === "history") {
+    return <HistoryPage onPlay={playMovie} onBack={goHome} />;
+  }
+
+  // My subscription screen (issue #14)
+  if (screen === "account") {
+    return <SubscriptionStatus onBack={goHome} />;
   }
 
   // Forgot Password screen
@@ -214,6 +243,20 @@ function App() {
                 currentUser.email ||
                 "Viewer"}
             </span>
+
+            <button
+              type="button"
+              onClick={() => setScreen("history")}
+            >
+              History
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setScreen("account")}
+            >
+              My Subscription
+            </button>
 
             <button
               type="button"
@@ -366,7 +409,14 @@ function App() {
 
                     <span
                       className="play-icon"
+                      role="button"
+                      tabIndex={0}
+                      style={{ cursor: "pointer" }}
                       aria-label={`Play ${movie.title}`}
+                      onClick={() => playMovie(movie.id)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") playMovie(movie.id);
+                      }}
                     >
                       ▶
                     </span>
