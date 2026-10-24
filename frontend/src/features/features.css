@@ -1,0 +1,26 @@
+/* Shared look for the playback / watchlist / subscription pages. */
+.feature-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.feature-page ul {
+  list-style: none;
+  padding: 0;
+}
+
+.feature-page li {
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.feature-page video {
+  width: 100%;
+  max-height: 70vh;
+  background: #000;
+}
+
+.feature-page .feature-error {
+  color: #ff6b6b;
+}

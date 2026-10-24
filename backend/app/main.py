@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.routers import auth, profile
 from app.routers import catalog, playback, subscription, admin
+from app.routers import watchlist
 
 app = FastAPI(
     title="StreamHub API",
@@ -30,6 +31,7 @@ app.include_router(catalog.router)
 app.include_router(playback.router)
 app.include_router(subscription.router)
 app.include_router(admin.router)
+app.include_router(watchlist.router)
 
 
 @app.get("/")
