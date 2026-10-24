@@ -4,6 +4,7 @@ import "./App.css";
 import ForgotPassword from "./ForgotPassword";
 import Auth from "./Auth";
 import Login from "./Login";
+import SubscriptionStatus from "./features/subscription/SubscriptionStatus";
 
 const movies = [
   {
@@ -162,6 +163,11 @@ function App() {
     setScreen("home");
   }
 
+  // My subscription screen (issue #14)
+  if (screen === "account") {
+    return <SubscriptionStatus onBack={goHome} />;
+  }
+
   // Forgot Password screen
   if (screen === "forgot") {
     return <ForgotPassword />;
@@ -214,6 +220,13 @@ function App() {
                 currentUser.email ||
                 "Viewer"}
             </span>
+
+            <button
+              type="button"
+              onClick={() => setScreen("account")}
+            >
+              My Subscription
+            </button>
 
             <button
               type="button"
