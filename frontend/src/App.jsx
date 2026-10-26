@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import ForgotPassword from "./ForgotPassword";
 import Auth from "./Auth";
@@ -8,6 +8,9 @@ import SubscriptionStatus from "./features/subscription/SubscriptionStatus";
 import WatchPage from "./features/playback/WatchPage";
 import HistoryPage from "./features/playback/HistoryPage";
 import WatchlistPage from "./features/watchlist/WatchlistPage";
+import AdminDashboard from "./features/admin/AdminDashboard";
+import { API_URL } from "./features/api";
+
 
 const movies = [
   {
@@ -136,7 +139,29 @@ function App() {
     }
   });
 
-  const filteredMovies = movies.filter((movie) => {
+  const [catalogMovies, setCatalogMovies] = useState(movies);
+
+  useEffect(() => {
+    fetch(`${API_URL}/catalog/titles`)
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const mapped = data.map((t) => ({
+            id: t.id,
+            title: t.title,
+            genre: t.genre || "Action",
+            year: t.year || 2024,
+            poster:
+              t.poster_url ||
+              "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
+          }));
+          setCatalogMovies(mapped);
+        }
+      })
+      .catch(() => {});
+  }, [screen]);
+
+  const filteredMovies = catalogMovies.filter((movie) => {
     const matchesGenre =
       selectedGenre === "All" || movie.genre === selectedGenre;
 
@@ -146,6 +171,7 @@ function App() {
 
     return matchesGenre && matchesSearch;
   });
+
 
   function goHome() {
     setScreen("home");
@@ -196,6 +222,12 @@ function App() {
   if (screen === "account") {
     return <SubscriptionStatus onBack={goHome} />;
   }
+
+  // Admin dashboard screen (OTT-F-050, OTT-F-051, OTT-F-052)
+  if (screen === "admin") {
+    return <AdminDashboard onBack={goHome} />;
+  }
+
 
   // Forgot Password screen
   if (screen === "forgot") {
@@ -271,12 +303,27 @@ function App() {
               My Subscription
             </button>
 
+            {Boolean(currentUser.is_admin || currentUser.role === "admin") && (
+              <button
+                type="button"
+                onClick={() => setScreen("admin")}
+                style={{
+                  border: "1px solid #e50914",
+                  color: "#e50914",
+                  fontWeight: "bold",
+                }}
+              >
+                🛠️ Admin Panel
+              </button>
+            )}
+
             <button
               type="button"
               onClick={handleLogout}
             >
               Logout
             </button>
+
 
             <button
               type="button"
