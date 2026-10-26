@@ -53,6 +53,18 @@ def get_current_user(
     return user
 
 
+def get_current_admin(
+    current_user: User = Depends(get_current_user),
+) -> User:
+    if not getattr(current_user, "is_admin", False) and getattr(current_user, "role", "viewer") != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Administrator authorization required.",
+        )
+    return current_user
+
+
+
 class ProfileUpdateRequest(BaseModel):
     full_name: str | None = Field(default=None, min_length=2, max_length=100)
     avatar_url: str | None = Field(default=None, max_length=500)
