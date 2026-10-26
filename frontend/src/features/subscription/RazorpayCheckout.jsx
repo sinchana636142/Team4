@@ -44,7 +44,24 @@ export default function RazorpayCheckout({ onSubscriptionUpdated }) {
       .then((data) => {
         setPlans(data);
         if (data.length > 0) {
-          setSelectedPlanId(data[0].id);
+          let initialPlanId = data[0].id;
+          try {
+            const savedPlan = sessionStorage.getItem("streamhub_selected_plan");
+            if (savedPlan) {
+              const parsed = JSON.parse(savedPlan);
+              const matched = data.find(
+                (p) =>
+                  p.name.toLowerCase() === (parsed.name || "").toLowerCase() ||
+                  p.id === parsed.id
+              );
+              if (matched) {
+                initialPlanId = matched.id;
+              }
+            }
+          } catch {
+            // Ignore parse errors and fallback to first plan
+          }
+          setSelectedPlanId(initialPlanId);
         }
       })
       .catch((err) => {

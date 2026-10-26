@@ -540,3 +540,161 @@ footer .brand {
     justify-content: flex-start;
   }
 }
+/* =========================================
+   RESPONSIVE LAYOUT — DESKTOP AND TABLET
+   Issue #20: OTT-NF-003
+========================================= */
+
+/* Prevent unwanted horizontal scrolling */
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+img,
+video {
+  max-width: 100%;
+}
+
+/* Main application containers */
+.app,
+.app-container,
+.home-page,
+.main-content {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Movie grids */
+.movie-grid,
+.movies-grid,
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 18px;
+}
+
+/* Movie cards */
+.movie-card {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Navigation */
+.navbar,
+.top-nav,
+.navigation {
+  max-width: 100%;
+  flex-wrap: wrap;
+}
+
+.navbar button,
+.top-nav button,
+.navigation button {
+  max-width: 100%;
+  white-space: normal;
+}
+
+/* Tablet landscape and smaller desktop screens */
+@media (max-width: 1100px) {
+  .movie-grid,
+  .movies-grid,
+  .content-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .main-content,
+  .home-page {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+/* Tablets */
+@media (max-width: 900px) {
+  .movie-grid,
+  .movies-grid,
+  .content-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .navbar,
+  .top-nav,
+  .navigation {
+    gap: 10px;
+  }
+
+  .movie-card h2,
+  .movie-card h3 {
+    font-size: 14px;
+    overflow-wrap: anywhere;
+  }
+
+  .movie-card button {
+    max-width: 100%;
+  }
+}
+
+/* Smaller tablets */
+@media (max-width: 650px) {
+  .movie-grid,
+  .movies-grid,
+  .content-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .main-content,
+  .home-page {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .navbar,
+  .top-nav,
+  .navigation {
+    align-items: center;
+    gap: 8px;
+  }
+
+  .navbar button,
+  .top-nav button,
+  .navigation button {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+}
+
+/* Handle long titles and descriptions */
+.movie-card h2,
+.movie-card h3,
+.movie-card p {
+  overflow-wrap: anywhere;
+}
+
+/* Ensure forms fit available space */
+input,
+select,
+textarea {
+  max-width: 100%;
+}
+
+/* Prevent action buttons from overflowing their cards */
+.movie-card button,
+.plan-card button {
+  overflow-wrap: anywhere;
+}
