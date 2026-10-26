@@ -1,4 +1,91 @@
-.auth-page {
+/* Star rating feature */
+
+.rating-panel {
+  padding: 0 16px 16px;
+  border-top: 1px solid #ffffff0d;
+}
+
+.rating-average {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 0 9px;
+  color: #f4f4f7;
+  font-size: 13px;
+}
+
+.rating-star {
+  color: #f6c85f;
+  font-size: 17px;
+}
+
+.rating-count {
+  color: #92909f;
+  font-size: 11px;
+}
+
+.rating-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.rating-label {
+  color: #aaa9b8;
+  font-size: 11px;
+}
+
+.rating-stars {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.rating-star-button {
+  border: none;
+  padding: 1px;
+  background: transparent;
+  color: #555360;
+  font-size: 20px;
+  line-height: 1;
+  transition: color 0.15s, transform 0.15s;
+}
+
+.rating-star-button:hover,
+.rating-star-button:focus-visible,
+.rating-star-button.selected {
+  color: #f6c85f;
+}
+
+.rating-star-button:hover {
+  transform: scale(1.15);
+}
+
+.rating-star-button:focus-visible {
+  outline: 2px solid #b89af7;
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.rating-message {
+  margin: 8px 0 0;
+  color: #bda1fa;
+  font-size: 11px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 650px) {
+  .rating-panel {
+    padding: 0 12px 12px;
+  }
+
+  .rating-control {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}.auth-page {
     min-height: 100vh;
     display: flex;
     align-items: center;
