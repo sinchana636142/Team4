@@ -6,7 +6,7 @@ load_dotenv()
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql+psycopg://postgres:YOUR_PASSWORD@localhost:5432/streamhub",
+    "postgresql+psycopg://postgres:Vivek%40123@localhost:5432/streamhub",
 )
 
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "")

@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import "./App.css";
 import ForgotPassword from "./ForgotPassword";
@@ -9,6 +8,7 @@ import WatchPage from "./features/playback/WatchPage";
 import HistoryPage from "./features/playback/HistoryPage";
 import WatchlistPage from "./features/watchlist/WatchlistPage";
 import AdminDashboard from "./features/admin/AdminDashboard";
+import SubscriptionPlans from "./SubscriptionPlans";
 import { API_URL } from "./features/api";
 
 
@@ -18,98 +18,112 @@ const movies = [
     title: "The Dark Knight",
     genre: "Action",
     year: 2008,
-    poster: "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
+    poster:
+      "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
   },
   {
     id: 2,
     title: "Mad Max: Fury Road",
     genre: "Action",
     year: 2015,
-    poster: "https://image.tmdb.org/t/p/w500/8tZYtuWezp8JbcsvHYO0O46tFbo.jpg",
+    poster:
+      "https://image.tmdb.org/t/p/w500/8tZYtuWezp8JbcsvHYO0O46tFbo.jpg",
   },
   {
     id: 3,
     title: "John Wick",
     genre: "Action",
     year: 2014,
-    poster: "https://image.tmdb.org/t/p/w500/fZPSd91yGE9fCcCe6OoQr6E3Bev.jpg",
+    poster:
+      "https://image.tmdb.org/t/p/w500/fZPSd91yGE9fCcCe6OoQr6E3Bev.jpg",
   },
   {
     id: 4,
     title: "The Hangover",
     genre: "Comedy",
     year: 2009,
-    poster: "https://image.tmdb.org/t/p/w500/uluhlXubGu1VxU63X9VHCLWDAYP.jpg",
+    poster:
+      "https://image.tmdb.org/t/p/w500/uluhlXubGu1VxU63X9VHCLWDAYP.jpg",
   },
   {
     id: 5,
     title: "Home Alone",
     genre: "Comedy",
     year: 1990,
-    poster: "https://image.tmdb.org/t/p/w500/onTSipZ8R3bliBdKfPtsDuHTdlL.jpg",
+    poster:
+      "https://image.tmdb.org/t/p/w500/onTSipZ8R3bliBdKfPtsDuHTdlL.jpg",
   },
   {
     id: 6,
     title: "The Mask",
     genre: "Comedy",
     year: 1994,
-    poster: "https://image.tmdb.org/t/p/w500/8bsbX0N1U3G6Wkz2q9z3jvJ7kYf.jpg",
+    poster:
+      "https://image.tmdb.org/t/p/w500/8bsbX0N1U3G6Wkz2q9z3jvJ7kYf.jpg",
   },
   {
     id: 7,
     title: "Inception",
     genre: "Thriller",
     year: 2010,
-    poster: "https://image.tmdb.org/t/p/w500/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg",
+    poster:
+      "https://image.tmdb.org/t/p/w500/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg",
   },
   {
     id: 8,
     title: "Shutter Island",
     genre: "Thriller",
     year: 2010,
-    poster: "https://image.tmdb.org/t/p/w500/4GDy0PHYX3VRXUtwK5ysFbg3kEx.jpg",
+    poster:
+      "https://image.tmdb.org/t/p/w500/4GDy0PHYX3VRXUtwK5ysFbg3kEx.jpg",
   },
   {
     id: 9,
     title: "Interstellar",
     genre: "Sci-Fi",
     year: 2014,
-    poster: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
+    poster:
+      "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
   },
   {
     id: 10,
     title: "The Martian",
     genre: "Sci-Fi",
     year: 2015,
-    poster: "https://image.tmdb.org/t/p/w500/5aGhaIH6nro2j5n9p8Zx6hG8nZC.jpg",
+    poster:
+      "https://image.tmdb.org/t/p/w500/5aGhaIH6nro2j5n9p8Zx6hG8nZC.jpg",
   },
   {
     id: 11,
     title: "Titanic",
     genre: "Romance",
     year: 1997,
-    poster: "https://image.tmdb.org/t/p/w500/9xjZS2rlVxm8SFx8kPC3aIGCOYQ.jpg",
+    poster:
+      "https://image.tmdb.org/t/p/w500/9xjZS2rlVxm8SFx8kPC3aIGCOYQ.jpg",
   },
   {
     id: 12,
     title: "The Notebook",
     genre: "Romance",
     year: 2004,
-    poster: "https://image.tmdb.org/t/p/w500/rNzQyW4f8B8cQeg7Dgj3n6eW9zV.jpg",
+    poster:
+      "https://image.tmdb.org/t/p/w500/rNzQyW4f8B8cQeg7Dgj3n6eW9zV.jpg",
   },
   {
     id: 13,
     title: "The Conjuring",
     genre: "Horror",
     year: 2013,
-    poster: "https://image.tmdb.org/t/p/w500/wVYREutTvI2tmxr6ujrHT704wGF.jpg",
+    poster:
+      "https://image.tmdb.org/t/p/w500/wVYREutTvI2tmxr6ujrHT704wGF.jpg",
   },
   {
     id: 14,
     title: "A Quiet Place",
     genre: "Horror",
     year: 2018,
-    poster: "https://image.tmdb.org/t/p/w500/nAU74GmpUk7t5iklEp3bufwDq4n.jpg",
+    poster:
+      "https://image.tmdb.org/t/p/w500/nAU74GmpUk7t5iklEp3bufwDq4n.jpg",
   },
 ];
 
@@ -161,7 +175,80 @@ function App() {
       .catch(() => {});
   }, [screen]);
 
+  // Rating states
+  const [titleRatings, setTitleRatings] = useState({});
+  const [myRatings, setMyRatings] = useState({});
+  const [ratingStatus, setRatingStatus] = useState({});
+  const [loadingRatings, setLoadingRatings] = useState(true);
+
+  // Load average ratings for all movies.
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadRatings() {
+      setLoadingRatings(true);
+
+      const results = await Promise.all(
+        catalogMovies.map(async (movie) => {
+          try {
+            const response = await fetch(
+              `${API_URL}/ratings/title/${movie.id}/average`
+            );
+
+            if (!response.ok) {
+              return [movie.id, null];
+            }
+
+            const data = await response.json();
+
+            const average =
+              data.average_rating ??
+              data.average ??
+              data.avg_rating ??
+              data.averageRating ??
+              null;
+
+            const count =
+              data.total_ratings ??
+              data.rating_count ??
+              data.count ??
+              data.totalRatings ??
+              0;
+
+            return [
+              movie.id,
+              {
+                average:
+                  average === null ? null : Number(average),
+                count: Number(count) || 0,
+              },
+            ];
+          } catch {
+            return [movie.id, null];
+          }
+        })
+      );
+
+      if (!cancelled) {
+        setTitleRatings(
+          Object.fromEntries(
+            results.filter(([, value]) => value !== null)
+          )
+        );
+        setLoadingRatings(false);
+      }
+    }
+
+    loadRatings();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [catalogMovies]);
+
+  // Filter movies by genre and search query.
   const filteredMovies = catalogMovies.filter((movie) => {
+
     const matchesGenre =
       selectedGenre === "All" || movie.genre === selectedGenre;
 
@@ -177,12 +264,13 @@ function App() {
     setScreen("home");
   }
 
-  // Open the video player (issue #3). Viewers must be logged in.
+  // Open the video player. Viewers must be logged in.
   function playMovie(titleId) {
     if (!currentUser) {
       setScreen("login");
       return;
     }
+
     setWatchTitleId(titleId);
     setScreen("watch");
   }
@@ -199,42 +287,180 @@ function App() {
   function handleLogout() {
     sessionStorage.removeItem("streamhub_access_token");
     sessionStorage.removeItem("streamhub_user");
+
     setCurrentUser(null);
+    setMyRatings({});
+    setRatingStatus({});
     setScreen("home");
   }
 
-  // Video player screen (issue #3)
+  // Submit a rating from 1 to 5 stars.
+  async function submitRating(titleId, rating) {
+    if (!currentUser) {
+      setRatingStatus((previous) => ({
+        ...previous,
+        [titleId]: "Please log in to rate this title.",
+      }));
+
+      setScreen("login");
+      return;
+    }
+
+    const token = sessionStorage.getItem("streamhub_access_token");
+
+    if (!token) {
+      setRatingStatus((previous) => ({
+        ...previous,
+        [titleId]: "Login token missing. Please log in again.",
+      }));
+
+      return;
+    }
+
+    setRatingStatus((previous) => ({
+      ...previous,
+      [titleId]: "Saving rating...",
+    }));
+
+    try {
+      const response = await fetch(`${API_URL}/ratings/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title_id: titleId,
+          rating,
+        }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        const message =
+          typeof data.detail === "string"
+            ? data.detail
+            : data.message || "Could not save rating.";
+
+        throw new Error(message);
+      }
+
+      // Store the viewer's rating in the current frontend session.
+      setMyRatings((previous) => ({
+        ...previous,
+        [titleId]: rating,
+      }));
+
+      setRatingStatus((previous) => ({
+        ...previous,
+        [titleId]: "Rating saved successfully!",
+      }));
+
+      // Reload the average rating after submission.
+      try {
+        const averageResponse = await fetch(
+          `${API_URL}/ratings/title/${titleId}/average`
+        );
+
+        if (averageResponse.ok) {
+          const averageData = await averageResponse.json();
+
+          const average =
+            averageData.average_rating ??
+            averageData.average ??
+            averageData.avg_rating ??
+            averageData.averageRating ??
+            null;
+
+          const count =
+            averageData.total_ratings ??
+            averageData.rating_count ??
+            averageData.count ??
+            averageData.totalRatings ??
+            0;
+
+          setTitleRatings((previous) => ({
+            ...previous,
+            [titleId]: {
+              average:
+                average === null ? null : Number(average),
+              count: Number(count) || 0,
+            },
+          }));
+        }
+      } catch {
+        // The rating may have saved even if refreshing the average fails.
+      }
+    } catch (error) {
+      setRatingStatus((previous) => ({
+        ...previous,
+        [titleId]:
+          error.message || "Could not save rating. Please try again.",
+      }));
+    }
+  }
+
+  // Video player screen.
   if (screen === "watch") {
-    return <WatchPage titleId={watchTitleId} onBack={goHome} />;
+    return (
+      <WatchPage
+        titleId={watchTitleId}
+        onBack={goHome}
+      />
+    );
   }
 
-  // Watchlist screen (issue #10)
+  // Watchlist screen.
   if (screen === "watchlist") {
-    return <WatchlistPage onPlay={playMovie} onBack={goHome} />;
+    return (
+      <WatchlistPage
+        onPlay={playMovie}
+        onBack={goHome}
+      />
+    );
   }
 
-  // Watch history screen (issue #9)
+  // Watch history screen.
   if (screen === "history") {
-    return <HistoryPage onPlay={playMovie} onBack={goHome} />;
+    return (
+      <HistoryPage
+        onPlay={playMovie}
+        onBack={goHome}
+      />
+    );
   }
 
-  // My subscription screen (issue #14)
+  // My subscription screen.
   if (screen === "account") {
     return <SubscriptionStatus onBack={goHome} />;
   }
-
   // Admin dashboard screen (OTT-F-050, OTT-F-051, OTT-F-052)
   if (screen === "admin") {
     return <AdminDashboard onBack={goHome} />;
   }
 
+  // Subscription plans screen.
+  if (screen === "plans") {
+    return (
+      <SubscriptionPlans
+        onBack={goHome}
+        onSelectPlan={(plan) => {
+          sessionStorage.setItem(
+            "streamhub_selected_plan",
+            JSON.stringify(plan)
+          );
+          setScreen("account");
+        }}
+      />
+    );
+  }
 
-  // Forgot Password screen
   if (screen === "forgot") {
     return <ForgotPassword />;
   }
 
-  // Sign Up and OTP verification screen
+  // Sign-up and OTP verification screen.
   if (screen === "signup") {
     return (
       <Auth
@@ -244,7 +470,7 @@ function App() {
     );
   }
 
-  // Login screen
+  // Login screen.
   if (screen === "login") {
     return (
       <Login
@@ -255,7 +481,7 @@ function App() {
     );
   }
 
-  // Original StreamHub homepage
+  // StreamHub homepage.
   return (
     <div className="app">
       <header className="navbar">
@@ -302,7 +528,6 @@ function App() {
             >
               My Subscription
             </button>
-
             {Boolean(currentUser.is_admin || currentUser.role === "admin") && (
               <button
                 type="button"
@@ -317,6 +542,12 @@ function App() {
               </button>
             )}
 
+            <button
+              type="button"
+              onClick={() => setScreen("plans")}
+            >
+              View Plans
+            </button>
             <button
               type="button"
               onClick={handleLogout}
@@ -347,7 +578,12 @@ function App() {
             >
               Sign Up
             </button>
-
+          <button
+  type="button"
+  onClick={() => setScreen("plans")}
+>
+  Subscription Plans
+</button>
             <button
               type="button"
               onClick={() => setScreen("forgot")}
@@ -383,6 +619,7 @@ function App() {
               <p className="eyebrow">
                 FIND YOUR NEXT FAVORITE
               </p>
+
               <h2>Browse by Genre</h2>
             </div>
 
@@ -420,8 +657,9 @@ function App() {
               <button
                 type="button"
                 key={genre}
-                className={`genre-button ${selectedGenre === genre ? "active" : ""
-                  }`}
+                className={`genre-button ${
+                  selectedGenre === genre ? "active" : ""
+                }`}
                 onClick={() => setSelectedGenre(genre)}
                 aria-pressed={selectedGenre === genre}
               >
@@ -442,47 +680,122 @@ function App() {
 
           {filteredMovies.length > 0 ? (
             <div className="movie-grid">
-              {filteredMovies.map((movie) => (
-                <article className="movie-card" key={movie.id}>
-                  <div
-                    className={`movie-poster poster-${movie.genre
-                      .toLowerCase()
-                      .replace(/[^a-z]/g, "")}`}
+              {filteredMovies.map((movie) => {
+                const movieRating = titleRatings[movie.id];
+
+                return (
+                  <article
+                    className="movie-card"
+                    key={movie.id}
                   >
-                    <img
-                      className="poster-image"
-                      src={movie.poster}
-                      alt={`${movie.title} poster`}
-                      loading="lazy"
-                    />
+                    <div
+                      className={`movie-poster poster-${movie.genre
+                        .toLowerCase()
+                        .replace(/[^a-z]/g, "")}`}
+                    >
+                      <img
+                        className="poster-image"
+                        src={movie.poster}
+                        alt={`${movie.title} poster`}
+                        loading="lazy"
+                      />
 
-                    <span className="poster-year">
-                      {movie.year}
-                    </span>
-                  </div>
-
-                  <div className="movie-info">
-                    <div>
-                      <h4>{movie.title}</h4>
-                      <p>{movie.genre}</p>
+                      <span className="poster-year">
+                        {movie.year}
+                      </span>
                     </div>
 
-                    <span
-                      className="play-icon"
-                      role="button"
-                      tabIndex={0}
-                      style={{ cursor: "pointer" }}
-                      aria-label={`Play ${movie.title}`}
-                      onClick={() => playMovie(movie.id)}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter") playMovie(movie.id);
-                      }}
-                    >
-                      ▶
-                    </span>
-                  </div>
-                </article>
-              ))}
+                    <div className="movie-info">
+                      <div>
+                        <h4>{movie.title}</h4>
+                        <p>{movie.genre}</p>
+                      </div>
+
+                      <button
+                        type="button"
+                        className="play-icon"
+                        aria-label={`Play ${movie.title}`}
+                        onClick={() => playMovie(movie.id)}
+                      >
+                        ▶
+                      </button>
+                    </div>
+
+                    {/* Star rating feature */}
+                    <div className="rating-panel">
+                      <div className="rating-average">
+                        <span className="rating-star">
+                          ★
+                        </span>
+
+                        <strong>
+                          {movieRating?.average != null &&
+                          Number.isFinite(movieRating.average)
+                            ? movieRating.average.toFixed(1)
+                            : "—"}
+                        </strong>
+
+                        <span className="rating-count">
+                          ({movieRating?.count ?? 0} ratings)
+                        </span>
+                      </div>
+
+                      <div className="rating-control">
+                        <span className="rating-label">
+                          {myRatings[movie.id]
+                            ? "Your rating"
+                            : "Rate this title"}
+                        </span>
+
+                        <div
+                          className="rating-stars"
+                          role="group"
+                          aria-label={`Rate ${movie.title} from 1 to 5 stars`}
+                        >
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              type="button"
+                              className={`rating-star-button ${
+                                star <= (myRatings[movie.id] || 0)
+                                  ? "selected"
+                                  : ""
+                              }`}
+                              onClick={() =>
+                                submitRating(movie.id, star)
+                              }
+                              aria-label={`${star} star${
+                                star === 1 ? "" : "s"
+                              }`}
+                              aria-pressed={
+                                myRatings[movie.id] === star
+                              }
+                              title={`Rate ${star} out of 5`}
+                            >
+                              ★
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {ratingStatus[movie.id] && (
+                        <p
+                          className="rating-message"
+                          role="status"
+                        >
+                          {ratingStatus[movie.id]}
+                        </p>
+                      )}
+
+                      {loadingRatings && (
+                        <p className="rating-loading">
+                          Loading ratings...
+                        </p>
+                      )}
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           ) : (
             <div className="empty-state" role="status">
@@ -515,7 +828,7 @@ function App() {
       </main>
 
       <footer>
-        <a className="brand" href="#home">
+        <a className="brand" href="#home" onClick={goHome}>
           <span className="brand-icon">▶</span> StreamHub
         </a>
 
