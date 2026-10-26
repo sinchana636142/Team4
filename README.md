@@ -580,10 +580,11 @@ Unit tests use an in-memory database, so **PostgreSQL is not needed**:
 ```bash
 cd backend
 pip install pytest httpx
-python -m pytest tests/playback_features
+python -m pytest
 ```
 
-Expected result with all Sprint 1 playback and personalisation features merged: **32 passed**.
+Expected result with all playback, personalisation, Razorpay hosted checkout, and content administration features merged: **53 passed** (32 playback/personalisation + 8 Razorpay checkout + 13 admin & catalog).
+
 
 Performance (OTT-NF-001) load test with Locust:
 
@@ -632,15 +633,16 @@ Legend: ✅ on `main` · 🟡 implemented on a feature branch, merge pending · 
 | #10 | `OTT-F-030` | Watchlist | 🟡 `feature/issue-10-watchlist` |
 | #14 | `OTT-F-042` | Subscription and expiry status | 🟡 `feature/issue-14-subscription-status` |
 | #11 | `OTT-F-031` | 1–5 star ratings | ⬜ |
-| #12 | `OTT-F-040` | Subscription plans | ⬜ |
-| #13 | `OTT-F-041` | Hosted payment checkout | ⬜ |
-| #15 | `OTT-F-050` | Upload titles and metadata | ⬜ |
-| #16 | `OTT-F-051` | Publish / unpublish titles | ⬜ |
-| #17 | `OTT-F-052` | View users and subscription status | ⬜ |
-| #19 | `OTT-NF-002` | Video start-up time ≤ 5 s | ⬜ |
+| #12 | `OTT-F-040` | Subscription plans | 🟡 `member4/testing-integration` |
+| #13 | `OTT-F-041` | Hosted payment checkout | 🟡 `member4/testing-integration` |
+| #15 | `OTT-F-050` | Upload titles and metadata | 🟡 `member4/testing-integration` |
+| #16 | `OTT-F-051` | Publish / unpublish titles | 🟡 `member4/testing-integration` |
+| #17 | `OTT-F-052` | View users and subscription status | 🟡 `member4/testing-integration` |
+| #19 | `OTT-NF-002` | Video start-up time ≤ 5 s | 🟡 `member4/testing-integration` |
 | #20 | `OTT-NF-003` | Desktop and tablet layouts | ⬜ |
-| #21 | `OTT-NF-004` | 50 concurrent users | ⬜ |
+| #21 | `OTT-NF-004` | 50 concurrent users | 🟡 `member4/testing-integration` |
 | #23 | `OTT-NF-006` | Availability in demo/test windows | ⬜ |
+
 
 > 📝 **Keep this table current.** When a pull request is merged, change its status to ✅. Issues #1, #2 and #6 are tracked on GitHub Issues and are not listed here.
 
