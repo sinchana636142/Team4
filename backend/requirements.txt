@@ -9,3 +9,5 @@ pwdlib[bcrypt]
 PyJWT
 python-dotenv
 bcrypt
+razorpay
+python-multipart
