@@ -7,8 +7,10 @@ import SubscriptionStatus from "./features/subscription/SubscriptionStatus";
 import WatchPage from "./features/playback/WatchPage";
 import HistoryPage from "./features/playback/HistoryPage";
 import WatchlistPage from "./features/watchlist/WatchlistPage";
+import AdminDashboard from "./features/admin/AdminDashboard";
 import SubscriptionPlans from "./SubscriptionPlans";
-const API_URL = "http://127.0.0.1:8000";
+import { API_URL } from "./features/api";
+
 
 const movies = [
   {
@@ -151,6 +153,28 @@ function App() {
     }
   });
 
+  const [catalogMovies, setCatalogMovies] = useState(movies);
+
+  useEffect(() => {
+    fetch(`${API_URL}/catalog/titles`)
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const mapped = data.map((t) => ({
+            id: t.id,
+            title: t.title,
+            genre: t.genre || "Action",
+            year: t.year || 2024,
+            poster:
+              t.poster_url ||
+              "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
+          }));
+          setCatalogMovies(mapped);
+        }
+      })
+      .catch(() => {});
+  }, [screen]);
+
   // Rating states
   const [titleRatings, setTitleRatings] = useState({});
   const [myRatings, setMyRatings] = useState({});
@@ -165,7 +189,7 @@ function App() {
       setLoadingRatings(true);
 
       const results = await Promise.all(
-        movies.map(async (movie) => {
+        catalogMovies.map(async (movie) => {
           try {
             const response = await fetch(
               `${API_URL}/ratings/title/${movie.id}/average`
@@ -220,10 +244,11 @@ function App() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [catalogMovies]);
 
   // Filter movies by genre and search query.
-  const filteredMovies = movies.filter((movie) => {
+  const filteredMovies = catalogMovies.filter((movie) => {
+
     const matchesGenre =
       selectedGenre === "All" || movie.genre === selectedGenre;
 
@@ -233,6 +258,7 @@ function App() {
 
     return matchesGenre && matchesSearch;
   });
+
 
   function goHome() {
     setScreen("home");
@@ -409,21 +435,27 @@ function App() {
   if (screen === "account") {
     return <SubscriptionStatus onBack={goHome} />;
   }
+  // Admin dashboard screen (OTT-F-050, OTT-F-051, OTT-F-052)
+  if (screen === "admin") {
+    return <AdminDashboard onBack={goHome} />;
+  }
+
   // Subscription plans screen.
-if (screen === "plans") {
-  return (
-    <SubscriptionPlans
-      onBack={goHome}
-      onSelectPlan={(plan) => {
-        sessionStorage.setItem(
-          "streamhub_selected_plan",
-          JSON.stringify(plan)
-        );
-      }}
-    />
-  );
-}
-  // Forgot password screen.
+  if (screen === "plans") {
+    return (
+      <SubscriptionPlans
+        onBack={goHome}
+        onSelectPlan={(plan) => {
+          sessionStorage.setItem(
+            "streamhub_selected_plan",
+            JSON.stringify(plan)
+          );
+          setScreen("account");
+        }}
+      />
+    );
+  }
+
   if (screen === "forgot") {
     return <ForgotPassword />;
   }
@@ -496,18 +528,33 @@ if (screen === "plans") {
             >
               My Subscription
             </button>
+            {Boolean(currentUser.is_admin || currentUser.role === "admin") && (
+              <button
+                type="button"
+                onClick={() => setScreen("admin")}
+                style={{
+                  border: "1px solid #e50914",
+                  color: "#e50914",
+                  fontWeight: "bold",
+                }}
+              >
+                🛠️ Admin Panel
+              </button>
+            )}
+
             <button
-  type="button"
-  onClick={() => setScreen("plans")}
->
-  View Plans
-</button>
+              type="button"
+              onClick={() => setScreen("plans")}
+            >
+              View Plans
+            </button>
             <button
               type="button"
               onClick={handleLogout}
             >
               Logout
             </button>
+
 
             <button
               type="button"

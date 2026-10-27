@@ -34,6 +34,15 @@ class User(Base):
         String(500), nullable=True
     )
 
+    is_admin: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False
+    )
+
+    role: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="viewer"
+    )
+
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

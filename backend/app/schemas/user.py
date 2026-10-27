@@ -19,8 +19,11 @@ class UserProfileResponse(BaseModel):
     email: EmailStr
     is_verified: bool
     avatar_url: str | None = None
+    is_admin: bool = False
+    role: str = "viewer"
 
     model_config = {"from_attributes": True}
+
 
 
 class VerifyOTPRequest(BaseModel):

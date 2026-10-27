@@ -25,7 +25,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount static files directory for uploaded media
+import os
+from fastapi.staticfiles import StaticFiles
+
+static_dir = os.path.join(os.path.dirname(__file__), "static")
+os.makedirs(static_dir, exist_ok=True)
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
 # Register application routers
+
 app.include_router(auth.router)
 app.include_router(profile.router)
 app.include_router(catalog.router)

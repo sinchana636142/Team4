@@ -24,3 +24,7 @@ class Subscription(Base):
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="pending")
     start_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     expiry_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    razorpay_order_id: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
+    razorpay_payment_id: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
+    razorpay_signature: Mapped[str | None] = mapped_column(String(255), nullable=True)
+
