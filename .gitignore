@@ -16,3 +16,6 @@ venv/
 # Frontend dependencies and build output
 node_modules/
 dist/
+
+# Uploaded runtime media
+backend/app/static/uploads/

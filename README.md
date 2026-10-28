@@ -1,799 +1,289 @@
-# 🎬 StreamHub — OTT Video Streaming Website
+🎬 StreamHub --- OTT Video Streaming Platform
+TEAM-04 · PES University · UE24CS341A Software Engineering
 
-## 🌟 Overview
+StreamHub is a responsive web-based Over-The-Top (OTT) streaming
+platform built as an academic team project. It brings together content
+discovery, video playback, personalization, subscriptions, hosted
+payment checkout, and content administration.
+Development status: Core viewer, subscription, and administration
+flows are implemented in the project. Sprint 1 manual testing is in
+progress; see the status table below for tests that remain pending. Do
+not treat a feature as production-ready solely because it works in
+Razorpay Test Mode.
 
-**StreamHub** is a web-based **Over-The-Top (OTT) video streaming platform** that allows registered users to discover, stream, personalize, and subscribe to video content through a responsive website.
+📚 Project documentation
+  Document                            Purpose
+  StreamHub_SRS.pdf                 Software Requirements Specification
+                                      --- what the system should do
 
-The system supports two primary roles:
+  StreamHub_SAD.pdf                 Software Architecture and Design
+                                      --- how the system is structured
 
-- 👤 **Viewer** — registration, OTP verification, login, browsing, search, playback, resume, watch history, watchlist, ratings, and subscriptions.
-- 🛠️ **Content Administrator** — upload/manage titles, publish/unpublish content, and view registered users and subscription status.
-
-The project is intentionally scoped as a **single responsive website** suitable for an academic implementation.
-
-> 🚀 **New here?** Jump to **Section 18 (Getting Started)** to run the project. Sprint progress is in **Section 19**, the code layout in **Section 20**, the working API in **Section 21**, the team's Git rules in **Section 22**, and known limitations in **Section 23**.
-
----
-
-## 📚 Documentation at a Glance
-
-| Document | Answers |
-|---|---|
-| 📘 **SRS — Software Requirements Specification** | **WHAT** must the system do? |
-| 🏗️ **SAD — Software Architecture & Design Specification** | **HOW** will the system be structured and designed? |
-| 🧪 **STP — Software Test Plan** | **HOW** will the system be verified? |
-
-```text
-                    ┌────────────────────┐
-                    │       SRS          │
-                    │    WHAT to build   │
-                    └─────────┬──────────┘
-                              ▼
-                    ┌────────────────────┐
-                    │       SAD          │
-                    │    HOW to build    │
-                    └─────────┬──────────┘
-                              ▼
-                    ┌────────────────────┐
-                    │       STP          │
-                    │   HOW to verify    │
-                    └────────────────────┘
-```
-
----
-
-# 🎯 1. Project Objectives
-
-StreamHub brings together:
-
-- 🔐 Secure registration and authentication
-- 🔎 Catalog browsing and title search
-- ▶️ Browser-based video playback
-- ⏯️ Resume playback and watch history
-- ❤️ Personal watchlist
-- ⭐ 1–5 star ratings
-- 💳 Subscription plans and hosted payment checkout
-- 🛠️ Content upload and publishing
-- 👥 Basic user/subscription administration
-- 📱 Responsive desktop/tablet usability
-- 🛡️ Security-focused API and payment handling
-
----
-
-# 👥 2. User Roles & Journeys
-
-### 👤 Viewer
-
-```text
-Register → Verify OTP → Login
-                     ↓
-             Browse / Search
-                     ↓
-              Title Details
-                     ↓
-              Check Access
-                ↙       ↘
-        Watch Video    Subscribe
-             ↓             ↓
-       Resume/History   Hosted Payment
-             ↘             ↙
-          Watchlist + Rating
-```
-
-### 🛠️ Administrator
-
-```text
-Admin
-  ↓
-Upload Title + Metadata
-  ↓
-Publish / Unpublish
-  ↓
-Manage Catalog
-  ↓
-View Users & Subscription Status
-```
-
----
-
-# 🧩 3. Functional Modules
-
-| Module | Capabilities |
-|---|---|
-| 🔐 Account, Authentication & Profile | Register + OTP, login, password reset, profile |
-| 🔎 Catalog, Browse & Search | Genre browsing, search, title details |
-| ▶️ Playback | Video playback, resume position, watch history |
-| ❤️ Personalisation | Watchlist, 1–5 star rating |
-| 💳 Subscription & Payment | Plans, hosted checkout, subscription status |
-| 🛠️ Content Administration | Upload, publish/unpublish, user/subscription view |
-
----
-
-# 🏗️ 4. Architecture
-
-StreamHub uses a **layered 3-tier client–server architecture** implemented as a **modular monolith**.
-
-```text
-┌───────────────────────────────────────────────┐
-│                    CLIENT                     │
-│             React Single Page App             │
-│ Browse | Search | Player | Watchlist | Admin │
-└───────────────────────┬───────────────────────┘
-                        │ REST / JSON
-                        │ HTTPS / TLS 1.2+
-                        ▼
-┌───────────────────────────────────────────────┐
-│                   BACKEND                     │
-│                 FastAPI API                   │
-│                                               │
-│ Auth | Catalog | Playback | Subscription     │
-│                     | Admin                   │
-└───────────────────────┬───────────────────────┘
-                        │
-                        ▼
-               ┌─────────────────┐
-               │   PostgreSQL    │
-               └─────────────────┘
-                        │
-          ┌─────────────┴─────────────┐
-          ▼                           ▼
-┌──────────────────┐       ┌────────────────────┐
-│ Cloud / Static   │       │ External Services  │
-│ Video + Images   │       │ Payment + Email    │
-└──────────────────┘       └────────────────────┘
-```
-
-### Why this architecture?
-
-The SAD chooses modular 3-tier architecture instead of microservices because the project is intended for a **single-team academic build at modest scale**. FastAPI modules provide separation of concerns without the complexity of service discovery, distributed transactions, and inter-service networking.
-
----
-
-# 🛠️ 5. Technology Stack
-
-| Layer | Technology |
-|---|---|
-| 🎨 Frontend | React SPA |
-| ⚙️ Backend | FastAPI / Python |
-| 🗄️ Database | PostgreSQL |
-| 📦 Validation | Pydantic |
-| 🔑 Authentication | Short-lived JWT |
-| 🔒 Password Storage | Salted bcrypt |
-| 🌐 Communication | REST / JSON over HTTPS |
-| 🎥 Storage | Cloud / Static Storage |
-| 💳 Payment | External hosted payment gateway |
-| ✉️ Email | SMTP / Transactional Email |
-| 📐 UML | draw.io |
-| 📡 API Documentation | Swagger / OpenAPI |
-| 🧪 UI/API Testing | Playwright / Selenium / Postman |
-| ⚡ Performance | JMeter / Locust |
-| 🐛 Defects | GitHub Issues / Jira |
-
----
-
-# 🔐 6. Security Architecture
-
-Security is built into the system design.
-
-| Threat / Requirement | Protection |
-|---|---|
-| 🔑 Spoofing | JWT sessions + bcrypt passwords |
-| 📝 Tampering | Pydantic validation + HTTPS |
-| 🧾 Repudiation | Server-side transaction/payment-status logging |
-| 👁️ Information Disclosure | TLS + no sensitive payment/password logging |
-| 🚫 DoS | Authentication endpoint rate limiting |
-| 👮 Privilege Escalation | Admin role checks |
-
-### Critical payment rule
-
-**Card/payment data never passes through or persists on the StreamHub server.**
-
-The payment flow uses an external hosted checkout and a payment-status callback.
-
-```text
+  StreamHub_Test_Plan.pdf           Software Test Plan --- how the
+                                  system is verified
+✨ Features
 Viewer
-  ↓
-Select Plan
-  ↓
-Subscription Service
-  ↓
-External Payment Gateway
-  ↓
-Payment Completed
-  ↓
-Callback
-  ↓
-Subscription Updated
-  ↓
-PostgreSQL
-```
-
----
-
-# ⚡ 7. Quality & Performance Targets
-
-| ID | Target |
-|---|---|
-| ⚡ OTT-NF-001 | 95% of API requests respond within **2 seconds** |
-| ▶️ OTT-NF-002 | Video starts within **5 seconds** on standard broadband |
-| 📱 OTT-NF-003 | Responsive on desktop and tablet widths |
-| 👥 OTT-NF-004 | At least **50 concurrent simulated users** without errors |
-| 🧱 OTT-NF-005 | Clearly separated backend modules |
-| 🟢 OTT-NF-006 | Available during scheduled demo/test windows |
-
----
-
-# 📋 8. Functional Requirements
-
-### Authentication
-`OTT-F-001` Register + OTP  
-`OTT-F-002` Login + JWT  
-`OTT-F-003` Password reset  
-`OTT-F-004` Profile management
-
-### Catalog
-`OTT-F-010` Browse by genre  
-`OTT-F-011` Search titles  
-`OTT-F-012` Title-detail page
-
-### Playback
-`OTT-F-020` HTML5 video playback  
-`OTT-F-021` Resume last position  
-`OTT-F-022` Watch history
-
-### Personalisation
-`OTT-F-030` Watchlist  
-`OTT-F-031` 1–5 star rating
-
-### Subscription
-`OTT-F-040` At least two plans  
-`OTT-F-041` Hosted payment checkout  
-`OTT-F-042` Plan + renewal/expiry status
-
-### Administration
-`OTT-F-050` Upload title + metadata  
-`OTT-F-051` Publish/unpublish  
-`OTT-F-052` View users + subscription status
-
----
-
-# 🧪 9. Test Strategy
-
-The STP defines four testing levels:
-
-```text
-Unit Tests
-    ↓
-Integration Tests
-    ↓
-System / End-to-End Tests
-    ↓
-Acceptance / UAT
-```
-
-### Test Types
-
-- ✅ Functional
-- 🔄 Regression
-- ⚡ Performance
-- 🖥️ Usability
-- 🔐 Security
-
-### Test Environment
-
-**Browsers:** Chrome, Edge, Firefox, Safari  
-**Devices:** Desktop and tablet-width environments  
-**Backend:** FastAPI  
-**Database:** PostgreSQL  
-**External services:** Payment sandbox + SMTP test account
-
-### Test Tools
-
-- Playwright / Selenium
-- Postman
-- JMeter / Locust
-- GitHub Issues / Jira
-
----
-
-# 🔗 10. Requirements Traceability
-
-The three documents connect requirements, architecture, and testing.
-
-| Requirement | Test Case |
-|---|---|
-| `OTT-F-001` Register with OTP | `TC-Auth-01` |
-| `OTT-F-002` Login | `TC-Auth-02` |
-| `OTT-F-020` Play Video | `TC-Play-01` |
-| `OTT-F-021` Resume Playback | `TC-Play-02` |
-| `OTT-F-041` Payment Checkout | `TC-Sub-02` |
-| `OTT-NF-001` Response ≤ 2s | `TC-Perf-01` |
-
-The SRS RTM currently records the listed requirements as **Not Started**, establishing the implementation/testing baseline.
-
-### ✅ Implementation & test evidence (Sprint 1)
-
-| Requirement | Test Case | Unit-test file (`backend/tests/playback_features/`) |
-|---|---|---|
-| `OTT-F-020` Play Video | `TC-Play-01` | `test_play_video.py` |
-| `OTT-F-021` Resume Playback | `TC-Play-02` | `test_resume_playback.py` |
-| `OTT-F-022` Watch History | `TC-Play-03` | `test_watch_history.py` |
-| `OTT-F-030` Watchlist | `TC-Personal-01` | `test_watchlist.py` |
-| `OTT-F-042` Subscription status | `TC-Sub-03` | `test_subscription_status.py` |
-
-Module-level unit tests are written by the developer of each module. Integration, system, regression, performance and security testing are coordinated by the testing member.
-
----
-
-# 🔌 11. Key API Interfaces
-
-### Login
-
-```http
-POST /api/auth/login
-```
-
-```json
-{
-  "email": "...",
-  "password": "..."
-}
-```
-
-Response:
-
-```json
-{
-  "token": "...",
-  "expiresIn": "..."
-}
-```
-
-### Subscription Checkout
-
-```http
-POST /api/subscription/checkout
-```
-
-```json
-{
-  "userId": "...",
-  "planId": "..."
-}
-```
-
-### Resume Playback
-
-```http
-GET /api/playback/{titleId}/resume
-```
-
-```json
-{
-  "positionSeconds": 0
-}
-```
-
-> ℹ️ **Contract vs. implementation.** The block above is the interface defined in the SAD. The running backend differs slightly: it serves routes **without** the `/api` prefix (for example `/auth/login`), and field names use `snake_case` (for example `access_token`, `position_seconds`). The endpoints that actually exist today are listed in **Section 21**.
-
----
-
-# 📐 12. Design Highlights
-
-The architecture/design documentation contains:
-
-- 🧩 Component architecture
-- 🔄 UML sequence diagrams
-- 👤 Register & Verify OTP sequence
-- 💳 Subscribe & Pay sequence
-- 🔌 API definitions
-- 🛡️ STRIDE threat model
-- 🎨 UX considerations
-- 🔗 Requirement-to-component traceability
-
-The SRS also includes a use-case overview connecting Viewer, Email Service, Payment Gateway, and Content Administrator.
-
----
-
-# 🚧 13. Explicit Scope Boundaries
-
-The following are **out of scope for this version**:
-
-- ❌ Native mobile application
-- ❌ Smart-TV application
-- ❌ DRM-protected playback
-- ❌ Full adaptive-bitrate transcoding pipeline
-- ❌ Offline downloads
-- ❌ Live linear TV
-- ❌ Dedicated CDN
-- ❌ Multi-region infrastructure
-- ❌ Storing/processing card data on StreamHub's server
-
-This keeps the system focused on a complete and testable **web-based OTT platform**.
-
----
-
-# ⚠️ 14. Risks & Mitigations
-
-| Risk | Mitigation |
-|---|---|
-| 💳 Payment callback failure | Idempotent callback + reconciliation |
-| 🎥 Storage/bandwidth limits | Fixed-quality progressive streams |
-| 🗄️ Database bottleneck | Connection pooling + indexed queries |
-| 🧪 Payment sandbox instability | Documented test cards + mock non-payment responses |
-| ⏳ Tight academic timeline | Prioritize High-priority requirements |
-| 🖥️ Backend/DB downtime | Backup environment on cloud VM |
-
----
-
-# 📦 15. Project Deliverables
-
-- 📘 Software Requirements Specification
-- 🏗️ Software Architecture & Design Specification
-- 🧪 Software Test Plan
-- 📝 Test cases
-- 💻 Test scripts
-- 🗃️ Test data
-- 📊 Execution logs
-- 🐛 Defect reports
-- 📑 Final Test Summary Report
-
----
-
-# 🏁 16. Definition of Done
-
-```text
-High-priority requirements implemented
-              +
-Planned test cases executed
-              +
-Zero critical defects open
-              +
-RTM fully updated
-              +
-Acceptance / UAT completed
-              ↓
-        ✅ READY FOR SUBMISSION
-```
-
----
-
-# 🗺️ 17. Documentation Relationship
-
-```text
-                 ┌─────────────────┐
-                 │      SRS        │
-                 │ Requirements    │
-                 └────────┬────────┘
-                          │
-                          ▼
-                 ┌─────────────────┐
-                 │      SAD        │
-                 │ Architecture   │
-                 │ & Design        │
-                 └────────┬────────┘
-                          │
-                          ▼
-                 ┌─────────────────┐
-                 │      STP        │
-                 │ Testing & QA    │
-                 └────────┬────────┘
-                          │
-                          ▼
-                    StreamHub
-                    Deliverable
-```
-
-# 🚀 18. Getting Started
-
-### Prerequisites
-
-| Tool | Version |
-|---|---|
-| Python | 3.11 or newer (tested with 3.13) |
-| Node.js | 20.19 or newer, or 22.12 or newer (required by Vite 8) |
-| PostgreSQL | A recent version (tested with 16), with a database named `streamhub` |
-| Git | any recent version |
-
-### 1️⃣ Clone the repository
-
-```bash
+- Account registration, OTP verification, login, and profile
+  management
+- Catalog browsing, search, and title details
+- Video playback, resume position, and watch history
+- Personal watchlist and ratings
+- Subscription plans and a hosted Razorpay Checkout flow
+- Subscription status and expiry display
+Content administrator
+- Upload titles and metadata, including poster/media files where
+  supported
+- Publish and unpublish titles
+- View registered users and subscription status
+- Role-protected administration operations
+Payment flow
+1. The viewer selects a subscription plan.
+2. The backend creates a Razorpay order.
+3. Razorpay Checkout handles the payment UI.
+4. The backend verifies the payment signature and checks payment
+   details before activating a subscription.
+5. Subscription status and expiry are saved in the application
+   database.
+Security rule: StreamHub must not activate a subscription based only
+on a browser success message. Activation must follow server-side
+verification. Card details should be handled by the hosted payment
+provider, not stored by StreamHub.
+🏗️ Architecture
+StreamHub uses a modular, three-tier client/server architecture.
+React + Vite frontend
+        |
+        | REST / JSON
+        v
+FastAPI backend
+        |
+        v
+PostgreSQL database
+
+External services:
+- Razorpay hosted checkout / payment webhooks
+- Email or OTP delivery service (depending on environment)
+- Static or cloud media storage
+Technology stack
+  Layer               Technology
+  Frontend            React, Vite, JavaScript
+  Backend             Python, FastAPI
+  Database            PostgreSQL
+  Validation          Pydantic
+  Authentication      JWT
+  Payment             Razorpay Checkout (Test Mode for development)
+  API documentation   Swagger / OpenAPI
+  Testing             pytest, API/manual testing; optional Locust load testing
+  Version control     Git and GitHub
+🚀 Getting started
+Prerequisites
+- Python 3.11 or newer
+- Node.js version supported by the installed Vite version
+- PostgreSQL, with a database named streamhub
+- Git
+1. Clone the repository
 git clone https://github.com/sinchana636142/Team4.git
 cd Team4
-```
-
-### 2️⃣ Backend setup
-
-```bash
+2. Configure and start the backend
+Open a terminal in the repository root:
 cd backend
 python -m venv .venv
-
-# activate it (pick the line for your system):
-#   Windows Command Prompt:  .venv\Scripts\activate
-#   Windows Git Bash:        source .venv/Scripts/activate
-#   Mac / Linux:             source .venv/bin/activate
-
+.\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-```
+On macOS/Linux, activate the environment with:
+source .venv/bin/activate
+Create backend/.env locally. Do not commit this file.
 
-Create a file named **`backend/.env`**. It is git-ignored, so never commit it:
-
-```env
+Example configuration (replace placeholders with your local values):
 DATABASE_URL=postgresql+psycopg://postgres:YOUR_PASSWORD@localhost:5432/streamhub
-JWT_SECRET_KEY=replace-with-a-long-random-text-of-at-least-32-characters
+JWT_SECRET_KEY=replace-with-a-long-random-secret
 OTP_DELIVERY_MODE=console
-# Optional: set to false to let any logged-in user play videos without a subscription (demos only)
-# REQUIRE_SUBSCRIPTION=false
-```
 
-| Variable | Meaning |
-|---|---|
-| `DATABASE_URL` | PostgreSQL connection string |
-| `JWT_SECRET_KEY` | Secret used to sign login tokens. **Required**: login fails without it |
-| `OTP_DELIVERY_MODE` | `console` prints OTP codes in the backend terminal (development only). Real email delivery is not configured yet |
-| `REQUIRE_SUBSCRIPTION` | `true` (default) requires an active subscription to play a video |
+# Razorpay Test Mode credentials only for local testing
+RAZORPAY_KEY_ID=your_test_key_id
+RAZORPAY_KEY_SECRET=your_test_key_secret
+RAZORPAY_WEBHOOK_SECRET=your_webhook_secret
 
-Create the tables and start the API:
+REQUIRE_SUBSCRIPTION=true
+Use the exact environment variable names expected by the current backend
+configuration. Never commit API keys, webhook secrets, database
+passwords, JWT secrets, OTPs, or payment credentials. Do not paste them
+into issues or chat.
 
-```bash
+Initialize the database and start the API:
 python -m app.init_db
-uvicorn app.main:app --port 8001 --reload
-```
-
+uvicorn app.main:app --host 127.0.0.1 --port 8001 --reload
+Backend URLs:
 - API: http://127.0.0.1:8001
-- Interactive docs (Swagger): http://127.0.0.1:8001/docs
-- Health check: http://127.0.0.1:8001/health
-
-### 3️⃣ Frontend setup (second terminal)
-
-```bash
+- Swagger docs: http://127.0.0.1:8001/docs
+- Health check, if enabled: http://127.0.0.1:8001/health
+3. Start the frontend
+Open a second terminal:
 cd frontend
 npm install
 npm run dev
-```
-
-Open http://localhost:5173. The frontend talks to the backend at `http://127.0.0.1:8001`, and CORS allows only `localhost:5173` and `127.0.0.1:5173`.
-
-### 4️⃣ Try it out
-
-1. Click **Sign Up**, register, and read the **OTP code in the backend terminal** (console mode).
-2. Log in. Once the Sprint 1 playback pull requests are merged, the navbar shows **Watchlist, History, My Subscription** and **Logout**.
-3. Click ▶ on a movie to open the player.
-
-> Playback needs a row in the `titles` table with a `video_url`, and an **active subscription** for the user. Until the catalog (upload) and payment features are merged, use the optional demo seed script below.
-
-### 5️⃣ Demo data (optional, development only)
-
-If `backend/seed_dev.py` is present:
-
-```bash
+Open the local URL printed by Vite (commonly http://localhost:5173).
+4. Run checks
+Backend tests:
 cd backend
-python seed_dev.py
-```
-
-It creates a verified demo user (`demo@example.com` / `Demo@12345`), the 14 homepage titles with a sample video, two plans, and an active subscription.
-
-### 6️⃣ Run the tests
-
-Unit tests use an in-memory database, so **PostgreSQL is not needed**:
-
-```bash
-cd backend
-pip install pytest httpx
 python -m pytest
-```
-
-Expected result with all playback, personalisation, Razorpay hosted checkout, and content administration features merged: **53 passed** (32 playback/personalisation + 8 Razorpay checkout + 13 admin & catalog).
-
-
-Performance (OTT-NF-001) load test with Locust:
-
-```bash
-cd backend
-pip install locust
-locust -f locustfile.py --host http://127.0.0.1:8001
-```
-
-### 7️⃣ Frontend checks
-
-```bash
+Frontend lint/build checks:
 cd frontend
 npm run lint
 npm run build
-```
+Only report test counts that were actually observed in the current
+checkout. Test results can change as branches and pull requests are
+merged.
+💳 Razorpay development/testing
+Use Razorpay Test Mode for development. Test payments simulate
+transactions and should not collect real money.
 
----
+Recommended checks for OTT-F-041:
+1. Select Basic or Premium and confirm Checkout opens.
+2. Complete a successful test payment and confirm the backend verifies
+   it.
+3. Confirm the correct plan, active status, and expiry appear in
+   StreamHub.
+4. Cancel or fail a test payment and confirm it does not activate a
+   subscription.
+5. Submit a deliberately invalid signature to the verification endpoint
+   and confirm the backend rejects it.
+6. If webhooks are enabled, configure the same webhook secret in the
+   Razorpay test dashboard and the backend environment. Use a reachable
+   webhook URL for local testing; a local-only 127.0.0.1 URL cannot
+   receive external Razorpay callbacks.
+Do not use real card details or real banking OTPs in tests. Do not
+switch to Live Mode or collect real payments for a college demo without
+the account owner's approval and the required provider activation.
+🧪 Sprint 1 --- Feature and test status
+This status reflects the latest manual-testing notes shared by the
+testing/integration member. A checked item means it was reported as
+tested; unchecked items still need verification. It is not an automated
+CI result.
+  Requirement       Feature             Reported status   Remaining work
+  OTT-F-041       Hosted Razorpay     Mostly tested     Verify
+                    checkout                              cancellation/failure
+                                                          does not activate a
+                                                          subscription; verify
+                                                          invalid signatures are
+                                                          rejected
 
-# 📊 19. Sprint 1 Status & Work Distribution
+  OTT-F-050       Upload titles and   Tested by member  Keep evidence of
+                    metadata                              creation, persistence
+                                                          after refresh,
+                                                          validation, file
+                                                          handling, and viewer
+                                                          permission checks
 
-### Work distribution
+  OTT-F-051       Publish/unpublish   Mostly tested     Test direct
+                    titles                                detail/playback API
+                                                          access to an
+                                                          unpublished title
 
-| Team member | Assigned issues | No. of issues | Story points |
-|---|---|---|---|
-| Member 1 — Frontend | #1, #2, #12, #20, #6, #11 | 6 | 16 |
-| Member 2 — Backend | #4, #5, #7, #18, #22, #23 | 6 | 19 |
-| Member 3 — Playback & Features | #3, #8, #9, #10, #14 | 5 | 17 |
-| Member 4 — Testing & Integration | #13, #15, #16, #17, #19, #21 | 6 | 22 |
+  OTT-F-052       View users and      Mostly tested     Check
+                    subscription status                   search/pagination if
+                                                          implemented; inspect
+                                                          API responses for
+                                                      sensitive fields
+Suggested evidence to save
+- Successful checkout and resulting subscription status/expiry
+- Failed/cancelled checkout with no subscription activation
+- Invalid signature rejection response
+- Uploaded title visible after refresh
+- Published title visible and unpublished title hidden
+- Direct API request for an unpublished title
+- Admin users list and a normal viewer's denied admin request
+- API response inspection confirming password hashes, OTPs, and
+  secrets are not exposed
+Definition of done: Mark an issue complete only after its required
+tests pass, evidence is saved, relevant defects are addressed, and the
+issue/PR is updated accurately.
+🔌 API documentation
+The running backend's Swagger page at http://127.0.0.1:8001/docs is
+the source of truth for the current request schemas and endpoint paths.
+The API may not use the /api prefix described in earlier design
+documents.
 
-### Feature status
+Known routes in the project documentation include:
+  Method                  Path                            Purpose
+  POST                  /auth/register                Register a user
 
-Legend: ✅ on `main` · 🟡 implemented on a feature branch, merge pending · ⬜ not on `main` yet
+  POST                  /auth/verify-otp              Verify registration OTP
 
-| Issue | Requirement | Feature | Status |
-|---|---|---|---|
-| #4 | `OTT-F-001` | Register with OTP verification | ✅ |
-| #5 | `OTT-F-002` | Login with JWT | ✅ |
-| — | `OTT-F-003` | Password reset with OTP | ✅ |
-| #7 | `OTT-F-004` | Manage viewer profile | ✅ |
-| #22 | `OTT-NF-005` | Modular backend structure | ✅ |
-| #18 | `OTT-NF-001` | API response-time target | 🟡 Locust login load test on `main`; full run pending |
-| #3 | `OTT-F-020` | Play videos | 🟡 `feature/issue-3-play-video` |
-| #8 | `OTT-F-021` | Resume from last position | 🟡 `feature/issue-8-resume-playback` |
-| #9 | `OTT-F-022` | Watch history | 🟡 `feature/issue-9-watch-history` |
-| #10 | `OTT-F-030` | Watchlist | 🟡 `feature/issue-10-watchlist` |
-| #14 | `OTT-F-042` | Subscription and expiry status | 🟡 `feature/issue-14-subscription-status` |
-| #11 | `OTT-F-031` | 1–5 star ratings | ⬜ |
-| #12 | `OTT-F-040` | Subscription plans | 🟡 `member4/testing-integration` |
-| #13 | `OTT-F-041` | Hosted payment checkout | 🟡 `member4/testing-integration` |
-| #15 | `OTT-F-050` | Upload titles and metadata | 🟡 `member4/testing-integration` |
-| #16 | `OTT-F-051` | Publish / unpublish titles | 🟡 `member4/testing-integration` |
-| #17 | `OTT-F-052` | View users and subscription status | 🟡 `member4/testing-integration` |
-| #19 | `OTT-NF-002` | Video start-up time ≤ 5 s | 🟡 `member4/testing-integration` |
-| #20 | `OTT-NF-003` | Desktop and tablet layouts | ⬜ |
-| #21 | `OTT-NF-004` | 50 concurrent users | 🟡 `member4/testing-integration` |
-| #23 | `OTT-NF-006` | Availability in demo/test windows | ⬜ |
+  POST                  /auth/login                   Log in and receive an
+                                                          access token
 
+  GET                   /auth/me                      Get current user
 
-> 📝 **Keep this table current.** When a pull request is merged, change its status to ✅. Issues #1, #2 and #6 are tracked on GitHub Issues and are not listed here.
+  GET                   /subscription/status          Get the current user's
+                                                          subscription status
 
----
+  GET                   /playback/{title_id}          Request playback access
 
-# 🗂️ 20. Repository Structure
+  GET                   /playback/{title_id}/resume   Get resume position
 
-```text
+  PUT                   /playback/{title_id}/resume   Save resume position
+
+  GET                   /playback/history             View watch history
+
+  GET                   /watchlist                    View the user's
+                                                      watchlist
+Subscription, catalog, and administration routes can evolve as features
+are integrated. Confirm the exact path, request body, and authorization
+requirements in Swagger before testing.
+🗂️ Repository structure
 Team4/
 ├── README.md
-├── StreamHub_SRS.pdf               Requirements
-├── StreamHub_SAD.pdf               Architecture & design
-├── StreamHub_Test_Plan.pdf         Test plan
-├── .github/workflows/blank.yml     CI: checks that README and the 3 documents exist
-│
-├── backend/                        FastAPI + SQLAlchemy + PostgreSQL
+├── StreamHub_SRS.pdf
+├── StreamHub_SAD.pdf
+├── StreamHub_Test_Plan.pdf
+├── backend/
 │   ├── requirements.txt
-│   ├── locustfile.py               Load test (OTT-NF-001)
-│   ├── seed_dev.py                 Optional demo data (development only)
 │   ├── app/
-│   │   ├── main.py                 App creation, CORS, router registration
-│   │   ├── database.py             Engine, session, Base, get_db
-│   │   ├── init_db.py              Creates all tables
-│   │   ├── core/                   config.py (env settings), security.py (bcrypt, JWT)
-│   │   ├── models/                 user, title, subscription (Plan, Subscription),
-│   │   │                           playback (PlaybackProgress, WatchHistory), watchlist
-│   │   ├── schemas/                Pydantic request/response models
-│   │   ├── services/               Business logic (auth, otp, email, subscription,
-│   │   │                           playback, resume, history)
-│   │   └── routers/                auth, profile, catalog, playback,
-│   │                               subscription, admin, watchlist
+│   │   ├── main.py
+│   │   ├── database.py
+│   │   ├── init_db.py
+│   │   ├── core/
+│   │   ├── models/
+│   │   ├── schemas/
+│   │   ├── services/
+│   │   └── routers/
 │   └── tests/
-│       └── playback_features/      Unit tests (TC-Play-01..03, TC-Personal-01, TC-Sub-03)
-│
-└── frontend/                       React + Vite
+└── frontend/
     └── src/
-        ├── App.jsx                 Home page and screen switching
-        ├── Auth.jsx, Login.jsx, ForgotPassword.jsx
-        └── features/
-            ├── api.js              Shared fetch helper (adds the login token)
-            ├── playback/           Player, resume, watch history
-            ├── watchlist/          Watchlist button and screen
-            └── subscription/       "My Subscription" screen
-```
-
-**How a request flows:** `router` (HTTP and validation) → `service` (business rules) → `model` (database tables). Keep new code in the same layers, and do not call the database directly from a router if a service exists.
-
----
-
-# 🔌 21. Implemented API Endpoints
-
-The backend currently has **no `/api` prefix**. Routes that need login expect the header `Authorization: Bearer <access_token>` and return `401` without it.
-
-### Authentication & profile
-
-| Method | Path | Purpose |
-|---|---|---|
-| `POST` | `/auth/register` | Register and send an OTP |
-| `POST` | `/auth/verify-otp` | Verify the registration OTP |
-| `POST` | `/auth/login` | Returns `{access_token, token_type, user}` |
-| `POST` | `/auth/forgot-password` | Start password reset |
-| `POST` | `/auth/verify-reset-otp` | Verify the reset OTP |
-| `POST` | `/auth/reset-password` | Set a new password |
-| `GET` | `/auth/me` · `/profile/me` | Current user |
-| `PATCH` | `/profile/me` | Update name / avatar |
-
-### Playback, watchlist and subscription 🔒
-
-| Method | Path | Purpose | Issue |
-|---|---|---|---|
-| `GET` | `/subscription/status` | Plan, price, status, expiry date | #14 |
-| `GET` | `/playback/{title_id}` | Returns `{title_id, title, video_url}`; needs an active subscription (`403` otherwise) | #3 |
-| `GET` | `/playback/{title_id}/resume` | `{position_seconds}` (0 if never watched) | #8 |
-| `PUT` | `/playback/{title_id}/resume` | Save `{position_seconds}` (must be ≥ 0) | #8 |
-| `POST` | `/playback/{title_id}/history` | Record a viewing session | #9 |
-| `GET` | `/playback/history` | The user's history, newest first | #9 |
-| `GET` | `/watchlist` | The user's watchlist | #10 |
-| `POST` | `/watchlist/{title_id}` | Add a title (adding twice is harmless) | #10 |
-| `DELETE` | `/watchlist/{title_id}` | Remove a title | #10 |
-
-### Not implemented yet
-
-`/catalog` and `/admin` are placeholders that only return a status message. Ratings, plans, payment checkout and admin upload are still to be built.
-
-### Error format
-
-Errors are JSON, for example `{"detail": "Title not found"}` with status `404`. Typical codes: `401` not logged in, `403` no active subscription, `404` not found, `422` invalid input.
-
-### Data rules
-
-- Every query for history, watchlist, resume position and subscription is **filtered by the logged-in user**, so users cannot see each other's data.
-- Timestamps (such as `watched_at`) are stored in UTC and returned as ISO text ending in `Z`.
-- Payment card data is never handled by StreamHub (see Section 6).
-
----
-
-# 🤝 22. Team Git Workflow
-
-1. **One branch per issue**, named `feature/issue-<number>-<short-name>`, for example `feature/issue-3-play-video`.
-2. **Commit messages** follow `type(scope): what changed #issue`.
-   - Types: `feat`, `test`, `fix`, `docs`, `chore`
-   - Example: `feat(playback): record and list watch history (OTT-F-022) #9`
-3. **Open a Pull Request into `main`.** The title ends with `(closes #<issue>)` so the issue closes when it merges.
-4. **Every PR needs at least one review** before merging. Ask the owner of the affected area:
-   - backend files (`models`, `routers`, `services`) → the Backend member
-   - screens or `App.jsx` → the Frontend member
-   - anything touching shared tables → also the Testing & Integration member
-5. **Merge in dependency order.** Do not merge a PR that builds on another until the earlier one is merged. Prefer **"Create a merge commit"** over squash for stacked branches.
-6. **Stacked branches:** if your issue depends on an unmerged one, branch from that issue's branch, otherwise branch from an up-to-date `main`.
-7. **Conflicts in `App.jsx` and `models/__init__.py`** are expected, because several people add to them. Keep **both** sides.
-8. **Shared tables:** `users`, `titles`, `plans`, `subscriptions` are shared. Extend the existing model, **never create a second table** for the same thing. Agree API contracts and table changes in the team chat first.
-9. **Never commit** `.env`, passwords, tokens, `node_modules` or `__pycache__`.
-10. **Before opening a PR:** the backend tests pass and `npm run build` succeeds.
-
----
-
-# 🧭 23. Known Limitations & Next Steps
-
-| Area | Current state | Next step |
-|---|---|---|
-| Catalog | The homepage shows 14 hard-coded movies in `App.jsx` | Build catalog endpoints and load titles from the database (`titles` table) |
-| Titles | The `titles` table exists, but nothing uploads titles yet | Admin upload and publish/unpublish (#15, #16); extend `Title`, do not recreate it |
-| Subscriptions | Nothing marks a subscription as `active` yet | Payment callback (#13) must set `status="active"`, `start_date`, `expiry_date` after a **verified** payment |
-| Playback | Requires an active subscription (SRS use-case diagram: *Play Video includes Check Active Subscription*) | Until payment works, use `REQUIRE_SUBSCRIPTION=false` or the demo seed |
-| Video | The backend returns a stored URL and the browser's HTML5 player streams it | Point `video_url` at cloud/static storage |
-| OTP email | Console mode only | Configure real email delivery for production |
-| API prefix | Routes have no `/api` prefix, unlike the SAD | Agree one convention in the team and update `app/main.py` and `frontend/src/features/api.js` |
-| Frontend | Screen switching is state-based in `App.jsx`, with no router library | Consider React Router if the number of screens grows |
-| Security | HTTPS and login rate limiting (SRS §6) are not set up in code | Configure at deployment and add rate limiting |
-
----
-
-# ⭐ StreamHub in One Sentence
-
-> **StreamHub is a secure, responsive, modular web-based OTT platform connecting content discovery, video playback, personalization, subscriptions, payment integration, and administration into one academically scoped and testable system.**
-
----
-
-## 📖 Source Documents
-
-This README consolidates the project's:
-
-1. **Software Requirements Specification (SRS) v1.0**
-2. **Software Architecture and Design Specification (SAD) v1.0**
-3. **Software Test Plan (STP) v1.0**
-
-> This README preserves the scope, terminology, architecture, requirements, and testing approach defined by those documents and does not assume implementation details that they do not specify.
-
----
-
-### 🎬 StreamHub
-**Discover. Watch. Personalize. Subscribe.**
-
-**TEAM-04 · PES University · UE24CS341A Software Engineering**
+The exact tree may change as team branches are merged.
+🤝 Team Git workflow and security
+1. Work on the branch assigned by the team and avoid overwriting
+   another member's work.
+2. Review git status and git diff before staging changes.
+3. Never commit .env, credentials, passwords, tokens, node_modules,
+   virtual environments, or __pycache__.
+4. Run the relevant backend tests and frontend build before opening a
+   pull request.
+5. Open a pull request to the team's target branch and request review.
+6. Update issue status only when the implementation and required tests
+   are complete.
+7. If a secret was accidentally committed, remove it from the
+   repository and rotate it; deleting it in a later commit does not
+   make the exposed secret safe.
+Example commit message:
+test(subscription): verify checkout and admin flows
+🚧 Known boundaries
+- This is an academic web application, not a production OTT service.
+- Test Mode payment success does not prove that Live Mode is activated
+  or production-ready.
+- Real email delivery depends on the configured email provider and
+  environment.
+- Media hosting, playback performance, access control, and file-upload
+  limits depend on the current implementation and deployment
+  configuration.
+- Production deployment would require additional security, monitoring,
+  backup, rate-limiting, HTTPS, and operational work.
+📖 Source documents
+This README summarizes the project's:
+1. Software Requirements Specification (SRS)
+2. Software Architecture and Design Specification (SAD)
+3. Software Test Plan (STP)
+For exact requirements and formal test cases, refer to those documents
+and the current implementation.
+🎬 StreamHub
+Discover. Watch. Personalize. Subscribe.
