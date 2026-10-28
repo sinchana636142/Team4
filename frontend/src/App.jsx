@@ -11,6 +11,7 @@ import AdminDashboard from "./features/admin/AdminDashboard";
 import SubscriptionPlans from "./SubscriptionPlans";
 import { API_URL } from "./features/api";
 import MovieDetails from "./MovieDetails";
+import MovieSearch from "./MovieSearch";
 
 
 const movies = [
