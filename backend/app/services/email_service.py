@@ -1,4 +1,3 @@
-
 import os
 import smtplib
 import logging
@@ -6,31 +5,43 @@ from email.message import EmailMessage
 
 from dotenv import load_dotenv
 
-load_dotenv()
-
 logger = logging.getLogger(__name__)
 
 
 def send_otp_email(to_email: str, otp: str) -> None:
     """Send a verification or password-reset OTP by email."""
 
-    smtp_email = os.getenv("SMTP_EMAIL")
-    smtp_password = os.getenv("SMTP_PASSWORD")
-    smtp_host = os.getenv("SMTP_HOST", "smtp.gmail.com")
+    # Reload environment to ensure latest .env changes are always used
+    load_dotenv(override=True)
+
+    delivery_mode = os.getenv("OTP_DELIVERY_MODE", "email").lower()
+    smtp_email = os.getenv("SMTP_EMAIL", "").strip()
+    smtp_password = os.getenv("SMTP_PASSWORD", "").strip().replace(" ", "")
+
+    # Only print to console if explicitly configured for console-only mode
+    if delivery_mode == "console":
+        print(f"\n==========================================")
+        print(f"[STREAMHUB OTP] Verification code for {to_email}: {otp}")
+        print(f"==========================================\n")
+        return
+
+    # If email credentials are not configured
+    if not smtp_email or not smtp_password:
+        logger.warning("SMTP_EMAIL or SMTP_PASSWORD is empty in .env. Skipping email dispatch.")
+        return
+
+    smtp_host = os.getenv("SMTP_HOST", "smtp.gmail.com").strip()
     smtp_port = int(os.getenv("SMTP_PORT", "587"))
 
-    if not smtp_email or not smtp_password:
-        raise RuntimeError("SMTP email configuration is missing.")
-
     message = EmailMessage()
-    message["From"] = smtp_email
+    message["From"] = f"StreamHub <{smtp_email}>"
     message["To"] = to_email
-    message["Subject"] = "Your StreamHub OTP Verification Code"
+    message["Subject"] = "StreamHub - Your OTP Verification Code"
 
     message.set_content(
         f"""Hello,
 
-Your StreamHub OTP is: {otp}
+Your StreamHub OTP verification code is: {otp}
 
 This code is valid for 5 minutes.
 Do not share this code with anyone.
@@ -43,15 +54,20 @@ StreamHub Team
     )
 
     try:
-        with smtplib.SMTP(smtp_host, smtp_port, timeout=20) as server:
+        with smtplib.SMTP(smtp_host, smtp_port, timeout=15) as server:
             server.ehlo()
             server.starttls()
             server.ehlo()
             server.login(smtp_email, smtp_password)
             server.send_message(message)
 
-        logger.info("OTP email sent successfully.")
+        logger.info("OTP email sent successfully to %s via %s", to_email, smtp_email)
 
-    except (smtplib.SMTPException, OSError):
-        logger.exception("Failed to send OTP email.")
+    except smtplib.SMTPAuthenticationError as auth_err:
+        logger.error("Gmail SMTP authentication failed. App Password required. %s", auth_err)
+        raise RuntimeError(
+            "Gmail authentication failed. You must use a 16-character Google App Password in .env, not your standard account password."
+        ) from auth_err
+    except Exception as exc:
+        logger.exception("Failed to send OTP email to %s", to_email)
         raise
