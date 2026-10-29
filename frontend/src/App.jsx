@@ -842,7 +842,6 @@ function App() {
         <p>Discover. Watch. Personalize. Subscribe.</p>
 
         <span>Team 04 · StreamHub</span>
-        
       </footer>
       <MovieDetails
         movie={selectedMovie}
