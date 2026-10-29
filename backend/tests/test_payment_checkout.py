@@ -14,6 +14,16 @@ from app.routers.subscription import router
 from app.services.subscription_service import seed_default_plans
 
 
+@pytest.fixture(autouse=True)
+def setup_test_razorpay_env(monkeypatch):
+    """Ensure test module runs in test sandbox mode with placeholder keys by default."""
+    from app.core import config
+    monkeypatch.setattr(config, "RAZORPAY_KEY_ID", "rzp_test_placeholder_key_id")
+    monkeypatch.setattr(config, "RAZORPAY_KEY_SECRET", "placeholder_razorpay_secret")
+    monkeypatch.setattr(config, "RAZORPAY_WEBHOOK_SECRET", "placeholder_webhook_secret")
+
+
+
 def test_list_subscription_plans(make_client, db):
     client = make_client(router, user_id=1)
     response = client.get("/subscription/plans")
@@ -161,3 +171,37 @@ def test_checkout_requires_login(make_client, db):
     client = make_client(router, user_id=None)
     response = client.post("/subscription/checkout", json={"plan_id": 1})
     assert response.status_code == 401
+
+
+def test_mock_signature_rejected_when_credentials_configured(make_client, db, monkeypatch):
+    """When genuine credentials are configured, sig_valid_mock must be rejected."""
+    from app.core import config
+    monkeypatch.setattr(config, "RAZORPAY_KEY_ID", "rzp_live_realid123")
+    monkeypatch.setattr(config, "RAZORPAY_KEY_SECRET", "real_secret_abc456")
+
+    seed_default_plans(db)
+    client = make_client(router, user_id=1)
+    plan = db.query(Plan).filter(Plan.name == "Basic").first()
+
+    sub = Subscription(
+        user_id=1,
+        plan_id=plan.id,
+        status="pending",
+        razorpay_order_id="order_live_test_123",
+    )
+    db.add(sub)
+    db.commit()
+
+    verify_res = client.post(
+        "/subscription/verify",
+        json={
+            "razorpay_order_id": "order_live_test_123",
+            "razorpay_payment_id": "pay_test_mock",
+            "razorpay_signature": "sig_valid_mock",
+        },
+    )
+    assert verify_res.status_code == 400
+    assert "invalid payment signature" in verify_res.json()["detail"].lower()
+
+    db.refresh(sub)
+    assert sub.status == "failed"

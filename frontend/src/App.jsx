@@ -10,6 +10,8 @@ import WatchlistPage from "./features/watchlist/WatchlistPage";
 import AdminDashboard from "./features/admin/AdminDashboard";
 import SubscriptionPlans from "./SubscriptionPlans";
 import { API_URL } from "./features/api";
+import MovieDetails from "./MovieDetails";
+import MovieSearch from "./MovieSearch";
 
 
 const movies = [
@@ -143,7 +145,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [screen, setScreen] = useState("home");
   const [watchTitleId, setWatchTitleId] = useState(null);
-
+  const [selectedMovie, setSelectedMovie] = useState(null);
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       const savedUser = sessionStorage.getItem("streamhub_user");
@@ -514,7 +516,12 @@ function App() {
             >
               Watchlist
             </button>
-
+                <button
+  type="button"
+  onClick={() => setSelectedMovie(movie)}
+>
+  View Details
+</button>
             <button
               type="button"
               onClick={() => setScreen("history")}
@@ -836,6 +843,10 @@ function App() {
 
         <span>Team 04 · StreamHub</span>
       </footer>
+      <MovieDetails
+        movie={selectedMovie}
+        onClose={() => setSelectedMovie(null)}
+      />
     </div>
   );
 }
