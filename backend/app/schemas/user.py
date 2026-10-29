@@ -1,4 +1,3 @@
-
 from pydantic import BaseModel, EmailStr, Field
 
 
@@ -25,10 +24,13 @@ class UserProfileResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
-
 class VerifyOTPRequest(BaseModel):
     email: EmailStr
     otp: str = Field(pattern=r"^\d{6}$")
+
+
+class ResendOTPRequest(BaseModel):
+    email: EmailStr
 
 
 # Password-reset schemas
