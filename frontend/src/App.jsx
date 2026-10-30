@@ -14,109 +14,7 @@ import MovieDetails from "./MovieDetails";
 import MovieSearch from "./MovieSearch";
 import MovieDetailsPage from "./MovieDetailsPage";
 import IntroVideo from "./IntroVideo";
-
-
-const movies = [
-  {
-    id: 1,
-    title: "The Dark Knight",
-    genre: "Action",
-    year: 2008,
-    poster:
-      "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
-  },
-  {
-    id: 2,
-    title: "Mad Max: Fury Road",
-    genre: "Action",
-    year: 2015,
-    poster:
-      "https://image.tmdb.org/t/p/w500/8tZYtuWezp8JbcsvHYO0O46tFbo.jpg",
-  },
-  {
-    id: 3,
-    title: "John Wick",
-    genre: "Action",
-    year: 2014,
-    poster:
-      "https://image.tmdb.org/t/p/w500/fZPSd91yGE9fCcCe6OoQr6E3Bev.jpg",
-  },
-  {
-    id: 4,
-    title: "The Hangover",
-    genre: "Comedy",
-    year: 2009,
-    poster:
-      "https://image.tmdb.org/t/p/w500/uluhlXubGu1VxU63X9VHCLWDAYP.jpg",
-  },
-  {
-    id: 5,
-    title: "Home Alone",
-    genre: "Comedy",
-    year: 1990,
-    poster:
-      "https://image.tmdb.org/t/p/w500/onTSipZ8R3bliBdKfPtsDuHTdlL.jpg",
-  },
-  {
-    id: 6,
-    title: "Inception",
-    genre: "Thriller",
-    year: 2010,
-    poster:
-      "https://image.tmdb.org/t/p/w500/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg",
-  },
-  {
-    id: 7,
-    title: "Shutter Island",
-    genre: "Thriller",
-    year: 2010,
-    poster:
-      "https://image.tmdb.org/t/p/w500/4GDy0PHYX3VRXUtwK5ysFbg3kEx.jpg",
-  },
-  {
-    id: 8,
-    title: "Interstellar",
-    genre: "Sci-Fi",
-    year: 2014,
-    poster:
-      "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
-  },
-  {
-    id: 9,
-    title: "Titanic",
-    genre: "Romance",
-    year: 1997,
-    poster:
-      "https://image.tmdb.org/t/p/w500/9xjZS2rlVxm8SFx8kPC3aIGCOYQ.jpg",
-  },
-  {
-    id: 10,
-    title: "The Conjuring",
-    genre: "Horror",
-    year: 2013,
-    poster:
-      "https://image.tmdb.org/t/p/w500/wVYREutTvI2tmxr6ujrHT704wGF.jpg",
-  },
-  {
-    id: 11,
-    title: "A Quiet Place",
-    genre: "Horror",
-    year: 2018,
-    poster:
-      "https://image.tmdb.org/t/p/w500/nAU74GmpUk7t5iklEp3bufwDq4n.jpg",
-  },
-];
-
-const genres = [
-  "All",
-  "Action",
-  "Comedy",
-  "Thriller",
-  "Sci-Fi",
-  "Romance",
-  "Horror",
-  "Drama",
-];
+import { movies, genres } from "./data/movies";
 
 function App() {
   
@@ -136,6 +34,8 @@ const finishIntro = () => {
   const [screen, setScreen] = useState("home");
   const [watchTitleId, setWatchTitleId] = useState(null);
   const [selectedMovie, setSelectedMovie] = useState(null);
+  const [selectedSeries, setSelectedSeries] = useState(null);
+  const [seriesPlayer, setSeriesPlayer] = useState(null);
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       const savedUser = sessionStorage.getItem("streamhub_user");
@@ -451,6 +351,64 @@ async function submitRating(titleId, rating) {
       />
     );
   }
+// Web Series screen. Keep it inside the normal app shell so the navbar remains available.
+if (screen === "series") {
+  return (
+    <div className="app">
+      <Navbar
+        currentUser={currentUser}
+        onHome={goHome}
+        onScreenChange={setScreen}
+        onLogout={handleLogout}
+      />
+      <main>
+        <WebSeries onSelectSeries={(show) => setSelectedSeries(show)} />
+      </main>
+      {selectedSeries && (
+        <SeriesDetails
+          series={selectedSeries}
+          onClose={() => setSelectedSeries(null)}
+          onWatchEpisode={({ series: show, episode }) => {
+            setSeriesPlayer({ kind: "episode", series: show, episode });
+          }}
+          onWatchTrailer={(show) => {
+            setSeriesPlayer({ kind: "trailer", series: show });
+          }}
+        />
+      )}
+      {seriesPlayer && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={seriesPlayer.kind === "trailer" ? "Series trailer" : "Episode player"}
+          style={{ position: "fixed", inset: 0, zIndex: 11000, background: "rgba(0,0,0,.94)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}
+        >
+          <div style={{ width: "min(1000px, 100%)", color: "white", background: "#17141f", borderRadius: 16, padding: 20 }}>
+            <button type="button" onClick={() => setSeriesPlayer(null)} style={{ float: "right", padding: "8px 14px", cursor: "pointer" }}>Close ✕</button>
+            <h2>{seriesPlayer.kind === "trailer" ? `${seriesPlayer.series.title} — Trailer` : `${seriesPlayer.series.title} — ${seriesPlayer.episode.title}`}</h2>
+            {seriesPlayer.kind === "trailer" && seriesPlayer.series.trailerUrl ? (
+              <div style={{ position: "relative", width: "100%", paddingTop: "56.25%" }}>
+                <iframe
+                  title={`${seriesPlayer.series.title} trailer`}
+                  src={seriesPlayer.series.trailerUrl}
+                  style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: 0 }}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              </div>
+            ) : seriesPlayer.kind === "episode" && seriesPlayer.episode.videoUrl ? (
+              <video controls autoPlay style={{ width: "100%", maxHeight: "70vh", background: "black" }} src={seriesPlayer.episode.videoUrl} />
+            ) : (
+              <p style={{ lineHeight: 1.7, color: "#d4ccdf" }}>
+                No authorized video source is configured for this episode yet. Add a video URL you own or are licensed to stream to this episode's <code>videoUrl</code> field in <code>src/data/series.js</code>.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
   // StreamHub homepage.
   return (
