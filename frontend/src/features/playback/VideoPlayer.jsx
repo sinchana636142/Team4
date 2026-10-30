@@ -1,6 +1,4 @@
 
-import { useEffect } from "react";
-
 // Supports YouTube videos and normal MP4 videos
 export default function VideoPlayer({ src, videoRef, onStartupMeasured }) {
   const getYouTubeId = (url) => {
@@ -14,9 +12,9 @@ export default function VideoPlayer({ src, videoRef, onStartupMeasured }) {
       }
 
       if (
-        parsedUrl.hostname === "www.youtube.com" ||
-        parsedUrl.hostname === "youtube.com" ||
-        parsedUrl.hostname === "m.youtube.com"
+        ["www.youtube.com", "youtube.com", "m.youtube.com"].includes(
+          parsedUrl.hostname
+        )
       ) {
         if (parsedUrl.pathname === "/watch") {
           return parsedUrl.searchParams.get("v");
@@ -39,12 +37,6 @@ export default function VideoPlayer({ src, videoRef, onStartupMeasured }) {
 
   const youtubeId = getYouTubeId(src);
 
-  useEffect(() => {
-    if (youtubeId && onStartupMeasured) {
-      onStartupMeasured();
-    }
-  }, [youtubeId, onStartupMeasured]);
-
   if (youtubeId) {
     return (
       <iframe
@@ -52,6 +44,7 @@ export default function VideoPlayer({ src, videoRef, onStartupMeasured }) {
         title="StreamHub Video Player"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowFullScreen
+        onLoad={() => onStartupMeasured?.()}
         style={{
           width: "100%",
           aspectRatio: "16 / 9",
@@ -70,9 +63,7 @@ export default function VideoPlayer({ src, videoRef, onStartupMeasured }) {
       controls
       preload="auto"
       playsInline
-      onCanPlay={() => {
-        if (onStartupMeasured) onStartupMeasured();
-      }}
+      onCanPlay={() => onStartupMeasured?.()}
       style={{
         width: "100%",
         maxHeight: "500px",
