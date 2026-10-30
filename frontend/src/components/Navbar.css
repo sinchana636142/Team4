@@ -1,0 +1,13 @@
+/* Navbar component styles. Base .navbar styles remain in ../App.css. */
+.admin-nav-button {
+  border: 1px solid #e50914 !important;
+  color: #e50914 !important;
+  font-weight: bold;
+}
+
+@media (max-width: 900px) {
+  .navbar {
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+}
