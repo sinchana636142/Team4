@@ -698,3 +698,411 @@ textarea {
 .plan-card button {
   overflow-wrap: anywhere;
 }
+
+
+/* =========================================
+   AUTO-SLIDING FEATURED MOVIE HERO
+========================================= */
+.hero-slider {
+  position: relative;
+  isolation: isolate;
+  min-height: clamp(440px, 48vw, 610px);
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #ffffff12;
+  background: #0c0d12;
+}
+
+.hero-slide-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-size: cover;
+  background-position: center 25%;
+  animation: heroBackdropIn 700ms ease both;
+  transition: background-image 500ms ease;
+}
+
+.hero-slide-content {
+  width: min(100%, 1250px);
+  margin: 0 auto;
+  padding: 78px 30px 100px;
+  animation: heroContentIn 550ms ease both;
+}
+
+.hero-slide-content .eyebrow {
+  display: inline-block;
+  margin: 0 0 18px;
+  padding: 8px 12px;
+  border: 1px solid #bda1fa55;
+  border-radius: 999px;
+  background: #171020aa;
+}
+
+.hero-slide-kicker {
+  margin: 0 0 10px;
+  color: #d3c2ff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.hero-slide-content h1 {
+  max-width: 760px;
+  margin: 0;
+  color: #fff;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(42px, 6.2vw, 82px);
+  font-weight: 700;
+  letter-spacing: -2.5px;
+  line-height: 1.04;
+  text-wrap: balance;
+  text-shadow: 0 4px 25px #0008;
+}
+
+.hero-slide-content .hero-description {
+  max-width: 550px;
+  margin: 22px 0 0;
+  color: #d0ceda;
+  font-size: clamp(15px, 1.5vw, 18px);
+  line-height: 1.7;
+}
+
+.hero-slide-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.hero-slide-actions .explore-button {
+  margin: 0;
+  border: 0;
+  cursor: pointer;
+}
+
+.hero-secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 12px 20px;
+  border: 1px solid #ffffff55;
+  border-radius: 8px;
+  background: #11111a99;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  transition: background 180ms ease, border-color 180ms ease;
+}
+
+.hero-secondary-button:hover {
+  border-color: #c3a2ff;
+  background: #29203fcc;
+}
+
+.hero-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  transform: translateY(-50%);
+  border: 1px solid #ffffff40;
+  border-radius: 50%;
+  background: #090910a8;
+  color: #fff;
+  font-size: 34px;
+  line-height: 1;
+  transition: background 180ms ease, border-color 180ms ease;
+}
+
+.hero-arrow:hover {
+  border-color: #c3a2ff;
+  background: #7d5ac7cc;
+}
+
+.hero-arrow-prev { left: 22px; }
+.hero-arrow-next { right: 22px; }
+
+.hero-dots {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transform: translateX(-50%);
+}
+
+.hero-dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 20px;
+  background: #ffffff70;
+  transition: width 220ms ease, background 220ms ease;
+}
+
+.hero-dot.active {
+  width: 28px;
+  background: #c3a2ff;
+}
+
+.hero-slide-count {
+  position: absolute;
+  right: 30px;
+  bottom: 27px;
+  color: #ffffffb5;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 1px;
+}
+
+@keyframes heroContentIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes heroBackdropIn {
+  from { opacity: 0.65; transform: scale(1.025); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@media (max-width: 650px) {
+  .hero-slider {
+    min-height: 490px;
+  }
+
+  .hero-slide-backdrop {
+    background-position: 58% center;
+  }
+
+  .hero-slide-content {
+    padding: 64px 24px 100px;
+  }
+
+  .hero-slide-content h1 {
+    font-size: clamp(38px, 10vw, 58px);
+    letter-spacing: -1.5px;
+  }
+
+  .hero-slide-content .hero-description {
+    max-width: 90%;
+    font-size: 14px;
+  }
+
+  .hero-arrow {
+    top: auto;
+    bottom: 18px;
+    width: 38px;
+    height: 38px;
+    font-size: 28px;
+    transform: none;
+  }
+
+  .hero-arrow-prev { left: 18px; }
+  .hero-arrow-next { right: 18px; }
+
+  .hero-dots {
+    bottom: 33px;
+  }
+
+  .hero-slide-count {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-slide-backdrop,
+  .hero-slide-content {
+    animation: none !important;
+  }
+}
+
+
+/* HERO SLIDER refinements: smaller title, brighter image, clean rectangular banner */
+.hero-slider {
+  border-radius: 0 !important;
+  aspect-ratio: 16 / 7;
+  min-height: 430px;
+  max-height: 590px;
+}
+
+.hero-slide-backdrop {
+  background-position: center center;
+  filter: brightness(1.22) saturate(1.08);
+  transform-origin: center;
+}
+
+.hero-slide-content h1 {
+  max-width: 650px;
+  font-size: clamp(34px, 4.2vw, 58px) !important;
+  letter-spacing: -1.4px !important;
+  line-height: 1.1 !important;
+}
+
+@media (max-width: 650px) {
+  .hero-slider {
+    aspect-ratio: auto;
+    min-height: 440px;
+    max-height: none;
+  }
+
+  .hero-slide-content h1 {
+    font-size: clamp(32px, 8vw, 44px) !important;
+    letter-spacing: -0.8px !important;
+  }
+}
+
+
+/* FINAL HERO IMAGE CLARITY FIX */
+.hero-slider {
+  overflow: hidden;
+  border-radius: 0 !important;
+  aspect-ratio: 16 / 7;
+  min-height: 430px;
+  max-height: 590px;
+  background: #0c0d12;
+}
+
+.hero-slide-backdrop {
+  filter: none !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  image-rendering: auto;
+  transform: none;
+}
+
+/* Keep text readable without washing out the featured image. */
+.hero-slide-content h1 {
+  font-size: clamp(34px, 4.2vw, 58px) !important;
+  letter-spacing: -1.4px !important;
+  line-height: 1.1 !important;
+}
+
+@media (max-width: 650px) {
+  .hero-slider {
+    aspect-ratio: auto;
+    min-height: 440px;
+    max-height: none;
+  }
+
+  .hero-slide-content h1 {
+    font-size: clamp(32px, 8vw, 44px) !important;
+    letter-spacing: -0.8px !important;
+  }
+}
+
+
+/* FEATURED HERO: show the complete movie poster sharply, without cropping/stretching */
+.hero-slider {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: linear-gradient(105deg, #171321 0%, #101018 56%, #090a0f 100%);
+}
+
+.hero-slide-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(90deg, #111019 0%, rgba(17, 16, 25, 0.98) 27%, rgba(17, 16, 25, 0.72) 48%, rgba(17, 16, 25, 0.12) 100%),
+    linear-gradient(0deg, rgba(10, 10, 16, 0.42), transparent 48%);
+  pointer-events: none;
+}
+
+.hero-featured-art {
+  position: absolute;
+  z-index: 0;
+  top: 4%;
+  right: 7%;
+  height: 92%;
+  width: auto;
+  max-width: 42%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  border-radius: 4px;
+  filter: none;
+  opacity: 1;
+  box-shadow: 0 16px 55px rgba(0, 0, 0, 0.45);
+  animation: heroBackdropIn 500ms ease both;
+}
+
+.hero-slide-content {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 1250px);
+}
+
+.hero-arrow,
+.hero-dots,
+.hero-slide-count {
+  z-index: 2;
+}
+
+@media (max-width: 650px) {
+  .hero-featured-art {
+    top: 8%;
+    right: 4%;
+    height: 62%;
+    max-width: 46%;
+    opacity: 0.68;
+  }
+
+  .hero-slide-backdrop {
+    background:
+      linear-gradient(90deg, rgba(17, 16, 25, 0.97) 0%, rgba(17, 16, 25, 0.82) 48%, rgba(17, 16, 25, 0.34) 100%),
+      linear-gradient(0deg, rgba(10, 10, 16, 0.55), transparent 48%);
+  }
+}
+
+
+/* MOVIE DETAILS MODAL: larger poster */
+.movie-details-poster,
+.movie-modal-poster,
+.details-poster,
+.movie-detail-image {
+  width: 220px !important;
+  max-width: 100% !important;
+  height: 330px !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  border-radius: 12px !important;
+}
+
+/* Common layout hooks for the poster inside the details modal */
+.movie-details-modal img,
+.movie-modal img,
+.movie-details img {
+  width: 220px;
+  height: 330px;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 12px;
+}
+
+@media (max-width: 700px) {
+  .movie-details-poster,
+  .movie-modal-poster,
+  .details-poster,
+  .movie-detail-image,
+  .movie-details-modal img,
+  .movie-modal img,
+  .movie-details img {
+    width: 150px !important;
+    height: 225px !important;
+  }
+}
