@@ -56,7 +56,7 @@ export default function Login({ onBack, onLoggedIn, onForgotPassword }) {
         } catch (error) {
             setMessage(
                 error.message === "Failed to fetch"
-                    ? "Cannot connect to the backend. Check that it is running on port 8001."
+                    ? "Cannot connect to the backend. Check that it is running on port 8000."
                     : error.message
             );
         } finally {
