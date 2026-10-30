@@ -1,0 +1,208 @@
+/* HeroSlider component styles. The app-wide design tokens remain in ../App.css. */
+.hero-slider {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 430px;
+  max-height: 590px;
+  aspect-ratio: 16 / 7;
+  background: linear-gradient(105deg, #171321 0%, #101018 56%, #090a0f 100%);
+}
+
+.hero-slide-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(90deg, #111019 0%, rgba(17,16,25,.96) 27%, rgba(17,16,25,.67) 49%, rgba(17,16,25,.10) 100%),
+    linear-gradient(0deg, rgba(10,10,16,.4), transparent 48%);
+  pointer-events: none;
+}
+
+.hero-featured-art {
+  position: absolute;
+  z-index: 0;
+  top: 4%;
+  right: 7%;
+  height: 92%;
+  width: auto;
+  max-width: 42%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  border-radius: 4px;
+  filter: none;
+  opacity: 1;
+  box-shadow: 0 16px 55px rgba(0,0,0,.45);
+  animation: heroBackdropIn 500ms ease both;
+}
+
+.hero-slide-content {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 1250px);
+  margin: 0 auto;
+  padding: 64px 30px 92px;
+  animation: heroContentIn 550ms ease both;
+}
+
+.hero-slide-content h1 {
+  max-width: 650px;
+  font-size: clamp(34px, 4.2vw, 58px);
+  letter-spacing: -1.4px;
+  line-height: 1.1;
+}
+
+.hero-slide-kicker {
+  color: #d3c2ff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.hero-slide-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.hero-slide-actions .explore-button {
+  margin: 0;
+  cursor: pointer;
+}
+
+.hero-secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 12px 20px;
+  border: 1px solid #ffffff55;
+  border-radius: 8px;
+  background: #11111a99;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.hero-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  transform: translateY(-50%);
+  border: 1px solid #ffffff40;
+  border-radius: 50%;
+  background: #090910a8;
+  color: #fff;
+  font-size: 34px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.hero-arrow-prev { left: 22px; }
+.hero-arrow-next { right: 22px; }
+
+.hero-dots {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transform: translateX(-50%);
+}
+
+.hero-dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 20px;
+  background: #ffffff70;
+  cursor: pointer;
+}
+
+.hero-dot.active {
+  width: 28px;
+  background: #c3a2ff;
+}
+
+.hero-slide-count {
+  position: absolute;
+  right: 30px;
+  bottom: 27px;
+  z-index: 2;
+  color: #ffffffb5;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+
+@keyframes heroContentIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes heroBackdropIn {
+  from { opacity: .65; transform: scale(1.025); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@media (max-width: 650px) {
+  .hero-slider {
+    aspect-ratio: auto;
+    min-height: 440px;
+    max-height: none;
+  }
+
+  .hero-featured-art {
+    top: 8%;
+    right: 4%;
+    height: 62%;
+    max-width: 46%;
+    opacity: .68;
+  }
+
+  .hero-slide-content {
+    padding: 64px 24px 100px;
+  }
+
+  .hero-slide-content h1 {
+    font-size: clamp(32px, 8vw, 44px);
+    letter-spacing: -.8px;
+  }
+
+  .hero-slide-content .hero-description {
+    max-width: 90%;
+    font-size: 14px;
+  }
+
+  .hero-arrow {
+    top: auto;
+    bottom: 18px;
+    width: 38px;
+    height: 38px;
+    font-size: 28px;
+    transform: none;
+  }
+
+  .hero-arrow-prev { left: 18px; }
+  .hero-arrow-next { right: 18px; }
+  .hero-dots { bottom: 33px; }
+  .hero-slide-count { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-slide-content,
+  .hero-featured-art { animation: none !important; }
+}
