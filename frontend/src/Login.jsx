@@ -54,19 +54,22 @@ export default function Login({ onBack, onLoggedIn, onForgotPassword }) {
             if (onLoggedIn) {
                 onLoggedIn(data.user);
             }
-        } catch (error) {
-            const msg =
-                error.message === "Failed to fetch"
-                    ? "Cannot connect to the backend. Check that it is running on port 8001."
-                    : error.message;
-            setMessage(msg);
-            if (msg.toLowerCase().includes("verify your email")) {
-                setNeedsVerification(true);
-            }
-        } finally {
-            setLoading(false);
+            } catch (error) {
+        const msg =
+            error.message === "Failed to fetch"
+                ? "Cannot connect to the backend. Check that it is running on port 8000."
+                : error.message;
+
+        setMessage(msg);
+
+        if (msg.toLowerCase().includes("verify your email")) {
+            setNeedsVerification(true);
         }
+    } finally {
+        setLoading(false);
     }
+        }
+    
 
     async function handleResendVerification() {
         if (!email.trim()) {
