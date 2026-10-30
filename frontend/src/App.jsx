@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import "./App.css";
+import Navbar from "./components/Navbar";
+import HeroSlider from "./components/HeroSlider";
 import ForgotPassword from "./ForgotPassword";
 import Auth from "./Auth";
 import Login from "./Login";
@@ -15,6 +17,8 @@ import MovieSearch from "./MovieSearch";
 import MovieDetailsPage from "./MovieDetailsPage";
 import IntroVideo from "./IntroVideo";
 import { movies, genres } from "./data/movies";
+import WebSeries from "./components/WebSeries";
+import SeriesDetails from "./components/SeriesDetails";
 
 function App() {
   
@@ -46,6 +50,7 @@ const finishIntro = () => {
   });
 
   const [catalogMovies, setCatalogMovies] = useState(movies);
+
 
   useEffect(() => {
     fetch(`${API_URL}/catalog/titles`)
@@ -417,139 +422,21 @@ if (screen === "series") {
       <IntroVideo onComplete={finishIntro} />
     ) : (
     <div className="app">
-      <header className="navbar">
-        <a
-          className="brand"
-          href="#home"
-          onClick={goHome}
-        >
-          <span className="brand-icon">▶</span> StreamHub
-        </a>
-
-        <nav>
-          <a href="#home">Home</a>
-          <a href="#movies">Movies</a>
-          <a href="#genres">Genres</a>
-        </nav>
-
-        {currentUser ? (
-          <div className="profile-actions">
-            <span className="profile">
-              {currentUser.name ||
-                currentUser.username ||
-                currentUser.email ||
-                "Viewer"}
-            </span>
-
-            <button
-              type="button"
-              onClick={() => setScreen("watchlist")}
-            >
-              Watchlist
-            </button>
-                <button
-  type="button"
-  onClick={() => setSelectedMovie(movie)}
->
-  View Details
-</button>
-            <button
-              type="button"
-              onClick={() => setScreen("history")}
-            >
-              History
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setScreen("account")}
-            >
-              My Subscription
-            </button>
-            {Boolean(currentUser.is_admin || currentUser.role === "admin") && (
-              <button
-                type="button"
-                onClick={() => setScreen("admin")}
-                style={{
-                  border: "1px solid #e50914",
-                  color: "#e50914",
-                  fontWeight: "bold",
-                }}
-              >
-                🛠️ Admin Panel
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={() => setScreen("plans")}
-            >
-              View Plans
-            </button>
-            <button
-              type="button"
-              onClick={handleLogout}
-            >
-              Logout
-            </button>
-
-
-            <button
-              type="button"
-              onClick={() => setScreen("forgot")}
-            >
-              Forgot Password?
-            </button>
-          </div>
-        ) : (
-          <div className="profile-actions">
-            <button
-              type="button"
-              onClick={() => setScreen("login")}
-            >
-              Log In
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setScreen("signup")}
-            >
-              Sign Up
-            </button>
-          <button
-  type="button"
-  onClick={() => setScreen("plans")}
->
-  Subscription Plans
-</button>
-            <button
-              type="button"
-              onClick={() => setScreen("forgot")}
-            >
-              Forgot Password?
-            </button>
-          </div>
-        )}
-      </header>
+      <Navbar
+        currentUser={currentUser}
+        onHome={goHome}
+        onScreenChange={setScreen}
+        onLogout={handleLogout}
+      />
 
       <main>
-        <section className="hero" id="home">
-          <p className="eyebrow">
-            YOUR ENTERTAINMENT DESTINATION
-          </p>
-
-          <h1>
-            Stories worth <span>watching.</span>
-          </h1>
-
-          <p className="hero-description">
-            Discover movies for every mood, all in one place.
-          </p>
-
-          <a className="explore-button" href="#genres">
-            Explore Movies ↓
-          </a>
-        </section>
+        <HeroSlider
+          movies={catalogMovies}
+          onWatchMovie={(movie) => {
+            setSelectedMovie(movie);
+            setScreen("home");
+          }}
+        />
 
         <section className="catalog" id="movies">
           <div className="section-heading">
@@ -781,8 +668,7 @@ if (screen === "series") {
   onClose={() => setSelectedMovie(null)}
   onWatchMovie={(movie) => {
     setSelectedMovie(null);
-    setCurrentPage("watch");
-    setSelectedMovieForPlayback(movie);
+    playMovie(movie.id);
   }}
 />
           </div>
