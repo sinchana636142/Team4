@@ -1,4 +1,3 @@
-
 from datetime import datetime, timedelta, timezone
 import logging
 
@@ -20,12 +19,14 @@ from app.schemas.user import (
     LoginRequest,
     UserProfileResponse,
     VerifyOTPRequest,
+    ResendOTPRequest,
     PasswordResetRequest,
     VerifyPasswordResetOTPRequest,
     CompletePasswordResetRequest,
 )
 from app.services.auth_service import (
     register_user as create_registered_user,
+    resend_verification_otp,
     verify_user_otp,
 )
 from app.services.email_service import send_otp_email
@@ -60,8 +61,7 @@ def register(
     try:
         send_otp_email(user.email, otp)
     except Exception as exc:
-        db.delete(user)
-        db.commit()
+        logger.exception("Could not deliver the verification code: %s", exc)
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Could not deliver the verification code. Please try again.",
@@ -87,6 +87,31 @@ def verify_otp(
         ) from exc
 
     return user
+
+
+@router.post("/resend-otp")
+def resend_otp(
+    request: ResendOTPRequest,
+    db: Session = Depends(get_db),
+):
+    try:
+        user, otp = resend_verification_otp(db, request.email)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+
+    try:
+        send_otp_email(user.email, otp)
+    except Exception as exc:
+        logger.exception("Could not deliver the verification code: %s", exc)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Could not deliver the verification code. Please try again.",
+        ) from exc
+
+    return {"message": "A new verification code has been sent to your email."}
 
 
 @router.post("/login")

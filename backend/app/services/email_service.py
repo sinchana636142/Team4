@@ -18,16 +18,20 @@ def send_otp_email(to_email: str, otp: str) -> None:
     smtp_email = os.getenv("SMTP_EMAIL", "").strip()
     smtp_password = os.getenv("SMTP_PASSWORD", "").strip().replace(" ", "")
 
-    # Only print to console if explicitly configured for console-only mode
-    if delivery_mode == "console":
+    # Print to console if configured for console or both
+    if delivery_mode in ("console", "both"):
         print(f"\n==========================================")
         print(f"[STREAMHUB OTP] Verification code for {to_email}: {otp}")
         print(f"==========================================\n")
-        return
+        if delivery_mode == "console":
+            return
 
-    # If email credentials are not configured
+    # If email credentials are not configured, print to console as fallback
     if not smtp_email or not smtp_password:
-        logger.warning("SMTP_EMAIL or SMTP_PASSWORD is empty in .env. Skipping email dispatch.")
+        logger.warning("SMTP_EMAIL or SMTP_PASSWORD is empty in .env. Falling back to console OTP output.")
+        print(f"\n==========================================")
+        print(f"[STREAMHUB OTP] (Console fallback) Verification code for {to_email}: {otp}")
+        print(f"==========================================\n")
         return
 
     smtp_host = os.getenv("SMTP_HOST", "smtp.gmail.com").strip()

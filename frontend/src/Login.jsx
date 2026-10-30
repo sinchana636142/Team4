@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import "./Auth.css";
 
@@ -9,10 +8,12 @@ export default function Login({ onBack, onLoggedIn, onForgotPassword }) {
     const [password, setPassword] = useState("");
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
+    const [needsVerification, setNeedsVerification] = useState(false);
 
     async function handleLogin(event) {
         event.preventDefault();
         setMessage("");
+        setNeedsVerification(false);
         setLoading(true);
 
         try {
@@ -53,12 +54,45 @@ export default function Login({ onBack, onLoggedIn, onForgotPassword }) {
             if (onLoggedIn) {
                 onLoggedIn(data.user);
             }
-        } catch (error) {
-            setMessage(
-                error.message === "Failed to fetch"
-                    ? "Cannot connect to the backend. Check that it is running on port 8000."
-                    : error.message
-            );
+            } catch (error) {
+        const msg =
+            error.message === "Failed to fetch"
+                ? "Cannot connect to the backend. Check that it is running on port 8000."
+                : error.message;
+
+        setMessage(msg);
+
+        if (msg.toLowerCase().includes("verify your email")) {
+            setNeedsVerification(true);
+        }
+    } finally {
+        setLoading(false);
+    }
+        }
+    
+
+    async function handleResendVerification() {
+        if (!email.trim()) {
+            setMessage("Please enter your email address.");
+            return;
+        }
+
+        setMessage("");
+        setLoading(true);
+
+        try {
+            const response = await fetch(`${API_URL}/auth/resend-otp`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: email.trim() }),
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.detail || "Failed to resend verification code.");
+            }
+            setMessage(data.message || "A new verification code has been sent to your email.");
+        } catch (err) {
+            setMessage(err.message);
         } finally {
             setLoading(false);
         }
@@ -96,6 +130,17 @@ export default function Login({ onBack, onLoggedIn, onForgotPassword }) {
                         {loading ? "Signing in..." : "Log in"}
                     </button>
                 </form>
+
+                {needsVerification && (
+                    <button
+                        type="button"
+                        className="auth-secondary"
+                        onClick={handleResendVerification}
+                        disabled={loading}
+                    >
+                        {loading ? "Sending..." : "Resend verification code"}
+                    </button>
+                )}
 
                 <button
                     type="button"
