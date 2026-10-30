@@ -17,8 +17,11 @@ import MovieSearch from "./MovieSearch";
 import MovieDetailsPage from "./MovieDetailsPage";
 import IntroVideo from "./IntroVideo";
 import { movies, genres } from "./data/movies";
+<<<<<<< HEAD
 import WebSeries from "./components/WebSeries";
 import SeriesDetails from "./components/SeriesDetails";
+=======
+>>>>>>> origin/main
 
 function App() {
   

@@ -12,9 +12,21 @@ export default function Navbar({
         <span className="brand-icon">▶</span> StreamHub
       </a>
 
-      <nav>
-  <a href="#home" onClick={onHome}>Home</a>
-  <a href="#movies" onClick={onHome}>Movies</a>
+<nav>
+  <a href="#home" onClick={onHome}>
+    Home
+  </a>
+
+  <a
+    href="#movies"
+    onClick={(e) => {
+      e.preventDefault();
+      onScreenChange("movies");
+    }}
+  >
+    Movies
+  </a>
+
   <a
     href="#series"
     onClick={(e) => {
@@ -24,9 +36,17 @@ export default function Navbar({
   >
     Web Series
   </a>
-  <a href="#genres" onClick={onHome}>Genres</a>
-</nav>
 
+  <a
+    href="#genres"
+    onClick={(e) => {
+      e.preventDefault();
+      onScreenChange("genres");
+    }}
+  >
+    Genres
+  </a>
+</nav>
 
       {currentUser ? (
         <div className="profile-actions">
