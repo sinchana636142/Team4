@@ -17,6 +17,11 @@ import MovieSearch from "./MovieSearch";
 import MovieDetailsPage from "./MovieDetailsPage";
 import IntroVideo from "./IntroVideo";
 import { movies, genres } from "./data/movies";
+<<<<<<< HEAD
+import WebSeries from "./components/WebSeries";
+import SeriesDetails from "./components/SeriesDetails";
+=======
+>>>>>>> origin/main
 
 function App() {
   
@@ -36,6 +41,8 @@ const finishIntro = () => {
   const [screen, setScreen] = useState("home");
   const [watchTitleId, setWatchTitleId] = useState(null);
   const [selectedMovie, setSelectedMovie] = useState(null);
+  const [selectedSeries, setSelectedSeries] = useState(null);
+  const [seriesPlayer, setSeriesPlayer] = useState(null);
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       const savedUser = sessionStorage.getItem("streamhub_user");
@@ -352,6 +359,64 @@ async function submitRating(titleId, rating) {
       />
     );
   }
+// Web Series screen. Keep it inside the normal app shell so the navbar remains available.
+if (screen === "series") {
+  return (
+    <div className="app">
+      <Navbar
+        currentUser={currentUser}
+        onHome={goHome}
+        onScreenChange={setScreen}
+        onLogout={handleLogout}
+      />
+      <main>
+        <WebSeries onSelectSeries={(show) => setSelectedSeries(show)} />
+      </main>
+      {selectedSeries && (
+        <SeriesDetails
+          series={selectedSeries}
+          onClose={() => setSelectedSeries(null)}
+          onWatchEpisode={({ series: show, episode }) => {
+            setSeriesPlayer({ kind: "episode", series: show, episode });
+          }}
+          onWatchTrailer={(show) => {
+            setSeriesPlayer({ kind: "trailer", series: show });
+          }}
+        />
+      )}
+      {seriesPlayer && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={seriesPlayer.kind === "trailer" ? "Series trailer" : "Episode player"}
+          style={{ position: "fixed", inset: 0, zIndex: 11000, background: "rgba(0,0,0,.94)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}
+        >
+          <div style={{ width: "min(1000px, 100%)", color: "white", background: "#17141f", borderRadius: 16, padding: 20 }}>
+            <button type="button" onClick={() => setSeriesPlayer(null)} style={{ float: "right", padding: "8px 14px", cursor: "pointer" }}>Close ✕</button>
+            <h2>{seriesPlayer.kind === "trailer" ? `${seriesPlayer.series.title} — Trailer` : `${seriesPlayer.series.title} — ${seriesPlayer.episode.title}`}</h2>
+            {seriesPlayer.kind === "trailer" && seriesPlayer.series.trailerUrl ? (
+              <div style={{ position: "relative", width: "100%", paddingTop: "56.25%" }}>
+                <iframe
+                  title={`${seriesPlayer.series.title} trailer`}
+                  src={seriesPlayer.series.trailerUrl}
+                  style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: 0 }}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              </div>
+            ) : seriesPlayer.kind === "episode" && seriesPlayer.episode.videoUrl ? (
+              <video controls autoPlay style={{ width: "100%", maxHeight: "70vh", background: "black" }} src={seriesPlayer.episode.videoUrl} />
+            ) : (
+              <p style={{ lineHeight: 1.7, color: "#d4ccdf" }}>
+                No authorized video source is configured for this episode yet. Add a video URL you own or are licensed to stream to this episode's <code>videoUrl</code> field in <code>src/data/series.js</code>.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
   // StreamHub homepage.
   return (
