@@ -1,19 +1,22 @@
-
 import { useState } from "react";
 import "./ForgotPassword.css";
 
-const API_URL = "http://127.0.0.1:8001";
+const API_URL = "http://127.0.0.1:8000";
 
-function ForgotPassword() {
+function ForgotPassword({ onBack }) {
   const [step, setStep] = useState(1);
-  const [email, setEmail] = useState("");
+  const [emailUsername, setEmailUsername] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [codeVerified, setCodeVerified] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const email = `${emailUsername.trim()}@gmail.com`;
 
   async function requestReset(event) {
     event.preventDefault();
@@ -25,7 +28,7 @@ function ForgotPassword() {
       const response = await fetch(`${API_URL}/auth/forgot-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim() }),
+        body: JSON.stringify({ email }),
       });
 
       const data = await response.json();
@@ -41,7 +44,7 @@ function ForgotPassword() {
       setStep(2);
       setMessage(
         data.message ||
-        "If the account exists, a reset code has been generated. For local testing, check the backend terminal."
+          "If the account exists, a reset code has been generated. Check your email."
       );
     } catch (err) {
       setError(
@@ -66,7 +69,7 @@ function ForgotPassword() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: email.trim(),
+          email,
           otp: verificationCode,
         }),
       });
@@ -123,7 +126,7 @@ function ForgotPassword() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: email.trim(),
+          email,
           otp: verificationCode,
           new_password: newPassword,
         }),
@@ -144,6 +147,8 @@ function ForgotPassword() {
       setConfirmPassword("");
       setVerificationCode("");
       setCodeVerified(false);
+      setShowNewPassword(false);
+      setShowConfirmPassword(false);
       setStep(3);
     } catch (err) {
       setError(
@@ -159,9 +164,13 @@ function ForgotPassword() {
   return (
     <main className="reset-page">
       <section className="reset-card">
-        <a className="reset-brand" href="/">
+        <button
+          type="button"
+          className="reset-brand"
+          onClick={onBack}
+        >
           <span>▶</span> StreamHub
-        </a>
+        </button>
 
         <div className="reset-icon">🔐</div>
 
@@ -175,9 +184,9 @@ function ForgotPassword() {
 
         <p className="reset-description">
           {step === 1
-            ? "Enter your registered email address to begin the password-reset process."
+            ? "Enter your Gmail username to begin the password-reset process."
             : step === 2
-              ? `Enter the verification code for ${email}.`
+              ? `Enter the verification code sent to ${email}.`
               : "Your password has been changed successfully. You can now return to StreamHub and sign in with your new password."}
         </p>
 
@@ -195,21 +204,31 @@ function ForgotPassword() {
 
         {step === 1 && (
           <form onSubmit={requestReset}>
-            <label htmlFor="reset-email">Email address</label>
-            <input
-              id="reset-email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              autoComplete="email"
-              required
-            />
+            <label htmlFor="reset-email">Gmail address</label>
+
+            <div className="gmail-input-group">
+              <input
+                id="reset-email"
+                type="text"
+                placeholder="yourusername"
+                value={emailUsername}
+                onChange={(event) =>
+                  setEmailUsername(
+                    event.target.value
+                      .replace(/@gmail\.com$/i, "")
+                      .replace(/\s/g, "")
+                  )
+                }
+                autoComplete="username"
+                required
+              />
+              <span className="gmail-suffix">@gmail.com</span>
+            </div>
 
             <button
               type="submit"
               className="reset-button"
-              disabled={loading}
+              disabled={loading || !emailUsername.trim()}
             >
               {loading ? "Requesting..." : "Request password reset"}
             </button>
@@ -220,6 +239,7 @@ function ForgotPassword() {
           <>
             <form onSubmit={verifyCode}>
               <label htmlFor="verification-code">Verification code</label>
+
               <input
                 id="verification-code"
                 type="text"
@@ -249,37 +269,66 @@ function ForgotPassword() {
 
             <form className="password-form" onSubmit={resetPassword}>
               <label htmlFor="new-password">New password</label>
-              <input
-                id="new-password"
-                type="password"
-                placeholder="At least 8 characters"
-                value={newPassword}
-                onChange={(event) => setNewPassword(event.target.value)}
-                autoComplete="new-password"
-                minLength={8}
-                maxLength={128}
-                required
-              />
+
+              <div className="password-input-group">
+                <input
+                  id="new-password"
+                  type={showNewPassword ? "text" : "password"}
+                  placeholder="At least 8 characters"
+                  value={newPassword}
+                  onChange={(event) => setNewPassword(event.target.value)}
+                  autoComplete="new-password"
+                  minLength={8}
+                  maxLength={128}
+                  required
+                />
+
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() =>
+                    setShowNewPassword((previous) => !previous)
+                  }
+                  aria-label={showNewPassword ? "Hide password" : "Show password"}
+                >
+                  {showNewPassword ? "Hide" : "Show"}
+                </button>
+              </div>
 
               <label htmlFor="confirm-password">Confirm new password</label>
-              <input
-                id="confirm-password"
-                type="password"
-                placeholder="Re-enter your password"
-                value={confirmPassword}
-                onChange={(event) => setConfirmPassword(event.target.value)}
-                autoComplete="new-password"
-                required
-              />
+
+              <div className="password-input-group">
+                <input
+                  id="confirm-password"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Re-enter your password"
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  autoComplete="new-password"
+                  maxLength={128}
+                  required
+                />
+
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() =>
+                    setShowConfirmPassword((previous) => !previous)
+                  }
+                  aria-label={
+                    showConfirmPassword ? "Hide password" : "Show password"
+                  }
+                >
+                  {showConfirmPassword ? "Hide" : "Show"}
+                </button>
+              </div>
 
               <button
                 type="submit"
                 className="reset-button"
                 disabled={loading || !codeVerified}
               >
-                {loading
-                  ? "Resetting password..."
-                  : "Reset password"}
+                {loading ? "Resetting password..." : "Reset password"}
               </button>
 
               {!codeVerified && (
@@ -312,17 +361,19 @@ function ForgotPassword() {
           <button
             type="button"
             className="reset-button"
-            onClick={() => {
-              window.location.href = "/#home";
-            }}
+            onClick={onBack}
           >
             Return to StreamHub
           </button>
         )}
 
-        <a className="back-to-home" href="/#home">
+        <button
+          type="button"
+          className="back-to-home"
+          onClick={onBack}
+        >
           ← Back to StreamHub
-        </a>
+        </button>
       </section>
     </main>
   );

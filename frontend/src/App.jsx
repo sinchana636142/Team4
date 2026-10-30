@@ -333,8 +333,8 @@ async function submitRating(titleId, rating) {
   }
 
   if (screen === "forgot") {
-    return <ForgotPassword />;
-  }
+  return <ForgotPassword onBack={goHome} />;
+}
 
   // Sign-up and OTP verification screen.
   if (screen === "signup") {
