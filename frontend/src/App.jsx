@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import "./App.css";
+import Navbar from "./components/Navbar";
+import HeroSlider from "./components/HeroSlider";
 import ForgotPassword from "./ForgotPassword";
 import Auth from "./Auth";
 import Login from "./Login";
@@ -14,109 +16,7 @@ import MovieDetails from "./MovieDetails";
 import MovieSearch from "./MovieSearch";
 import MovieDetailsPage from "./MovieDetailsPage";
 import IntroVideo from "./IntroVideo";
-
-
-const movies = [
-  {
-    id: 1,
-    title: "The Dark Knight",
-    genre: "Action",
-    year: 2008,
-    poster:
-      "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
-  },
-  {
-    id: 2,
-    title: "Mad Max: Fury Road",
-    genre: "Action",
-    year: 2015,
-    poster:
-      "https://image.tmdb.org/t/p/w500/8tZYtuWezp8JbcsvHYO0O46tFbo.jpg",
-  },
-  {
-    id: 3,
-    title: "John Wick",
-    genre: "Action",
-    year: 2014,
-    poster:
-      "https://image.tmdb.org/t/p/w500/fZPSd91yGE9fCcCe6OoQr6E3Bev.jpg",
-  },
-  {
-    id: 4,
-    title: "The Hangover",
-    genre: "Comedy",
-    year: 2009,
-    poster:
-      "https://image.tmdb.org/t/p/w500/uluhlXubGu1VxU63X9VHCLWDAYP.jpg",
-  },
-  {
-    id: 5,
-    title: "Home Alone",
-    genre: "Comedy",
-    year: 1990,
-    poster:
-      "https://image.tmdb.org/t/p/w500/onTSipZ8R3bliBdKfPtsDuHTdlL.jpg",
-  },
-  {
-    id: 6,
-    title: "Inception",
-    genre: "Thriller",
-    year: 2010,
-    poster:
-      "https://image.tmdb.org/t/p/w500/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg",
-  },
-  {
-    id: 7,
-    title: "Shutter Island",
-    genre: "Thriller",
-    year: 2010,
-    poster:
-      "https://image.tmdb.org/t/p/w500/4GDy0PHYX3VRXUtwK5ysFbg3kEx.jpg",
-  },
-  {
-    id: 8,
-    title: "Interstellar",
-    genre: "Sci-Fi",
-    year: 2014,
-    poster:
-      "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
-  },
-  {
-    id: 9,
-    title: "Titanic",
-    genre: "Romance",
-    year: 1997,
-    poster:
-      "https://image.tmdb.org/t/p/w500/9xjZS2rlVxm8SFx8kPC3aIGCOYQ.jpg",
-  },
-  {
-    id: 10,
-    title: "The Conjuring",
-    genre: "Horror",
-    year: 2013,
-    poster:
-      "https://image.tmdb.org/t/p/w500/wVYREutTvI2tmxr6ujrHT704wGF.jpg",
-  },
-  {
-    id: 11,
-    title: "A Quiet Place",
-    genre: "Horror",
-    year: 2018,
-    poster:
-      "https://image.tmdb.org/t/p/w500/nAU74GmpUk7t5iklEp3bufwDq4n.jpg",
-  },
-];
-
-const genres = [
-  "All",
-  "Action",
-  "Comedy",
-  "Thriller",
-  "Sci-Fi",
-  "Romance",
-  "Horror",
-  "Drama",
-];
+import { movies, genres } from "./data/movies";
 
 function App() {
   
@@ -146,6 +46,7 @@ const finishIntro = () => {
   });
 
   const [catalogMovies, setCatalogMovies] = useState(movies);
+
 
   useEffect(() => {
     fetch(`${API_URL}/catalog/titles`)
@@ -459,139 +360,21 @@ async function submitRating(titleId, rating) {
       <IntroVideo onComplete={finishIntro} />
     ) : (
     <div className="app">
-      <header className="navbar">
-        <a
-          className="brand"
-          href="#home"
-          onClick={goHome}
-        >
-          <span className="brand-icon">▶</span> StreamHub
-        </a>
-
-        <nav>
-          <a href="#home">Home</a>
-          <a href="#movies">Movies</a>
-          <a href="#genres">Genres</a>
-        </nav>
-
-        {currentUser ? (
-          <div className="profile-actions">
-            <span className="profile">
-              {currentUser.name ||
-                currentUser.username ||
-                currentUser.email ||
-                "Viewer"}
-            </span>
-
-            <button
-              type="button"
-              onClick={() => setScreen("watchlist")}
-            >
-              Watchlist
-            </button>
-                <button
-  type="button"
-  onClick={() => setSelectedMovie(movie)}
->
-  View Details
-</button>
-            <button
-              type="button"
-              onClick={() => setScreen("history")}
-            >
-              History
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setScreen("account")}
-            >
-              My Subscription
-            </button>
-            {Boolean(currentUser.is_admin || currentUser.role === "admin") && (
-              <button
-                type="button"
-                onClick={() => setScreen("admin")}
-                style={{
-                  border: "1px solid #e50914",
-                  color: "#e50914",
-                  fontWeight: "bold",
-                }}
-              >
-                🛠️ Admin Panel
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={() => setScreen("plans")}
-            >
-              View Plans
-            </button>
-            <button
-              type="button"
-              onClick={handleLogout}
-            >
-              Logout
-            </button>
-
-
-            <button
-              type="button"
-              onClick={() => setScreen("forgot")}
-            >
-              Forgot Password?
-            </button>
-          </div>
-        ) : (
-          <div className="profile-actions">
-            <button
-              type="button"
-              onClick={() => setScreen("login")}
-            >
-              Log In
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setScreen("signup")}
-            >
-              Sign Up
-            </button>
-          <button
-  type="button"
-  onClick={() => setScreen("plans")}
->
-  Subscription Plans
-</button>
-            <button
-              type="button"
-              onClick={() => setScreen("forgot")}
-            >
-              Forgot Password?
-            </button>
-          </div>
-        )}
-      </header>
+      <Navbar
+        currentUser={currentUser}
+        onHome={goHome}
+        onScreenChange={setScreen}
+        onLogout={handleLogout}
+      />
 
       <main>
-        <section className="hero" id="home">
-          <p className="eyebrow">
-            YOUR ENTERTAINMENT DESTINATION
-          </p>
-
-          <h1>
-            Stories worth <span>watching.</span>
-          </h1>
-
-          <p className="hero-description">
-            Discover movies for every mood, all in one place.
-          </p>
-
-          <a className="explore-button" href="#genres">
-            Explore Movies ↓
-          </a>
-        </section>
+        <HeroSlider
+          movies={catalogMovies}
+          onWatchMovie={(movie) => {
+            setSelectedMovie(movie);
+            setScreen("home");
+          }}
+        />
 
         <section className="catalog" id="movies">
           <div className="section-heading">
@@ -823,8 +606,7 @@ async function submitRating(titleId, rating) {
   onClose={() => setSelectedMovie(null)}
   onWatchMovie={(movie) => {
     setSelectedMovie(null);
-    setCurrentPage("watch");
-    setSelectedMovieForPlayback(movie);
+    playMovie(movie.id);
   }}
 />
           </div>
