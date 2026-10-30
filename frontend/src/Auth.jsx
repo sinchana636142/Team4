@@ -1,20 +1,30 @@
 import { useState } from "react";
 import "./Auth.css";
 
-const API_URL = "http://127.0.0.1:8001";
+const API_URL = "http://127.0.0.1:8000";
 
 export default function Auth({ onVerified, onBack }) {
     const [step, setStep] = useState("register");
     const [fullName, setFullName] = useState("");
-    const [email, setEmail] = useState("");
+    const [emailUsername, setEmailUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [otp, setOtp] = useState("");
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
 
+    // The backend continues to receive a complete email address.
+    const email = `${emailUsername.trim()}@gmail.com`;
+
     async function handleRegister(event) {
         event.preventDefault();
         setMessage("");
+
+        if (!emailUsername.trim()) {
+            setMessage("Please enter your Gmail username.");
+            return;
+        }
+
         setLoading(true);
 
         try {
@@ -25,7 +35,7 @@ export default function Auth({ onVerified, onBack }) {
                 },
                 body: JSON.stringify({
                     full_name: fullName.trim(),
-                    email: email.trim(),
+                    email,
                     password,
                 }),
             });
@@ -33,11 +43,9 @@ export default function Auth({ onVerified, onBack }) {
             const data = await response.json();
 
             if (!response.ok) {
-                const detail = data.detail;
-
                 throw new Error(
-                    typeof detail === "string"
-                        ? detail
+                    typeof data.detail === "string"
+                        ? data.detail
                         : "Registration failed. Please check your details."
                 );
             }
@@ -49,13 +57,11 @@ export default function Auth({ onVerified, onBack }) {
         } catch (error) {
             console.error("Registration error:", error);
 
-            if (error.message === "Failed to fetch") {
-                setMessage(
-                    "Cannot reach the backend on port 8001. Check that the server is running and CORS is configured."
-                );
-            } else {
-                setMessage(error.message || "Registration failed.");
-            }
+            setMessage(
+                error.message === "Failed to fetch"
+                    ? "Cannot reach the backend on port 8000. Check that the server is running and CORS is configured."
+                    : error.message || "Registration failed."
+            );
         } finally {
             setLoading(false);
         }
@@ -73,7 +79,7 @@ export default function Auth({ onVerified, onBack }) {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    email: email.trim(),
+                    email,
                     otp,
                 }),
             });
@@ -81,11 +87,9 @@ export default function Auth({ onVerified, onBack }) {
             const data = await response.json();
 
             if (!response.ok) {
-                const detail = data.detail;
-
                 throw new Error(
-                    typeof detail === "string"
-                        ? detail
+                    typeof data.detail === "string"
+                        ? data.detail
                         : "Verification failed. Please check your OTP."
                 );
             }
@@ -104,21 +108,19 @@ export default function Auth({ onVerified, onBack }) {
         } catch (error) {
             console.error("OTP verification error:", error);
 
-            if (error.message === "Failed to fetch") {
-                setMessage(
-                    "Cannot reach the backend on port 8001. Check the server and CORS settings."
-                );
-            } else {
-                setMessage(error.message || "OTP verification failed.");
-            }
+            setMessage(
+                error.message === "Failed to fetch"
+                    ? "Cannot reach the backend on port 8000. Check the server and CORS settings."
+                    : error.message || "OTP verification failed."
+            );
         } finally {
             setLoading(false);
         }
     }
 
     async function handleResendOtp() {
-        if (!email.trim()) {
-            setMessage("Please enter your email address to resend code.");
+        if (!emailUsername.trim()) {
+            setMessage("Please enter your Gmail username.");
             return;
         }
 
@@ -131,21 +133,26 @@ export default function Auth({ onVerified, onBack }) {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ email: email.trim() }),
+                body: JSON.stringify({ email }),
             });
 
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.detail || "Failed to resend verification code.");
+                throw new Error(
+                    data.detail || "Failed to resend verification code."
+                );
             }
 
-            setMessage(data.message || "A new verification code has been sent to your email.");
+            setMessage(
+                data.message || "A new verification code has been sent to your email."
+            );
         } catch (error) {
             console.error("Resend OTP error:", error);
+
             setMessage(
                 error.message === "Failed to fetch"
-                    ? "Cannot reach the backend on port 8001. Check the server and CORS settings."
+                    ? "Cannot reach the backend on port 8000. Check the server and CORS settings."
                     : error.message
             );
         } finally {
@@ -188,33 +195,58 @@ export default function Auth({ onVerified, onBack }) {
                                 required
                             />
 
-                            <label htmlFor="email">Email address</label>
+                            <label htmlFor="emailUsername">Gmail address</label>
 
-                            <input
-                                id="email"
-                                type="email"
-                                value={email}
-                                onChange={(event) =>
-                                    setEmail(event.target.value)
-                                }
-                                autoComplete="email"
-                                required
-                            />
+                            <div className="gmail-input-group">
+                                <input
+                                    id="emailUsername"
+                                    type="text"
+                                    value={emailUsername}
+                                    onChange={(event) =>
+                                        setEmailUsername(
+                                            event.target.value
+                                                .replace(/\s/g, "")
+                                                .replace(/@.*$/, "")
+                                        )
+                                    }
+                                    placeholder="Enter Gmail username"
+                                    autoComplete="username"
+                                    required
+                                />
+                                <span className="gmail-suffix">@gmail.com</span>
+                            </div>
 
                             <label htmlFor="password">Password</label>
 
-                            <input
-                                id="password"
-                                type="password"
-                                value={password}
-                                onChange={(event) =>
-                                    setPassword(event.target.value)
-                                }
-                                minLength={8}
-                                maxLength={128}
-                                autoComplete="new-password"
-                                required
-                            />
+                            <div className="password-input-group">
+                                <input
+                                    id="password"
+                                    type={showPassword ? "text" : "password"}
+                                    value={password}
+                                    onChange={(event) =>
+                                        setPassword(event.target.value)
+                                    }
+                                    minLength={8}
+                                    maxLength={128}
+                                    autoComplete="new-password"
+                                    required
+                                />
+
+                                <button
+                                    type="button"
+                                    className="password-toggle"
+                                    onClick={() =>
+                                        setShowPassword((previous) => !previous)
+                                    }
+                                    aria-label={
+                                        showPassword
+                                            ? "Hide password"
+                                            : "Show password"
+                                    }
+                                >
+                                    {showPassword ? "Hide" : "Show"}
+                                </button>
+                            </div>
 
                             <button type="submit" disabled={loading}>
                                 {loading
