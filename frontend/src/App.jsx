@@ -12,6 +12,8 @@ import SubscriptionPlans from "./SubscriptionPlans";
 import { API_URL } from "./features/api";
 import MovieDetails from "./MovieDetails";
 import MovieSearch from "./MovieSearch";
+import MovieDetailsPage from "./MovieDetailsPage";
+import IntroVideo from "./IntroVideo";
 
 
 const movies = [
@@ -57,14 +59,6 @@ const movies = [
   },
   {
     id: 6,
-    title: "The Mask",
-    genre: "Comedy",
-    year: 1994,
-    poster:
-      "https://image.tmdb.org/t/p/w500/8bsbX0N1U3G6Wkz2q9z3jvJ7kYf.jpg",
-  },
-  {
-    id: 7,
     title: "Inception",
     genre: "Thriller",
     year: 2010,
@@ -72,7 +66,7 @@ const movies = [
       "https://image.tmdb.org/t/p/w500/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg",
   },
   {
-    id: 8,
+    id: 7,
     title: "Shutter Island",
     genre: "Thriller",
     year: 2010,
@@ -80,7 +74,7 @@ const movies = [
       "https://image.tmdb.org/t/p/w500/4GDy0PHYX3VRXUtwK5ysFbg3kEx.jpg",
   },
   {
-    id: 9,
+    id: 8,
     title: "Interstellar",
     genre: "Sci-Fi",
     year: 2014,
@@ -88,15 +82,7 @@ const movies = [
       "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
   },
   {
-    id: 10,
-    title: "The Martian",
-    genre: "Sci-Fi",
-    year: 2015,
-    poster:
-      "https://image.tmdb.org/t/p/w500/5aGhaIH6nro2j5n9p8Zx6hG8nZC.jpg",
-  },
-  {
-    id: 11,
+    id: 9,
     title: "Titanic",
     genre: "Romance",
     year: 1997,
@@ -104,15 +90,7 @@ const movies = [
       "https://image.tmdb.org/t/p/w500/9xjZS2rlVxm8SFx8kPC3aIGCOYQ.jpg",
   },
   {
-    id: 12,
-    title: "The Notebook",
-    genre: "Romance",
-    year: 2004,
-    poster:
-      "https://image.tmdb.org/t/p/w500/rNzQyW4f8B8cQeg7Dgj3n6eW9zV.jpg",
-  },
-  {
-    id: 13,
+    id: 10,
     title: "The Conjuring",
     genre: "Horror",
     year: 2013,
@@ -120,7 +98,7 @@ const movies = [
       "https://image.tmdb.org/t/p/w500/wVYREutTvI2tmxr6ujrHT704wGF.jpg",
   },
   {
-    id: 14,
+    id: 11,
     title: "A Quiet Place",
     genre: "Horror",
     year: 2018,
@@ -141,6 +119,18 @@ const genres = [
 ];
 
 function App() {
+  
+
+const [showIntro, setShowIntro] = useState(
+  () => sessionStorage.getItem("streamhubIntroPlayed") !== "true"
+);
+
+const finishIntro = () => {
+  sessionStorage.setItem("streamhubIntroPlayed", "true");
+  setShowIntro(false);
+};
+
+
   const [selectedGenre, setSelectedGenre] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [screen, setScreen] = useState("home");
@@ -297,111 +287,90 @@ function App() {
   }
 
   // Submit a rating from 1 to 5 stars.
-  async function submitRating(titleId, rating) {
-    if (!currentUser) {
-      setRatingStatus((previous) => ({
-        ...previous,
-        [titleId]: "Please log in to rate this title.",
-      }));
 
-      setScreen("login");
-      return;
+async function submitRating(titleId, rating) {
+  if (!currentUser) {
+    setRatingStatus((previous) => ({
+      ...previous,
+      [titleId]: "Please log in to rate this title.",
+    }));
+    setScreen("login");
+    return;
+  }
+
+  const token = sessionStorage.getItem("streamhub_access_token");
+
+  if (!token) {
+    setRatingStatus((previous) => ({
+      ...previous,
+      [titleId]: "Login token missing. Please log in again.",
+    }));
+    return;
+  }
+
+  setRatingStatus((previous) => ({
+    ...previous,
+    [titleId]: "Saving rating...",
+  }));
+
+  try {
+    const response = await fetch(`${API_URL}/ratings/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        title_id: Number(titleId),
+        rating: Number(rating),
+      }),
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      const message =
+        typeof data.detail === "string"
+          ? data.detail
+          : data.message || `Could not save rating (HTTP ${response.status}).`;
+
+      throw new Error(message);
     }
 
-    const token = sessionStorage.getItem("streamhub_access_token");
-
-    if (!token) {
-      setRatingStatus((previous) => ({
-        ...previous,
-        [titleId]: "Login token missing. Please log in again.",
-      }));
-
-      return;
-    }
+    setMyRatings((previous) => ({
+      ...previous,
+      [titleId]: Number(rating),
+    }));
 
     setRatingStatus((previous) => ({
       ...previous,
-      [titleId]: "Saving rating...",
+      [titleId]: "Rating saved successfully!",
     }));
 
-    try {
-      const response = await fetch(`${API_URL}/ratings/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+    const averageResponse = await fetch(
+      `${API_URL}/ratings/title/${titleId}/average`
+    );
+
+    if (averageResponse.ok) {
+      const averageData = await averageResponse.json();
+
+      setTitleRatings((previous) => ({
+        ...previous,
+        [titleId]: {
+          average: averageData.average_rating ?? null,
+          count: Number(averageData.total_ratings) || 0,
         },
-        body: JSON.stringify({
-          title_id: titleId,
-          rating,
-        }),
-      });
-
-      const data = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        const message =
-          typeof data.detail === "string"
-            ? data.detail
-            : data.message || "Could not save rating.";
-
-        throw new Error(message);
-      }
-
-      // Store the viewer's rating in the current frontend session.
-      setMyRatings((previous) => ({
-        ...previous,
-        [titleId]: rating,
-      }));
-
-      setRatingStatus((previous) => ({
-        ...previous,
-        [titleId]: "Rating saved successfully!",
-      }));
-
-      // Reload the average rating after submission.
-      try {
-        const averageResponse = await fetch(
-          `${API_URL}/ratings/title/${titleId}/average`
-        );
-
-        if (averageResponse.ok) {
-          const averageData = await averageResponse.json();
-
-          const average =
-            averageData.average_rating ??
-            averageData.average ??
-            averageData.avg_rating ??
-            averageData.averageRating ??
-            null;
-
-          const count =
-            averageData.total_ratings ??
-            averageData.rating_count ??
-            averageData.count ??
-            averageData.totalRatings ??
-            0;
-
-          setTitleRatings((previous) => ({
-            ...previous,
-            [titleId]: {
-              average:
-                average === null ? null : Number(average),
-              count: Number(count) || 0,
-            },
-          }));
-        }
-      } catch {
-        // The rating may have saved even if refreshing the average fails.
-      }
-    } catch (error) {
-      setRatingStatus((previous) => ({
-        ...previous,
-        [titleId]:
-          error.message || "Could not save rating. Please try again.",
       }));
     }
+  } catch (error) {
+    console.error("Rating submission failed:", error);
+
+    setRatingStatus((previous) => ({
+      ...previous,
+      [titleId]: error.message || "Could not save rating. Please try again.",
+    }));
   }
+}
 
   // Video player screen.
   if (screen === "watch") {
@@ -485,6 +454,10 @@ function App() {
 
   // StreamHub homepage.
   return (
+    <>
+    {showIntro ? (
+      <IntroVideo onComplete={finishIntro} />
+    ) : (
     <div className="app">
       <header className="navbar">
         <a
@@ -691,10 +664,15 @@ function App() {
                 const movieRating = titleRatings[movie.id];
 
                 return (
-                  <article
-                    className="movie-card"
-                    key={movie.id}
-                  >
+  <article
+    className="movie-card"
+    key={movie.id}
+    onClick={() => {
+      setSelectedMovie(movie);
+      setScreen("movieDetails");
+    }}
+    style={{ cursor: "pointer" }}
+  >
                     <div
                       className={`movie-poster poster-${movie.genre
                         .toLowerCase()
@@ -760,27 +738,24 @@ function App() {
                           aria-label={`Rate ${movie.title} from 1 to 5 stars`}
                         >
                           {[1, 2, 3, 4, 5].map((star) => (
-                            <button
-                              key={star}
-                              type="button"
-                              className={`rating-star-button ${
-                                star <= (myRatings[movie.id] || 0)
-                                  ? "selected"
-                                  : ""
-                              }`}
-                              onClick={() =>
-                                submitRating(movie.id, star)
-                              }
-                              aria-label={`${star} star${
-                                star === 1 ? "" : "s"
-                              }`}
-                              aria-pressed={
-                                myRatings[movie.id] === star
-                              }
-                              title={`Rate ${star} out of 5`}
-                            >
-                              ★
-                            </button>
+                  
+<button
+  type="button"
+  className={`rating-star-button ${
+    Number(myRatings[movie.id]) >= star ? "selected" : ""
+  }`}
+  onClick={(event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    submitRating(movie.id, star);
+  }}
+  onMouseDown={(event) => event.stopPropagation()}
+  aria-label={`Rate ${movie.title} ${star} out of 5 stars`}
+  title={`Rate ${star} out of 5`}
+>
+  ★
+</button>
+
                           ))}
                         </div>
                       </div>
@@ -843,12 +818,19 @@ function App() {
 
         <span>Team 04 · StreamHub</span>
       </footer>
-      <MovieDetails
-        movie={selectedMovie}
-        onClose={() => setSelectedMovie(null)}
-      />
-    </div>
-  );
+      <MovieDetailsPage
+  movie={selectedMovie}
+  onClose={() => setSelectedMovie(null)}
+  onWatchMovie={(movie) => {
+    setSelectedMovie(null);
+    setCurrentPage("watch");
+    setSelectedMovieForPlayback(movie);
+  }}
+/>
+          </div>
+    )}
+  </>
+);
 }
 
 export default App;
