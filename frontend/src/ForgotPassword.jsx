@@ -46,7 +46,7 @@ function ForgotPassword() {
     } catch (err) {
       setError(
         err.message === "Failed to fetch"
-          ? "Cannot connect to the backend. Check that it is running on port 8001."
+          ? "Cannot connect to the backend. Check that it is running on port 8000."
           : err.message
       );
     } finally {
@@ -88,7 +88,7 @@ function ForgotPassword() {
     } catch (err) {
       setError(
         err.message === "Failed to fetch"
-          ? "Cannot connect to the backend. Check that it is running on port 8001."
+          ? "Cannot connect to the backend. Check that it is running on port 8000."
           : err.message
       );
     } finally {
@@ -148,7 +148,7 @@ function ForgotPassword() {
     } catch (err) {
       setError(
         err.message === "Failed to fetch"
-          ? "Cannot connect to the backend. Check that it is running on port 8001."
+          ? "Cannot connect to the backend. Check that it is running on port 8000."
           : err.message
       );
     } finally {
