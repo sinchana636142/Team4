@@ -3,7 +3,7 @@ import logging
 from datetime import date, timedelta
 
 from app.database import Base, engine, SessionLocal
-import app.models  # Registers all SQLAlchemy models
+import app.models
 
 from app.models import Plan, User, Title, Subscription
 from app.core.security import hash_password
@@ -114,8 +114,8 @@ INITIAL_TITLES = [
 ]
 
 SAMPLE_VIDEO = (
-    "https://commondatastorage.googleapis.com/"
-    "gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
+    "https://interactive-examples.mdn.mozilla.net/"
+    "media/cc0-videos/flower.mp4"
 )
 
 
@@ -167,7 +167,6 @@ def seed_demo_user(db):
         db.commit()
         db.refresh(demo_user)
 
-    # Ensure the demo user has an active subscription.
     active_subscription = (
         db.query(Subscription)
         .filter(
@@ -278,7 +277,5 @@ def initialize_database() -> None:
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-
     initialize_database()
-
     print("StreamHub database tables and seed data initialized successfully.")
