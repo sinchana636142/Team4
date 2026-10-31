@@ -40,7 +40,7 @@ export default function VideoPlayer({ src, videoRef, onStartupMeasured }) {
   if (youtubeId) {
     return (
       <iframe
-        src={`https://www.youtube.com/embed/${youtubeId}`}
+        src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1`}
         title="StreamHub Video Player"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowFullScreen
@@ -61,6 +61,7 @@ export default function VideoPlayer({ src, videoRef, onStartupMeasured }) {
       ref={videoRef}
       src={src}
       controls
+      autoPlay
       preload="auto"
       playsInline
       onCanPlay={() => onStartupMeasured?.()}
