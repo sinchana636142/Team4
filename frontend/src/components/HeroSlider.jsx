@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import "./HeroSlider.css";
 
-export default function HeroSlider({ movies = [], onWatchMovie }) {
+export default function HeroSlider({
+  movies = [],
+  onWatchMovie,
+  onSelectSeries,
+}) {
   const [heroIndex, setHeroIndex] = useState(0);
 
   useEffect(() => {
@@ -29,7 +33,7 @@ export default function HeroSlider({ movies = [], onWatchMovie }) {
   };
 
   return (
-    <section className="hero-slider" id="home" aria-label="Featured movies">
+    <section className="hero-slider" id="home" aria-label="Featured titles">
       <div className="hero-slide-backdrop" aria-hidden="true" />
       <img
         className="hero-featured-art"
@@ -42,7 +46,7 @@ export default function HeroSlider({ movies = [], onWatchMovie }) {
       <div className="hero-slide-content" key={`content-${featuredMovie.id}`}>
         <p className="eyebrow">FEATURED ON STREAMHUB</p>
         <p className="hero-slide-kicker">
-          {featuredMovie.genre || "MOVIES"}
+          {featuredMovie.type === "series" ? "WEB SERIES" : featuredMovie.genre || "MOVIES"}
           {featuredMovie.year ? ` • ${featuredMovie.year}` : ""}
         </p>
         <h1>{featuredMovie.title}</h1>
@@ -53,11 +57,24 @@ export default function HeroSlider({ movies = [], onWatchMovie }) {
           <button
             type="button"
             className="explore-button"
-            onClick={() => onWatchMovie(featuredMovie)}
+            onClick={() => {
+              if (featuredMovie.type === "series") {
+                onSelectSeries(featuredMovie);
+              } else {
+                onWatchMovie(featuredMovie);
+              }
+            }}
           >
-            ▶ Watch Now
+            {featuredMovie.type === "series" ? "View Series" : "▶ Watch Now"}
           </button>
-          <a className="hero-secondary-button" href="#genres">Explore Movies ↓</a>
+          <a
+            className="hero-secondary-button"
+            href={featuredMovie.type === "series" ? "#web-series" : "#genres"}
+          >
+            {featuredMovie.type === "series"
+              ? "Explore Web Series ↓"
+              : "Explore Movies ↓"}
+          </a>
         </div>
       </div>
 
@@ -77,9 +94,6 @@ export default function HeroSlider({ movies = [], onWatchMovie }) {
               />
             ))}
           </div>
-          <span className="hero-slide-count">
-            {String(heroIndex + 1).padStart(2, "0")} / {String(movies.length).padStart(2, "0")}
-          </span>
         </>
       )}
     </section>
