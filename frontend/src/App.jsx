@@ -542,13 +542,16 @@ if (screen === "series") {
                       </div>
 
                       <button
-                        type="button"
-                        className="play-icon"
-                        aria-label={`Play ${movie.title}`}
-                        onClick={() => playMovie(movie.id)}
-                      >
-                        ▶
-                      </button>
+  type="button"
+  className="play-icon"
+  aria-label={`Play ${movie.title}`}
+  onClick={(event) => {
+    event.stopPropagation();
+    playMovie(movie.id);
+  }}
+>
+  ▶
+</button>
                     </div>
 
                     {/* Star rating feature */}
