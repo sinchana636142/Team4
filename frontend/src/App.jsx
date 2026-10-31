@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "./App.css";
 import Navbar from "./components/Navbar";
 import HeroSlider from "./components/HeroSlider";
@@ -12,13 +12,15 @@ import WatchlistPage from "./features/watchlist/WatchlistPage";
 import AdminDashboard from "./features/admin/AdminDashboard";
 import SubscriptionPlans from "./SubscriptionPlans";
 import { API_URL } from "./features/api";
-import MovieDetails from "./MovieDetails";
-import MovieSearch from "./MovieSearch";
 import MovieDetailsPage from "./MovieDetailsPage";
 import IntroVideo from "./IntroVideo";
 import { movies, genres } from "./data/movies";
+import { series } from "./data/series";
 import WebSeries from "./components/WebSeries";
+import MoviesPage from "./features/movies/MoviesPage";
 import SeriesDetails from "./components/SeriesDetails";
+import EpisodesPage from "./features/episodes/EpisodesPage";
+import ProfilePage from "./features/profile/ProfilePage";
 
 function App() {
   
@@ -50,6 +52,16 @@ const finishIntro = () => {
   });
 
   const [catalogMovies, setCatalogMovies] = useState(movies);
+  const featuredTitles = useMemo(() => {
+    const titles = [...catalogMovies, ...series];
+
+    for (let index = titles.length - 1; index > 0; index -= 1) {
+      const randomIndex = Math.floor(Math.random() * (index + 1));
+      [titles[index], titles[randomIndex]] = [titles[randomIndex], titles[index]];
+    }
+
+    return titles.slice(0, 10);
+  }, [catalogMovies]);
 
 
   useEffect(() => {
@@ -282,6 +294,7 @@ async function submitRating(titleId, rating) {
     return (
       <WatchPage
         titleId={watchTitleId}
+        movie={catalogMovies.find((movie) => movie.id === watchTitleId)}
         onBack={goHome}
       />
     );
@@ -290,10 +303,48 @@ async function submitRating(titleId, rating) {
   // Watchlist screen.
   if (screen === "watchlist") {
     return (
-      <WatchlistPage
-        onPlay={playMovie}
-        onBack={goHome}
-      />
+      <div className="app">
+        <WatchlistPage
+          user={currentUser}
+          onBack={goHome}
+          onSelectMovie={setSelectedMovie}
+          onSelectSeries={(show) => {
+            setSelectedSeries(show);
+          }}
+        />
+        {selectedSeries && (
+          <SeriesDetails
+            series={selectedSeries}
+            user={currentUser}
+            onClose={() => setSelectedSeries(null)}
+            onWatchEpisode={({ series: show, episode }) => {
+              setSeriesPlayer({ kind: "episode", series: show, episode });
+            }}
+            onWatchTrailer={(show) => {
+              setSeriesPlayer({ kind: "trailer", series: show });
+            }}
+          />
+        )}
+        {seriesPlayer && (
+          <EpisodesPage
+            seriesPlayer={seriesPlayer}
+            onClose={() => setSeriesPlayer(null)}
+            onSelectEpisode={(episode) =>
+              setSeriesPlayer((previous) =>
+                previous ? { ...previous, episode } : previous
+              )
+            }
+          />
+        )}
+        <MovieDetailsPage
+          movie={selectedMovie}
+          onClose={() => setSelectedMovie(null)}
+          onWatchMovie={(movie) => {
+            setSelectedMovie(null);
+            playMovie(movie.id);
+          }}
+        />
+      </div>
     );
   }
 
@@ -310,6 +361,23 @@ async function submitRating(titleId, rating) {
   // My subscription screen.
   if (screen === "account") {
     return <SubscriptionStatus onBack={goHome} />;
+  }
+  if (screen === "profile") {
+    return (
+      <div className="app">
+        <Navbar
+          currentUser={currentUser}
+          onHome={goHome}
+          onScreenChange={setScreen}
+          onLogout={handleLogout}
+        />
+        <ProfilePage
+          user={currentUser}
+          onNavigate={setScreen}
+          onLogout={handleLogout}
+        />
+      </div>
+    );
   }
   // Admin dashboard screen (OTT-F-050, OTT-F-051, OTT-F-052)
   if (screen === "admin") {
@@ -356,6 +424,36 @@ async function submitRating(titleId, rating) {
       />
     );
   }
+
+  if (screen === "movies") {
+    return (
+      <div className="app">
+        <Navbar
+          currentUser={currentUser}
+          onHome={goHome}
+          onScreenChange={setScreen}
+          onLogout={handleLogout}
+        />
+        <main>
+          <MoviesPage
+            movies={catalogMovies}
+            genres={genres}
+            onSelectMovie={setSelectedMovie}
+            onWatchMovie={(movie) => playMovie(movie.id)}
+          />
+        </main>
+                <MovieDetailsPage
+          movie={selectedMovie}
+          onClose={() => setSelectedMovie(null)}
+          onWatchMovie={(movie) => {
+            setSelectedMovie(null);
+            playMovie(movie.id);
+          }}
+        />
+      </div>
+    );
+  }
+
 // Web Series screen. Keep it inside the normal app shell so the navbar remains available.
 if (screen === "series") {
   return (
@@ -372,6 +470,7 @@ if (screen === "series") {
       {selectedSeries && (
         <SeriesDetails
           series={selectedSeries}
+          user={currentUser}
           onClose={() => setSelectedSeries(null)}
           onWatchEpisode={({ series: show, episode }) => {
             setSeriesPlayer({ kind: "episode", series: show, episode });
@@ -382,34 +481,15 @@ if (screen === "series") {
         />
       )}
       {seriesPlayer && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label={seriesPlayer.kind === "trailer" ? "Series trailer" : "Episode player"}
-          style={{ position: "fixed", inset: 0, zIndex: 11000, background: "rgba(0,0,0,.94)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}
-        >
-          <div style={{ width: "min(1000px, 100%)", color: "white", background: "#17141f", borderRadius: 16, padding: 20 }}>
-            <button type="button" onClick={() => setSeriesPlayer(null)} style={{ float: "right", padding: "8px 14px", cursor: "pointer" }}>Close ✕</button>
-            <h2>{seriesPlayer.kind === "trailer" ? `${seriesPlayer.series.title} — Trailer` : `${seriesPlayer.series.title} — ${seriesPlayer.episode.title}`}</h2>
-            {seriesPlayer.kind === "trailer" && seriesPlayer.series.trailerUrl ? (
-              <div style={{ position: "relative", width: "100%", paddingTop: "56.25%" }}>
-                <iframe
-                  title={`${seriesPlayer.series.title} trailer`}
-                  src={seriesPlayer.series.trailerUrl}
-                  style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: 0 }}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                />
-              </div>
-            ) : seriesPlayer.kind === "episode" && seriesPlayer.episode.videoUrl ? (
-              <video controls autoPlay style={{ width: "100%", maxHeight: "70vh", background: "black" }} src={seriesPlayer.episode.videoUrl} />
-            ) : (
-              <p style={{ lineHeight: 1.7, color: "#d4ccdf" }}>
-                No authorized video source is configured for this episode yet. Add a video URL you own or are licensed to stream to this episode's <code>videoUrl</code> field in <code>src/data/series.js</code>.
-              </p>
-            )}
-          </div>
-        </div>
+        <EpisodesPage
+          seriesPlayer={seriesPlayer}
+          onClose={() => setSeriesPlayer(null)}
+          onSelectEpisode={(episode) =>
+            setSeriesPlayer((previous) =>
+              previous ? { ...previous, episode } : previous
+            )
+          }
+        />
       )}
     </div>
   );
@@ -431,11 +511,12 @@ if (screen === "series") {
 
       <main>
         <HeroSlider
-          movies={catalogMovies}
+          movies={featuredTitles}
           onWatchMovie={(movie) => {
             setSelectedMovie(movie);
             setScreen("home");
           }}
+          onSelectSeries={setSelectedSeries}
         />
 
         <section className="catalog" id="movies">
@@ -448,9 +529,6 @@ if (screen === "series") {
               <h2>Browse by Genre</h2>
             </div>
 
-            <span className="movie-count">
-              {filteredMovies.length} titles
-            </span>
           </div>
 
           <div className="genre-list" id="genres">
@@ -492,6 +570,15 @@ if (screen === "series") {
               </button>
             ))}
           </div>
+
+          {searchQuery.trim() && (
+            <WebSeries
+              compact
+              searchQuery={searchQuery}
+              onSelectSeries={setSelectedSeries}
+              onViewAll={() => setScreen("series")}
+            />
+          )}
 
           <div className="results-heading">
             <h3>
@@ -633,13 +720,13 @@ if (screen === "series") {
 
               <h3>
                 {searchQuery.trim()
-                  ? "No matching titles found"
+                  ? "No matching movies found"
                   : "No movies available"}
               </h3>
 
               <p>
                 {searchQuery.trim()
-                  ? `No titles match "${searchQuery.trim()}". Try another search.`
+                  ? `No movies match "${searchQuery.trim()}". Try another search.`
                   : `There are currently no movies in the ${selectedGenre} genre. Please explore another genre.`}
               </p>
 
@@ -654,8 +741,48 @@ if (screen === "series") {
               </button>
             </div>
           )}
+          <button
+            type="button"
+            className="home-view-all-movies"
+            onClick={() => setScreen("movies")}
+          >
+            View All Movies
+          </button>
         </section>
+
+        {!searchQuery.trim() && (
+          <WebSeries
+            compact
+            onSelectSeries={setSelectedSeries}
+            onViewAll={() => setScreen("series")}
+          />
+        )}
       </main>
+
+      {selectedSeries && (
+        <SeriesDetails
+          series={selectedSeries}
+          user={currentUser}
+          onClose={() => setSelectedSeries(null)}
+          onWatchEpisode={({ series: show, episode }) => {
+            setSeriesPlayer({ kind: "episode", series: show, episode });
+          }}
+          onWatchTrailer={(show) => {
+            setSeriesPlayer({ kind: "trailer", series: show });
+          }}
+        />
+      )}
+      {seriesPlayer && (
+        <EpisodesPage
+          seriesPlayer={seriesPlayer}
+          onClose={() => setSeriesPlayer(null)}
+          onSelectEpisode={(episode) =>
+            setSeriesPlayer((previous) =>
+              previous ? { ...previous, episode } : previous
+            )
+          }
+        />
+      )}
 
       <footer>
         <a className="brand" href="#home" onClick={goHome}>

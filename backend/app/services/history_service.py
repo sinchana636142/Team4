@@ -42,3 +42,28 @@ def list_history(db, user_id):
         }
         for entry, title in rows
     ]
+
+
+def delete_history_entry(db, user_id, history_id):
+    entry = (
+        db.query(WatchHistory)
+        .filter(
+            WatchHistory.id == history_id,
+            WatchHistory.user_id == user_id,
+        )
+        .first()
+    )
+    if entry is None:
+        raise HTTPException(status_code=404, detail="History entry not found")
+
+    db.delete(entry)
+    db.commit()
+    return {"id": history_id, "deleted": True}
+
+
+def clear_history(db, user_id):
+    db.query(WatchHistory).filter(WatchHistory.user_id == user_id).delete(
+        synchronize_session=False
+    )
+    db.commit()
+    return {"cleared": True}

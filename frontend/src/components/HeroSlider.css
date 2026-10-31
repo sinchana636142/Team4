@@ -138,16 +138,6 @@
   background: #c3a2ff;
 }
 
-.hero-slide-count {
-  position: absolute;
-  right: 30px;
-  bottom: 27px;
-  z-index: 2;
-  color: #ffffffb5;
-  font-size: 12px;
-  letter-spacing: 1px;
-}
-
 @keyframes heroContentIn {
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
@@ -199,7 +189,6 @@
   .hero-arrow-prev { left: 18px; }
   .hero-arrow-next { right: 18px; }
   .hero-dots { bottom: 33px; }
-  .hero-slide-count { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

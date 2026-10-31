@@ -1,6 +1,7 @@
 
 import React, { useState } from "react";
 import "./MovieDetailsPage.css";
+import WatchlistButton from "./features/watchlist/WatchlistButton";
 
 const movieDescriptions = {
   "The Dark Knight":
@@ -207,6 +208,10 @@ export default function MovieDetailsPage({
                 >
                   ▷ Watch Trailer
                 </button>
+                <WatchlistButton
+                  titleId={movie.id}
+                  className="movie-trailer-button"
+                />
               </div>
 
               <p className="movie-details-note">

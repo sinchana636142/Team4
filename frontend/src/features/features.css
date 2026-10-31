@@ -24,3 +24,299 @@
 .feature-page .feature-error {
   color: #ff6b6b;
 }
+
+.watchlist-intro {
+  margin: 0 0 24px;
+  color: #aaa9b8;
+}
+
+.watchlist-page {
+  max-width: 1250px;
+  min-height: 100vh;
+  padding: 38px 30px 72px;
+}
+
+.watchlist-page > h1 {
+  margin: 22px 0 8px;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 30px;
+}
+
+.watchlist-back-button {
+  padding: 9px 15px;
+  border: 1px solid #51466a;
+  border-radius: 8px;
+  background: #1b1824;
+  color: #e8ddff;
+}
+
+.watchlist-back-button:hover {
+  border-color: #b89af7;
+  background: #29213a;
+}
+
+.watchlist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.watchlist-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #302a40;
+  border-radius: 12px;
+  background: #191722;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.watchlist-card:hover {
+  transform: translateY(-4px);
+  border-color: #8050ee;
+}
+
+.watchlist-poster-link {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  background: transparent;
+  color: white;
+  cursor: pointer;
+  text-align: left;
+}
+
+.watchlist-poster-link img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  background: #252230;
+}
+
+.watchlist-poster-title {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 28px 11px 11px;
+  overflow: hidden;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+  font-size: 14px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.watchlist-poster-kind {
+  position: absolute;
+  top: 9px;
+  left: 9px;
+  padding: 4px 7px;
+  border-radius: 5px;
+  background: rgba(15, 13, 20, 0.82);
+  color: #d7c4ff;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.watchlist-remove {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  background: rgba(12, 11, 16, 0.82);
+  color: #fff;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.watchlist-remove:hover {
+  border-color: #ff727d;
+  background: #8d2934;
+}
+
+.watchlist-action {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+.history-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.history-card {
+  overflow: hidden;
+  border: 1px solid #302a40;
+  border-radius: 12px;
+  background: #191722;
+}
+
+.history-card-poster {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: #252230;
+  cursor: pointer;
+}
+
+.history-card-poster img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+}
+
+.history-card-poster span {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 24px 12px 12px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+  color: #fff;
+  font-weight: 700;
+  text-align: left;
+}
+
+.history-card-info {
+  padding: 12px;
+}
+
+.history-card-info h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.history-card-info p {
+  margin: 0;
+  color: #aaa9b8;
+  font-size: 12px;
+}
+
+.history-page {
+  max-width: 1250px;
+  min-height: 100vh;
+  padding: 38px 30px 72px;
+}
+
+.history-back-button,
+.history-clear-button,
+.history-delete-button {
+  padding: 9px 15px;
+  border: 1px solid #51466a;
+  border-radius: 8px;
+  background: #1b1824;
+  color: #e8ddff;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, transform 0.2s;
+}
+
+.history-back-button:hover,
+.history-clear-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: #b89af7;
+  background: #29213a;
+}
+
+.history-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 22px 0 24px;
+}
+
+.history-heading p {
+  margin: 0 0 6px;
+  color: #b995ff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+}
+
+.history-heading h1 {
+  margin: 0;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 30px;
+}
+
+.history-clear-button {
+  border-color: #74434b;
+  color: #ff9aa1;
+}
+
+.history-clear-button:hover:not(:disabled) {
+  border-color: #ff727d;
+  background: #8d2934;
+  color: #fff;
+}
+
+.history-clear-button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.history-card {
+  position: relative;
+}
+
+.history-delete-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  padding: 0;
+  border-color: rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  background: rgba(12, 11, 16, 0.82);
+  color: #fff;
+  font-size: 20px;
+}
+
+.history-delete-button:hover {
+  border-color: #ff727d;
+  background: #8d2934;
+}
+
+@media (max-width: 520px) {
+  .watchlist-page {
+    padding: 28px 16px 54px;
+  }
+
+  .history-page {
+    padding: 28px 16px 54px;
+  }
+
+  .history-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .watchlist-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+}

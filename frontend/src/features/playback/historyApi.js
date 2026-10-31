@@ -8,3 +8,11 @@ export function recordView(titleId) {
 export function getHistory() {
   return apiFetch("/playback/history");
 }
+
+export function deleteHistoryEntry(historyId) {
+  return apiFetch(`/playback/history/${historyId}`, { method: "DELETE" });
+}
+
+export function clearHistory() {
+  return apiFetch("/playback/history", { method: "DELETE" });
+}

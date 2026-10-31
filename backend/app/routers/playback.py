@@ -5,7 +5,12 @@ from app.database import get_db
 from app.routers.profile import get_current_user
 from app.schemas.playback import ResumeRequest
 from app.services.playback_service import get_playable_title
-from app.services.history_service import list_history, record_view
+from app.services.history_service import (
+    clear_history,
+    delete_history_entry,
+    list_history,
+    record_view,
+)
 from app.services.resume_service import get_position, save_position
 
 router = APIRouter(prefix="/playback", tags=["Playback"])
@@ -23,6 +28,25 @@ def get_watch_history(
 ):
     """The logged-in user's watch history, newest first."""
     return list_history(db, current_user.id)
+
+
+@router.delete("/history")
+def delete_watch_history(
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Delete all watch-history entries belonging to the logged-in user."""
+    return clear_history(db, current_user.id)
+
+
+@router.delete("/history/{history_id}")
+def delete_watch_history_entry(
+    history_id: int,
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Delete one watch-history entry belonging to the logged-in user."""
+    return delete_history_entry(db, current_user.id, history_id)
 
 
 @router.post("/{title_id}/history", status_code=201)
