@@ -31,7 +31,14 @@ def list_watchlist(
         .all()
     )
     return [
-        {"title_id": title.id, "title": title.title, "poster_url": title.poster_url}
+        {
+            "title_id": title.id,
+            "title": title.title,
+            "poster_url": title.poster_url,
+            "genre": title.genre,
+            "year": title.year,
+            "synopsis": title.synopsis,
+        }
         for item, title in rows
     ]
 
