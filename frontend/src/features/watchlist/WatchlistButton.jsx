@@ -2,14 +2,14 @@ import { useEffect, useState } from "react";
 import { addToWatchlist, getWatchlist, removeFromWatchlist } from "./watchlistApi";
 
 // Add / Remove button. Use <WatchlistButton titleId={id} /> on any title page.
-export default function WatchlistButton({ titleId }) {
+export default function WatchlistButton({ titleId, className = "" }) {
   const [inList, setInList] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
     getWatchlist()
       .then((items) => setInList(items.some((item) => item.title_id === Number(titleId))))
-      .catch(() => {});
+      .catch((loadError) => setError(loadError.message));
   }, [titleId]);
 
   async function toggle() {
@@ -27,8 +27,8 @@ export default function WatchlistButton({ titleId }) {
   }
 
   return (
-    <span>
-      <button type="button" onClick={toggle}>
+    <span className="watchlist-action">
+      <button className={className} type="button" onClick={toggle}>
         {inList ? "Remove from watchlist" : "Add to watchlist"}
       </button>
       {error && <span role="alert" className="feature-error"> {error}</span>}
