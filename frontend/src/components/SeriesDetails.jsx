@@ -1,12 +1,14 @@
 
 import React, { useState } from "react";
 import "./SeriesDetails.css";
+import SeriesWatchlistButton from "../features/watchlist/SeriesWatchlistButton";
 
 export default function SeriesDetails({
   series,
   onClose,
   onWatchEpisode,
   onWatchTrailer,
+  user,
 }) {
   const [selectedEpisode, setSelectedEpisode] = useState(
     series.episodes?.[0] || null
@@ -89,6 +91,7 @@ export default function SeriesDetails({
               >
                 ▷ Watch Trailer
               </button>
+              <SeriesWatchlistButton series={series} user={user} />
             </div>
 
             <h2 className="episodes-heading">
