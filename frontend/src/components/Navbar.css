@@ -5,6 +5,24 @@
   font-weight: bold;
 }
 
+.profile-icon-button {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  padding: 0 !important;
+  border: 1px solid #51466a !important;
+  border-radius: 50% !important;
+  background: #201a2f !important;
+  color: #d7c4ff !important;
+  font-size: 23px !important;
+}
+
+.profile-icon-button:hover {
+  border-color: #b89af7 !important;
+  background: #2b2240 !important;
+}
+
 @media (max-width: 900px) {
   .navbar {
     flex-wrap: wrap;
