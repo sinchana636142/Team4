@@ -183,7 +183,8 @@
 }
 
 .movie-watch-button,
-.movie-trailer-button {
+.movie-trailer-button,
+.movie-details-actions .watchlist-action button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -218,6 +219,11 @@
   color: #eee6ff;
   background: #292533;
   border: 1px solid #51475f;
+}
+
+.movie-details-actions .watchlist-action button {
+  min-width: 145px;
+  min-height: 48px;
 }
 
 .movie-trailer-button:hover {
