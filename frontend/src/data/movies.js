@@ -4,6 +4,7 @@ export const movies = [
     title: "The Dark Knight",
     genre: "Action",
     year: 2008,
+    videoUrl: "/static/uploads/videos/vid.mkv",
     poster:
       "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
   },
@@ -12,6 +13,7 @@ export const movies = [
     title: "Mad Max: Fury Road",
     genre: "Action",
     year: 2015,
+    videoUrl: "/static/uploads/videos/movie.mkv",
     poster:
       "https://image.tmdb.org/t/p/w500/8tZYtuWezp8JbcsvHYO0O46tFbo.jpg",
   },
