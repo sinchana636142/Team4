@@ -5,7 +5,7 @@ load_dotenv()
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql+psycopg://postgres:Vivek%40123@localhost:5432/streamhub",
+    "postgresql+psycopg://postgres:YOUR_DATABASE_PASSWORD@localhost:5432/streamhub",
 )
 
 JWT_SECRET_KEY = os.getenv(
@@ -19,3 +19,6 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "")
 RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "")
 RAZORPAY_WEBHOOK_SECRET = os.getenv("RAZORPAY_WEBHOOK_SECRET", "")
+
+
+PREMIUM_ACCESS_CODE = os.getenv("PREMIUM_ACCESS_CODE", "")

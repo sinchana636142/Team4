@@ -1,4 +1,4 @@
-
+from app.models.premium_code import PremiumCodeRedemption
 from app.models.user import User
 from app.models.title import Title
 from app.models.subscription import Plan, Subscription
@@ -15,4 +15,6 @@ __all__ = [
     "WatchHistory",
     "WatchlistItem",
     "Rating",
+    "PremiumCodeRedemption",
+
 ]
