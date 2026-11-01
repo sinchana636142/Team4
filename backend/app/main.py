@@ -1,4 +1,6 @@
 import os
+from app.routers import watchlist
+from app.routers import premium_code
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -57,6 +59,7 @@ app.include_router(playback.router)
 app.include_router(subscription.router)
 app.include_router(admin.router)
 app.include_router(watchlist.router)
+app.include_router(premium_code.router)
 app.include_router(ratings.router)
 
 
