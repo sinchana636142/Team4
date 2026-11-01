@@ -75,6 +75,16 @@
   border: 0;
 }
 
+.episodes-video-panel .stream-player,
+.episodes-video-panel .stream-player-embed {
+  width: 100%;
+  min-height: 420px;
+}
+
+.episodes-video-panel .stream-player {
+  max-height: none;
+}
+
 .episodes-empty-state {
   min-height: 420px;
   display: flex;
