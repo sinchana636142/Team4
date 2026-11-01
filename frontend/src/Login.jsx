@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./Auth.css";
 
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "http://127.0.0.1:8001";
 
 export default function Login({ onBack, onLoggedIn, onForgotPassword }) {
     const [emailUsername, setEmailUsername] = useState("");
@@ -73,7 +73,7 @@ export default function Login({ onBack, onLoggedIn, onForgotPassword }) {
         } catch (error) {
             const msg =
                 error.message === "Failed to fetch"
-                    ? "Cannot connect to the backend. Check that it is running on port 8000."
+                    ? "Cannot connect to the backend. Check that it is running on port 8001."
                     : error.message;
 
             setMessage(msg);
@@ -119,7 +119,7 @@ export default function Login({ onBack, onLoggedIn, onForgotPassword }) {
         } catch (error) {
             setMessage(
                 error.message === "Failed to fetch"
-                    ? "Cannot connect to the backend. Check that it is running on port 8000."
+                    ? "Cannot connect to the backend. Check that it is running on port 8001."
                     : error.message
             );
         } finally {
