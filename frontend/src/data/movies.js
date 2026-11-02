@@ -13,7 +13,7 @@ export const movies = [
     title: "Mad Max: Fury Road",
     genre: "Action",
     year: 2015,
-    videoUrl: "/static/uploads/videos/movie.mkv",
+     videoUrl: "/static/uploads/videos/vid.mkv",
     poster:
       "https://image.tmdb.org/t/p/w500/8tZYtuWezp8JbcsvHYO0O46tFbo.jpg",
   },
@@ -22,6 +22,7 @@ export const movies = [
     title: "John Wick",
     genre: "Action",
     year: 2014,
+     videoUrl: "/static/uploads/videos/vid.mkv",
     poster:
       "https://image.tmdb.org/t/p/w500/fZPSd91yGE9fCcCe6OoQr6E3Bev.jpg",
   },
@@ -30,6 +31,7 @@ export const movies = [
     title: "The Hangover",
     genre: "Comedy",
     year: 2009,
+     videoUrl: "/static/uploads/videos/vid.mkv",
     poster:
       "https://image.tmdb.org/t/p/w500/uluhlXubGu1VxU63X9VHCLWDAYP.jpg",
   },
@@ -38,6 +40,7 @@ export const movies = [
     title: "Home Alone",
     genre: "Comedy",
     year: 1990,
+     videoUrl: "/static/uploads/videos/vid.mkv",
     poster:
       "https://image.tmdb.org/t/p/w500/onTSipZ8R3bliBdKfPtsDuHTdlL.jpg",
   },
@@ -46,6 +49,7 @@ export const movies = [
     title: "Inception",
     genre: "Thriller",
     year: 2010,
+     videoUrl: "/static/uploads/videos/vid.mkv",
     poster:
       "https://image.tmdb.org/t/p/w500/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg",
   },
@@ -54,6 +58,7 @@ export const movies = [
     title: "Shutter Island",
     genre: "Thriller",
     year: 2010,
+     videoUrl: "/static/uploads/videos/vid.mkv",
     poster:
       "https://image.tmdb.org/t/p/w500/4GDy0PHYX3VRXUtwK5ysFbg3kEx.jpg",
   },
@@ -62,6 +67,7 @@ export const movies = [
     title: "Interstellar",
     genre: "Sci-Fi",
     year: 2014,
+     videoUrl: "/static/uploads/videos/vid.mkv",
     poster:
       "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
   },
@@ -70,6 +76,7 @@ export const movies = [
     title: "Titanic",
     genre: "Romance",
     year: 1997,
+     videoUrl: "/static/uploads/videos/vid.mkv",
     poster:
       "https://image.tmdb.org/t/p/w500/9xjZS2rlVxm8SFx8kPC3aIGCOYQ.jpg",
   },
@@ -78,6 +85,7 @@ export const movies = [
     title: "The Conjuring",
     genre: "Horror",
     year: 2013,
+     videoUrl: "/static/uploads/videos/vid.mkv",
     poster:
       "https://image.tmdb.org/t/p/w500/wVYREutTvI2tmxr6ujrHT704wGF.jpg",
   },
@@ -86,6 +94,7 @@ export const movies = [
     title: "A Quiet Place",
     genre: "Horror",
     year: 2018,
+     videoUrl: "/static/uploads/videos/vid.mkv",
     poster:
       "https://image.tmdb.org/t/p/w500/nAU74GmpUk7t5iklEp3bufwDq4n.jpg",
   },
