@@ -1,3 +1,6 @@
+import KidsHome from "./profiles/kids/KidsHome";
+import ProfileSelection from "./profiles/ProfileSelection";
+
 import { useEffect, useMemo, useState } from "react";
 import "./App.css";
 import Navbar from "./components/Navbar";
@@ -23,21 +26,28 @@ import EpisodesPage from "./features/episodes/EpisodesPage";
 import ProfilePage from "./features/profile/ProfilePage";
 
 function App() {
-  
 
-const [showIntro, setShowIntro] = useState(
-  () => sessionStorage.getItem("streamhubIntroPlayed") !== "true"
-);
 
-const finishIntro = () => {
-  sessionStorage.setItem("streamhubIntroPlayed", "true");
-  setShowIntro(false);
-};
+  const [showIntro, setShowIntro] = useState(
+    () => sessionStorage.getItem("streamhubIntroPlayed") !== "true"
+  );
+
+  const finishIntro = () => {
+    sessionStorage.setItem("streamhubIntroPlayed", "true");
+    setShowIntro(false);
+  };
 
 
   const [selectedGenre, setSelectedGenre] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [screen, setScreen] = useState("home");
+  const [selectedProfile, setSelectedProfile] = useState(() => {
+    try {
+      return JSON.parse(sessionStorage.getItem("streamhub_selected_profile"));
+    } catch {
+      return null;
+    }
+  });
   const [watchTitleId, setWatchTitleId] = useState(null);
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [selectedSeries, setSelectedSeries] = useState(null);
@@ -54,6 +64,8 @@ const finishIntro = () => {
   useEffect(() => {
     function handleSessionExpired() {
       setCurrentUser(null);
+      sessionStorage.removeItem("streamhub_selected_profile");
+      setSelectedProfile(null);
       setMyRatings({});
       setRatingStatus({});
       setScreen("login");
@@ -100,7 +112,7 @@ const finishIntro = () => {
           setCatalogMovies(mapped);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, [screen]);
 
   // Rating states
@@ -209,12 +221,14 @@ const finishIntro = () => {
       setCurrentUser(user);
     }
 
-    setScreen("home");
+    setScreen("profiles");
   }
 
   function handleLogout() {
     sessionStorage.removeItem("streamhub_access_token");
     sessionStorage.removeItem("streamhub_user");
+    sessionStorage.removeItem("streamhub_selected_profile");
+    setSelectedProfile(null);
 
     setCurrentUser(null);
     setMyRatings({});
@@ -224,89 +238,129 @@ const finishIntro = () => {
 
   // Submit a rating from 1 to 5 stars.
 
-async function submitRating(titleId, rating) {
-  if (!currentUser) {
-    setRatingStatus((previous) => ({
-      ...previous,
-      [titleId]: "Please log in to rate this title.",
-    }));
-    setScreen("login");
-    return;
-  }
-
-  const token = sessionStorage.getItem("streamhub_access_token");
-
-  if (!token) {
-    setRatingStatus((previous) => ({
-      ...previous,
-      [titleId]: "Login token missing. Please log in again.",
-    }));
-    return;
-  }
-
-  setRatingStatus((previous) => ({
-    ...previous,
-    [titleId]: "Saving rating...",
-  }));
-
-  try {
-    const response = await fetch(`${API_URL}/ratings/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        title_id: Number(titleId),
-        rating: Number(rating),
-      }),
-    });
-
-    const data = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-      const message =
-        typeof data.detail === "string"
-          ? data.detail
-          : data.message || `Could not save rating (HTTP ${response.status}).`;
-
-      throw new Error(message);
+  async function submitRating(titleId, rating) {
+    if (!currentUser) {
+      setRatingStatus((previous) => ({
+        ...previous,
+        [titleId]: "Please log in to rate this title.",
+      }));
+      setScreen("login");
+      return;
     }
 
-    setMyRatings((previous) => ({
-      ...previous,
-      [titleId]: Number(rating),
-    }));
+    const token = sessionStorage.getItem("streamhub_access_token");
+
+    if (!token) {
+      setRatingStatus((previous) => ({
+        ...previous,
+        [titleId]: "Login token missing. Please log in again.",
+      }));
+      return;
+    }
 
     setRatingStatus((previous) => ({
       ...previous,
-      [titleId]: "Rating saved successfully!",
+      [titleId]: "Saving rating...",
     }));
 
-    const averageResponse = await fetch(
-      `${API_URL}/ratings/title/${titleId}/average`
-    );
-
-    if (averageResponse.ok) {
-      const averageData = await averageResponse.json();
-
-      setTitleRatings((previous) => ({
-        ...previous,
-        [titleId]: {
-          average: averageData.average_rating ?? null,
-          count: Number(averageData.total_ratings) || 0,
+    try {
+      const response = await fetch(`${API_URL}/ratings/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
+        body: JSON.stringify({
+          title_id: Number(titleId),
+          rating: Number(rating),
+        }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        const message =
+          typeof data.detail === "string"
+            ? data.detail
+            : data.message || `Could not save rating (HTTP ${response.status}).`;
+
+        throw new Error(message);
+      }
+
+      setMyRatings((previous) => ({
+        ...previous,
+        [titleId]: Number(rating),
+      }));
+
+      setRatingStatus((previous) => ({
+        ...previous,
+        [titleId]: "Rating saved successfully!",
+      }));
+
+      const averageResponse = await fetch(
+        `${API_URL}/ratings/title/${titleId}/average`
+      );
+
+      if (averageResponse.ok) {
+        const averageData = await averageResponse.json();
+
+        setTitleRatings((previous) => ({
+          ...previous,
+          [titleId]: {
+            average: averageData.average_rating ?? null,
+            count: Number(averageData.total_ratings) || 0,
+          },
+        }));
+      }
+    } catch (error) {
+      console.error("Rating submission failed:", error);
+
+      setRatingStatus((previous) => ({
+        ...previous,
+        [titleId]: error.message || "Could not save rating. Please try again.",
       }));
     }
-  } catch (error) {
-    console.error("Rating submission failed:", error);
-
-    setRatingStatus((previous) => ({
-      ...previous,
-      [titleId]: error.message || "Could not save rating. Please try again.",
-    }));
   }
-}
+  // Profile selection screen.
+  if (screen === "profiles") {
+    return (
+      <ProfileSelection
+        user={currentUser}
+        onSelectProfile={(profile) => {
+          setSelectedProfile(profile);
+          sessionStorage.setItem(
+            "streamhub_selected_profile",
+            JSON.stringify(profile)
+          );
+          setScreen(profile.kids ? "kids" : "home");
+        }}
+      />
+    );
+  }
+
+
+  // Separate Kids homepage with StreamHub movie details popup.
+  if (screen === "kids") {
+    return (
+      <div className="app">
+        <KidsHome
+          onBack={() => setScreen("profiles")}
+          onSelectTitle={(title) => setSelectedMovie(title)}
+        />
+
+        <MovieDetailsPage
+          movie={selectedMovie}
+          onClose={() => setSelectedMovie(null)}
+          isKidsPreview={true}
+          onWatchMovie={() => {
+            alert(
+              "This cartoon is not yet connected to the StreamHub video catalogue."
+            );
+          }}
+        />
+      </div>
+    );
+  }
 
   // Video player screen.
   if (screen === "watch") {
@@ -420,8 +474,8 @@ async function submitRating(titleId, rating) {
   }
 
   if (screen === "forgot") {
-  return <ForgotPassword onBack={goHome} />;
-}
+    return <ForgotPassword onBack={goHome} />;
+  }
 
   // Sign-up and OTP verification screen.
   if (screen === "signup") {
@@ -432,7 +486,6 @@ async function submitRating(titleId, rating) {
       />
     );
   }
-
   // Login screen.
   if (screen === "login") {
     return (
@@ -461,7 +514,7 @@ async function submitRating(titleId, rating) {
             onWatchMovie={(movie) => playMovie(movie.id)}
           />
         </main>
-                <MovieDetailsPage
+        <MovieDetailsPage
           movie={selectedMovie}
           onClose={() => setSelectedMovie(null)}
           onWatchMovie={(movie) => {
@@ -473,357 +526,355 @@ async function submitRating(titleId, rating) {
     );
   }
 
-// Web Series screen. Keep it inside the normal app shell so the navbar remains available.
-if (screen === "series") {
-  return (
-    <div className="app">
-      <Navbar
-        currentUser={currentUser}
-        onHome={goHome}
-        onScreenChange={setScreen}
-        onLogout={handleLogout}
-      />
-      <main>
-        <WebSeries onSelectSeries={(show) => setSelectedSeries(show)} />
-      </main>
-      {selectedSeries && (
-        <SeriesDetails
-          series={selectedSeries}
-          user={currentUser}
-          onClose={() => setSelectedSeries(null)}
-          onWatchEpisode={({ series: show, episode }) => {
-            setSeriesPlayer({ kind: "episode", series: show, episode });
-          }}
-          onWatchTrailer={(show) => {
-            setSeriesPlayer({ kind: "trailer", series: show });
-          }}
+  // Web Series screen. Keep it inside the normal app shell so the navbar remains available.
+  if (screen === "series") {
+    return (
+      <div className="app">
+        <Navbar
+          currentUser={currentUser}
+          onHome={goHome}
+          onScreenChange={setScreen}
+          onLogout={handleLogout}
         />
-      )}
-      {seriesPlayer && (
-        <EpisodesPage
-          seriesPlayer={seriesPlayer}
-          onClose={() => setSeriesPlayer(null)}
-          onSelectEpisode={(episode) =>
-            setSeriesPlayer((previous) =>
-              previous ? { ...previous, episode } : previous
-            )
-          }
-        />
-      )}
-    </div>
-  );
-}
+        <main>
+          <WebSeries onSelectSeries={(show) => setSelectedSeries(show)} />
+        </main>
+        {selectedSeries && (
+          <SeriesDetails
+            series={selectedSeries}
+            user={currentUser}
+            onClose={() => setSelectedSeries(null)}
+            onWatchEpisode={({ series: show, episode }) => {
+              setSeriesPlayer({ kind: "episode", series: show, episode });
+            }}
+            onWatchTrailer={(show) => {
+              setSeriesPlayer({ kind: "trailer", series: show });
+            }}
+          />
+        )}
+        {seriesPlayer && (
+          <EpisodesPage
+            seriesPlayer={seriesPlayer}
+            onClose={() => setSeriesPlayer(null)}
+            onSelectEpisode={(episode) =>
+              setSeriesPlayer((previous) =>
+                previous ? { ...previous, episode } : previous
+              )
+            }
+          />
+        )}
+      </div>
+    );
+  }
 
   // StreamHub homepage.
   return (
     <>
-    {showIntro ? (
-      <IntroVideo onComplete={finishIntro} />
-    ) : (
-    <div className="app">
-      <Navbar
-        currentUser={currentUser}
-        onHome={goHome}
-        onScreenChange={setScreen}
-        onLogout={handleLogout}
-      />
+      {showIntro ? (
+        <IntroVideo onComplete={finishIntro} />
+      ) : (
+        <div className="app">
+          <Navbar
+            currentUser={currentUser}
+            onHome={goHome}
+            onScreenChange={setScreen}
+            onLogout={handleLogout}
+          />
 
-      <main>
-        <HeroSlider
-          movies={featuredTitles}
-          onWatchMovie={(movie) => {
-            setSelectedMovie(movie);
-            setScreen("home");
-          }}
-          onSelectSeries={setSelectedSeries}
-        />
+          <main>
+            <HeroSlider
+              movies={featuredTitles}
+              onWatchMovie={(movie) => {
+                setSelectedMovie(movie);
+                setScreen("home");
+              }}
+              onSelectSeries={setSelectedSeries}
+            />
 
-        <section className="catalog" id="movies">
-          <div className="section-heading">
-            <div>
-              <p className="eyebrow">
-                FIND YOUR NEXT FAVORITE
-              </p>
+            <section className="catalog" id="movies">
+              <div className="section-heading">
+                <div>
+                  <p className="eyebrow">
+                    FIND YOUR NEXT FAVORITE
+                  </p>
 
-              <h2>Browse by Genre</h2>
-            </div>
+                  <h2>Browse by Genre</h2>
+                </div>
 
-          </div>
+              </div>
 
-          <div className="genre-list" id="genres">
-            <div className="search-container">
-              <input
-                type="search"
-                className="search-input"
-                placeholder="Search movies and shows..."
-                value={searchQuery}
-                onChange={(event) =>
-                  setSearchQuery(event.target.value)
-                }
-                aria-label="Search movies and shows"
-              />
+              <div className="genre-list" id="genres">
+                <div className="search-container">
+                  <input
+                    type="search"
+                    className="search-input"
+                    placeholder="Search movies and shows..."
+                    value={searchQuery}
+                    onChange={(event) =>
+                      setSearchQuery(event.target.value)
+                    }
+                    aria-label="Search movies and shows"
+                  />
 
-              {searchQuery && (
-                <button
-                  type="button"
-                  className="clear-search"
-                  onClick={() => setSearchQuery("")}
-                  aria-label="Clear search"
-                >
-                  ✕
-                </button>
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      className="clear-search"
+                      onClick={() => setSearchQuery("")}
+                      aria-label="Clear search"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+
+                {genres.map((genre) => (
+                  <button
+                    type="button"
+                    key={genre}
+                    className={`genre-button ${selectedGenre === genre ? "active" : ""
+                      }`}
+                    onClick={() => setSelectedGenre(genre)}
+                    aria-pressed={selectedGenre === genre}
+                  >
+                    {genre}
+                  </button>
+                ))}
+              </div>
+
+              {searchQuery.trim() && (
+                <WebSeries
+                  compact
+                  searchQuery={searchQuery}
+                  onSelectSeries={setSelectedSeries}
+                  onViewAll={() => setScreen("series")}
+                />
               )}
-            </div>
 
-            {genres.map((genre) => (
+              <div className="results-heading">
+                <h3>
+                  {selectedGenre === "All"
+                    ? "Popular Movies"
+                    : `${selectedGenre} Movies`}
+                </h3>
+
+                <span>Explore the collection</span>
+              </div>
+
+              {filteredMovies.length > 0 ? (
+                <div className="movie-grid">
+                  {filteredMovies.map((movie) => {
+                    const movieRating = titleRatings[movie.id];
+
+                    return (
+                      <article
+                        className="movie-card"
+                        key={movie.id}
+                        onClick={() => {
+                          setSelectedMovie(movie);
+                          setScreen("movieDetails");
+                        }}
+                        style={{ cursor: "pointer" }}
+                      >
+                        <div
+                          className={`movie-poster poster-${movie.genre
+                            .toLowerCase()
+                            .replace(/[^a-z]/g, "")}`}
+                        >
+                          <img
+                            className="poster-image"
+                            src={movie.poster}
+                            alt={`${movie.title} poster`}
+                            loading="lazy"
+                          />
+
+                          <span className="poster-year">
+                            {movie.year}
+                          </span>
+                        </div>
+
+                        <div className="movie-info">
+                          <div>
+                            <h4>{movie.title}</h4>
+                            <p>{movie.genre}</p>
+                          </div>
+
+                          <button
+                            type="button"
+                            className="play-icon"
+                            aria-label={`Play ${movie.title}`}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              playMovie(movie.id);
+                            }}
+                          >
+                            ▶
+                          </button>
+                        </div>
+
+                        {/* Star rating feature */}
+                        <div className="rating-panel">
+                          <div className="rating-average">
+                            <span className="rating-star">
+                              ★
+                            </span>
+
+                            <strong>
+                              {movieRating?.average != null &&
+                                Number.isFinite(movieRating.average)
+                                ? movieRating.average.toFixed(1)
+                                : "—"}
+                            </strong>
+
+                            <span className="rating-count">
+                              ({movieRating?.count ?? 0} ratings)
+                            </span>
+                          </div>
+
+                          <div className="rating-control">
+                            <span className="rating-label">
+                              {myRatings[movie.id]
+                                ? "Your rating"
+                                : "Rate this title"}
+                            </span>
+
+                            <div
+                              className="rating-stars"
+                              role="group"
+                              aria-label={`Rate ${movie.title} from 1 to 5 stars`}
+                            >
+                              {[1, 2, 3, 4, 5].map((star) => (
+
+                                <button
+                                  type="button"
+                                  className={`rating-star-button ${Number(myRatings[movie.id]) >= star ? "selected" : ""
+                                    }`}
+                                  onClick={(event) => {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    submitRating(movie.id, star);
+                                  }}
+                                  onMouseDown={(event) => event.stopPropagation()}
+                                  aria-label={`Rate ${movie.title} ${star} out of 5 stars`}
+                                  title={`Rate ${star} out of 5`}
+                                >
+                                  ★
+                                </button>
+
+                              ))}
+                            </div>
+                          </div>
+
+                          {ratingStatus[movie.id] && (
+                            <p
+                              className="rating-message"
+                              role="status"
+                            >
+                              {ratingStatus[movie.id]}
+                            </p>
+                          )}
+
+                          {loadingRatings && (
+                            <p className="rating-loading">
+                              Loading ratings...
+                            </p>
+                          )}
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="empty-state" role="status">
+                  <span>🎬</span>
+
+                  <h3>
+                    {searchQuery.trim()
+                      ? "No matching movies found"
+                      : "No movies available"}
+                  </h3>
+
+                  <p>
+                    {searchQuery.trim()
+                      ? `No movies match "${searchQuery.trim()}". Try another search.`
+                      : `There are currently no movies in the ${selectedGenre} genre. Please explore another genre.`}
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedGenre("All");
+                      setSearchQuery("");
+                    }}
+                  >
+                    Browse All Movies
+                  </button>
+                </div>
+              )}
               <button
                 type="button"
-                key={genre}
-                className={`genre-button ${
-                  selectedGenre === genre ? "active" : ""
-                }`}
-                onClick={() => setSelectedGenre(genre)}
-                aria-pressed={selectedGenre === genre}
+                className="home-view-all-movies"
+                onClick={() => setScreen("movies")}
               >
-                {genre}
+                View All Movies
               </button>
-            ))}
-          </div>
+            </section>
 
-          {searchQuery.trim() && (
-            <WebSeries
-              compact
-              searchQuery={searchQuery}
-              onSelectSeries={setSelectedSeries}
-              onViewAll={() => setScreen("series")}
+            {!searchQuery.trim() && (
+              <WebSeries
+                compact
+                onSelectSeries={setSelectedSeries}
+                onViewAll={() => setScreen("series")}
+              />
+            )}
+          </main>
+
+          {selectedSeries && (
+            <SeriesDetails
+              series={selectedSeries}
+              user={currentUser}
+              onClose={() => setSelectedSeries(null)}
+              onWatchEpisode={({ series: show, episode }) => {
+                setSeriesPlayer({ kind: "episode", series: show, episode });
+              }}
+              onWatchTrailer={(show) => {
+                setSeriesPlayer({ kind: "trailer", series: show });
+              }}
+            />
+          )}
+          {seriesPlayer && (
+            <EpisodesPage
+              seriesPlayer={seriesPlayer}
+              onClose={() => setSeriesPlayer(null)}
+              onSelectEpisode={(episode) =>
+                setSeriesPlayer((previous) =>
+                  previous ? { ...previous, episode } : previous
+                )
+              }
             />
           )}
 
-          <div className="results-heading">
-            <h3>
-              {selectedGenre === "All"
-                ? "Popular Movies"
-                : `${selectedGenre} Movies`}
-            </h3>
+          <footer>
+            <a className="brand" href="#home" onClick={goHome}>
+              <span className="brand-icon">▶</span> StreamHub
+            </a>
 
-            <span>Explore the collection</span>
-          </div>
+            <p>Discover. Watch. Personalize. Subscribe.</p>
 
-          {filteredMovies.length > 0 ? (
-            <div className="movie-grid">
-              {filteredMovies.map((movie) => {
-                const movieRating = titleRatings[movie.id];
-
-                return (
-  <article
-    className="movie-card"
-    key={movie.id}
-    onClick={() => {
-      setSelectedMovie(movie);
-      setScreen("movieDetails");
-    }}
-    style={{ cursor: "pointer" }}
-  >
-                    <div
-                      className={`movie-poster poster-${movie.genre
-                        .toLowerCase()
-                        .replace(/[^a-z]/g, "")}`}
-                    >
-                      <img
-                        className="poster-image"
-                        src={movie.poster}
-                        alt={`${movie.title} poster`}
-                        loading="lazy"
-                      />
-
-                      <span className="poster-year">
-                        {movie.year}
-                      </span>
-                    </div>
-
-                    <div className="movie-info">
-                      <div>
-                        <h4>{movie.title}</h4>
-                        <p>{movie.genre}</p>
-                      </div>
-
-                      <button
-  type="button"
-  className="play-icon"
-  aria-label={`Play ${movie.title}`}
-  onClick={(event) => {
-    event.stopPropagation();
-    playMovie(movie.id);
-  }}
->
-  ▶
-</button>
-                    </div>
-
-                    {/* Star rating feature */}
-                    <div className="rating-panel">
-                      <div className="rating-average">
-                        <span className="rating-star">
-                          ★
-                        </span>
-
-                        <strong>
-                          {movieRating?.average != null &&
-                          Number.isFinite(movieRating.average)
-                            ? movieRating.average.toFixed(1)
-                            : "—"}
-                        </strong>
-
-                        <span className="rating-count">
-                          ({movieRating?.count ?? 0} ratings)
-                        </span>
-                      </div>
-
-                      <div className="rating-control">
-                        <span className="rating-label">
-                          {myRatings[movie.id]
-                            ? "Your rating"
-                            : "Rate this title"}
-                        </span>
-
-                        <div
-                          className="rating-stars"
-                          role="group"
-                          aria-label={`Rate ${movie.title} from 1 to 5 stars`}
-                        >
-                          {[1, 2, 3, 4, 5].map((star) => (
-                  
-<button
-  type="button"
-  className={`rating-star-button ${
-    Number(myRatings[movie.id]) >= star ? "selected" : ""
-  }`}
-  onClick={(event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    submitRating(movie.id, star);
-  }}
-  onMouseDown={(event) => event.stopPropagation()}
-  aria-label={`Rate ${movie.title} ${star} out of 5 stars`}
-  title={`Rate ${star} out of 5`}
->
-  ★
-</button>
-
-                          ))}
-                        </div>
-                      </div>
-
-                      {ratingStatus[movie.id] && (
-                        <p
-                          className="rating-message"
-                          role="status"
-                        >
-                          {ratingStatus[movie.id]}
-                        </p>
-                      )}
-
-                      {loadingRatings && (
-                        <p className="rating-loading">
-                          Loading ratings...
-                        </p>
-                      )}
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="empty-state" role="status">
-              <span>🎬</span>
-
-              <h3>
-                {searchQuery.trim()
-                  ? "No matching movies found"
-                  : "No movies available"}
-              </h3>
-
-              <p>
-                {searchQuery.trim()
-                  ? `No movies match "${searchQuery.trim()}". Try another search.`
-                  : `There are currently no movies in the ${selectedGenre} genre. Please explore another genre.`}
-              </p>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedGenre("All");
-                  setSearchQuery("");
-                }}
-              >
-                Browse All Movies
-              </button>
-            </div>
-          )}
-          <button
-            type="button"
-            className="home-view-all-movies"
-            onClick={() => setScreen("movies")}
-          >
-            View All Movies
-          </button>
-        </section>
-
-        {!searchQuery.trim() && (
-          <WebSeries
-            compact
-            onSelectSeries={setSelectedSeries}
-            onViewAll={() => setScreen("series")}
+            <span>Team 04 · StreamHub</span>
+          </footer>
+          <MovieDetailsPage
+            movie={selectedMovie}
+            onClose={() => setSelectedMovie(null)}
+            onWatchMovie={(movie) => {
+              setSelectedMovie(null);
+              playMovie(movie.id);
+            }}
           />
-        )}
-      </main>
-
-      {selectedSeries && (
-        <SeriesDetails
-          series={selectedSeries}
-          user={currentUser}
-          onClose={() => setSelectedSeries(null)}
-          onWatchEpisode={({ series: show, episode }) => {
-            setSeriesPlayer({ kind: "episode", series: show, episode });
-          }}
-          onWatchTrailer={(show) => {
-            setSeriesPlayer({ kind: "trailer", series: show });
-          }}
-        />
+        </div>
       )}
-      {seriesPlayer && (
-        <EpisodesPage
-          seriesPlayer={seriesPlayer}
-          onClose={() => setSeriesPlayer(null)}
-          onSelectEpisode={(episode) =>
-            setSeriesPlayer((previous) =>
-              previous ? { ...previous, episode } : previous
-            )
-          }
-        />
-      )}
-
-      <footer>
-        <a className="brand" href="#home" onClick={goHome}>
-          <span className="brand-icon">▶</span> StreamHub
-        </a>
-
-        <p>Discover. Watch. Personalize. Subscribe.</p>
-
-        <span>Team 04 · StreamHub</span>
-      </footer>
-      <MovieDetailsPage
-  movie={selectedMovie}
-  onClose={() => setSelectedMovie(null)}
-  onWatchMovie={(movie) => {
-    setSelectedMovie(null);
-    playMovie(movie.id);
-  }}
-/>
-          </div>
-    )}
-  </>
-);
+    </>
+  );
 }
 
 export default App;

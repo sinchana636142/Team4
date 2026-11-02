@@ -1,0 +1,153 @@
+.profile-screen {
+    min-height: 100vh;
+    background:
+        radial-gradient(ellipse at top, #202039 0%, #0b0b13 55%, #07070c 100%);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    padding: 45px 20px;
+    box-sizing: border-box;
+}
+
+.profile-header {
+    text-align: center;
+}
+
+.profile-header h1 {
+    font-size: 34px;
+    letter-spacing: 5px;
+    margin: 0;
+}
+
+.profile-header h1 span {
+    color: #a78bfa;
+}
+
+.profile-header p,
+.profile-subtitle {
+    color: #aaa9bd;
+}
+
+.profile-content {
+    width: 100%;
+    max-width: 850px;
+    margin: auto;
+    text-align: center;
+}
+
+.profile-content h2 {
+    font-size: 36px;
+    margin-bottom: 8px;
+}
+
+.profile-grid {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 35px;
+    margin: 55px 0 35px;
+}
+
+.profile-item {
+    width: 135px;
+    text-align: center;
+}
+
+.profile-avatar {
+    width: 125px;
+    height: 125px;
+    border: 3px solid transparent;
+    border-radius: 20px;
+    background: linear-gradient(145deg, #393953, #191927);
+    color: white;
+    font-size: 65px;
+    cursor: pointer;
+    position: relative;
+    transition: 0.25s;
+}
+
+.profile-avatar:hover {
+    border-color: #a78bfa;
+    transform: translateY(-7px);
+    box-shadow: 0 0 25px #8b5cf677;
+}
+
+.profile-item p {
+    font-size: 15px;
+    color: #e5e5ef;
+}
+
+.kids-tag {
+    position: absolute;
+    bottom: 7px;
+    right: 7px;
+    background: #8b5cf6;
+    padding: 4px 7px;
+    border-radius: 5px;
+    font-size: 10px;
+}
+
+.profile-add {
+    width: 125px;
+    height: 125px;
+    border: 2px dashed #77758e;
+    border-radius: 20px;
+    background: transparent;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.profile-add span {
+    font-size: 48px;
+    color: #a78bfa;
+}
+
+.profile-add-form {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 20px;
+}
+
+.profile-add-form input {
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #555;
+    background: #202033;
+    color: white;
+}
+
+.profile-add-form button,
+.profile-manage,
+.profile-delete {
+    padding: 11px 20px;
+    border: 1px solid #77758e;
+    border-radius: 8px;
+    background: transparent;
+    color: white;
+    cursor: pointer;
+}
+
+.profile-manage {
+    margin-top: 25px;
+    letter-spacing: 1px;
+}
+
+.profile-manage:hover,
+.profile-add-form button:hover {
+    background: #7048c7;
+}
+
+.profile-footer {
+    color: #77758e;
+    font-size: 13px;
+}
