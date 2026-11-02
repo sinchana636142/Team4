@@ -29,7 +29,7 @@ export const series = [
         id: 3,
         title: "Chapter Three: Holly, Jolly",
         duration: "52 min",
-        videoUrl: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+        videoUrl: "/static/uploads/videos/vid.mkv",
       },
     ],
   },
