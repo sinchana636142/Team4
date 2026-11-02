@@ -21,6 +21,79 @@ import MoviesPage from "./features/movies/MoviesPage";
 import SeriesDetails from "./components/SeriesDetails";
 import EpisodesPage from "./features/episodes/EpisodesPage";
 import ProfilePage from "./features/profile/ProfilePage";
+import ProfileChooser from "./features/profile/ProfileChooser";
+import KidsPage from "./features/profile/KidsPage";
+
+const ACCOUNTS_STORAGE_KEY = "streamhub_accounts";
+
+function profileStorageKey(user) {
+  const accountId = user?.email || user?.id || user?.full_name || "viewer";
+  return `streamhub_profiles:${String(accountId).trim().toLowerCase()}`;
+}
+
+function accountStorageKey(email, kind) {
+  return `streamhub_${kind}:${email.trim().toLowerCase()}`;
+}
+
+function readAccounts() {
+  try {
+    const savedAccounts = localStorage.getItem(ACCOUNTS_STORAGE_KEY);
+    const accounts = savedAccounts ? JSON.parse(savedAccounts) : [];
+    if (!Array.isArray(accounts)) return [];
+
+    return accounts.filter(
+      (account) =>
+        account &&
+        typeof account.email === "string" &&
+        typeof account.name === "string"
+    );
+  } catch (error) {
+    console.error("Could not load saved accounts:", error);
+    return [];
+  }
+}
+
+function createDefaultProfiles(user) {
+  const accountName =
+    user?.full_name || user?.name || user?.username || "Viewer";
+  return [
+    { id: "main", name: accountName, isKid: false },
+    { id: "kids", name: "Kids", isKid: true },
+  ];
+}
+
+function readProfiles(user) {
+  const key = profileStorageKey(user);
+  const savedProfiles = localStorage.getItem(key);
+  if (!savedProfiles) {
+    const defaults = createDefaultProfiles(user);
+    localStorage.setItem(key, JSON.stringify(defaults));
+    return defaults;
+  }
+
+  const parsedProfiles = JSON.parse(savedProfiles);
+  if (!Array.isArray(parsedProfiles) || parsedProfiles.length === 0) {
+    const defaults = createDefaultProfiles(user);
+    localStorage.setItem(key, JSON.stringify(defaults));
+    return defaults;
+  }
+
+  const profiles = parsedProfiles
+    .filter((profile) => profile && typeof profile.name === "string")
+    .map((profile) => ({
+      id: String(profile.id),
+      name: profile.name,
+      isKid: Boolean(profile.isKid),
+    }));
+
+  if (profiles.length > 0) {
+    return profiles;
+  }
+
+  const defaults = createDefaultProfiles(user);
+  localStorage.setItem(key, JSON.stringify(defaults));
+  return defaults;
+}
 
 function App() {
   
@@ -37,7 +110,9 @@ const finishIntro = () => {
 
   const [selectedGenre, setSelectedGenre] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
-  const [screen, setScreen] = useState("home");
+  const [screen, setScreen] = useState(() =>
+    sessionStorage.getItem("streamhub_user") ? "profiles" : "home"
+  );
   const [watchTitleId, setWatchTitleId] = useState(null);
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [selectedSeries, setSelectedSeries] = useState(null);
@@ -50,10 +125,54 @@ const finishIntro = () => {
       return null;
     }
   });
+  const [accounts, setAccounts] = useState(readAccounts);
+  const [profiles, setProfiles] = useState([]);
+  const [currentProfile, setCurrentProfile] = useState(null);
+  const [profileError, setProfileError] = useState("");
+  const [loginEmail, setLoginEmail] = useState("");
+
+  useEffect(() => {
+    if (!currentUser) {
+      setProfiles([]);
+      setCurrentProfile(null);
+      return;
+    }
+
+    try {
+      setProfiles(readProfiles(currentUser));
+      setProfileError("");
+      const email = currentUser.email?.trim().toLowerCase();
+      const token = sessionStorage.getItem("streamhub_access_token");
+      if (email && token) {
+        sessionStorage.setItem(accountStorageKey(email, "access_token"), token);
+        sessionStorage.setItem(
+          accountStorageKey(email, "user"),
+          JSON.stringify(currentUser)
+        );
+        rememberAccount(currentUser);
+      }
+    } catch (error) {
+      console.error("Could not load viewer profiles:", error);
+      setProfiles(createDefaultProfiles(currentUser));
+      setProfileError(
+        "Saved profiles could not be loaded. You can still choose a default profile."
+      );
+    }
+  }, [currentUser]);
 
   useEffect(() => {
     function handleSessionExpired() {
+      if (currentUser?.email) {
+        sessionStorage.removeItem(
+          accountStorageKey(currentUser.email, "access_token")
+        );
+        sessionStorage.removeItem(
+          accountStorageKey(currentUser.email, "user")
+        );
+      }
       setCurrentUser(null);
+      setCurrentProfile(null);
+      setProfiles([]);
       setMyRatings({});
       setRatingStatus({});
       setScreen("login");
@@ -65,7 +184,7 @@ const finishIntro = () => {
         "streamhub:session-expired",
         handleSessionExpired
       );
-  }, []);
+  }, [currentUser]);
 
   const [catalogMovies, setCatalogMovies] = useState(movies);
   const featuredTitles = useMemo(() => {
@@ -187,9 +306,101 @@ const finishIntro = () => {
     return matchesGenre && matchesSearch;
   });
 
+  function rememberAccount(user) {
+    const email = user.email?.trim().toLowerCase();
+    if (!email) return;
+
+    const nextAccounts = [
+      ...accounts.filter(
+        (account) => account.email.trim().toLowerCase() !== email
+      ),
+      {
+        email,
+        name: user.full_name || user.name || user.username || email,
+      },
+    ];
+
+    try {
+      localStorage.setItem(
+        ACCOUNTS_STORAGE_KEY,
+        JSON.stringify(nextAccounts)
+      );
+      setAccounts(nextAccounts);
+      setProfileError("");
+    } catch (error) {
+      console.error("Could not save account list:", error);
+      setProfileError(
+        "The account was signed in, but this browser could not save the account list."
+      );
+    }
+  }
 
   function goHome() {
-    setScreen("home");
+    setScreen(currentProfile?.isKid ? "kids" : "home");
+  }
+
+  function showProfiles() {
+    setCurrentProfile(null);
+    sessionStorage.removeItem("streamhub_profile_id");
+    setScreen("profiles");
+  }
+
+  function handleProfilesChange(nextProfiles) {
+    try {
+      localStorage.setItem(
+        profileStorageKey(currentUser),
+        JSON.stringify(nextProfiles)
+      );
+      setProfiles(nextProfiles);
+      setProfileError("");
+    } catch (error) {
+      console.error("Could not save viewer profiles:", error);
+      setProfileError(
+        "Profile changes could not be saved. Check your browser storage and try again."
+      );
+    }
+  }
+
+  function handleProfileSelect(profile) {
+    setCurrentProfile(profile);
+    sessionStorage.setItem("streamhub_profile_id", profile.id);
+    setScreen(profile.isKid ? "kids" : "home");
+  }
+
+  function handleAccountSelect(account) {
+    const email = account.email.trim().toLowerCase();
+    if (email === currentUser?.email?.trim().toLowerCase()) {
+      const mainProfile =
+        profiles.find((profile) => profile.id === "main") ||
+        createDefaultProfiles(currentUser)[0];
+      handleProfileSelect(mainProfile);
+      return;
+    }
+
+    const token = sessionStorage.getItem(
+      accountStorageKey(email, "access_token")
+    );
+    const savedUser = sessionStorage.getItem(accountStorageKey(email, "user"));
+
+    if (!token || !savedUser) {
+      setLoginEmail(email);
+      setScreen("addAccount");
+      return;
+    }
+
+    try {
+      const user = JSON.parse(savedUser);
+      sessionStorage.setItem("streamhub_access_token", token);
+      sessionStorage.setItem("streamhub_user", JSON.stringify(user));
+      setCurrentProfile(null);
+      setCurrentUser(user);
+      setScreen("profiles");
+    } catch (error) {
+      console.error("Could not switch to saved account:", error);
+      setProfileError("Could not switch accounts. Please log in again.");
+      setLoginEmail(email);
+      setScreen("addAccount");
+    }
   }
 
   // Open the video player. Viewers must be logged in.
@@ -199,27 +410,132 @@ const finishIntro = () => {
       return;
     }
 
+    if (currentProfile?.isKid && titleId !== 5) {
+      return;
+    }
+
     setWatchTitleId(titleId);
     setScreen("watch");
   }
 
-  function handleLogin(user) {
+  function handleLogin(user, token) {
     if (user) {
+      const email = user.email?.trim().toLowerCase();
+      if (email && token) {
+        sessionStorage.setItem(
+          accountStorageKey(email, "access_token"),
+          token
+        );
+        sessionStorage.setItem(
+          accountStorageKey(email, "user"),
+          JSON.stringify(user)
+        );
+        rememberAccount(user);
+      }
       sessionStorage.setItem("streamhub_user", JSON.stringify(user));
       setCurrentUser(user);
+      setCurrentProfile(null);
+      sessionStorage.removeItem("streamhub_profile_id");
     }
 
-    setScreen("home");
+    setScreen(user ? "profiles" : "home");
   }
 
   function handleLogout() {
+    if (currentUser?.email) {
+      sessionStorage.removeItem(
+        accountStorageKey(currentUser.email, "access_token")
+      );
+      sessionStorage.removeItem(accountStorageKey(currentUser.email, "user"));
+    }
     sessionStorage.removeItem("streamhub_access_token");
     sessionStorage.removeItem("streamhub_user");
+    sessionStorage.removeItem("streamhub_profile_id");
 
     setCurrentUser(null);
+    setCurrentProfile(null);
+    setProfiles([]);
     setMyRatings({});
     setRatingStatus({});
     setScreen("home");
+  }
+
+  function handleSignOut() {
+    const email = currentUser?.email?.trim().toLowerCase();
+    if (!email) {
+      setProfileError("Could not identify this account, so it was not removed.");
+      return;
+    }
+
+    let nextAccounts;
+    try {
+      nextAccounts = accounts.filter(
+        (account) => account.email.trim().toLowerCase() !== email
+      );
+      localStorage.setItem(ACCOUNTS_STORAGE_KEY, JSON.stringify(nextAccounts));
+      localStorage.removeItem(profileStorageKey(currentUser));
+    } catch (error) {
+      console.error("Could not forget this account in the browser:", error);
+      setProfileError(
+        "This account could not be removed from this browser. You are still signed in."
+      );
+      return;
+    }
+
+    sessionStorage.removeItem(accountStorageKey(email, "access_token"));
+    sessionStorage.removeItem(accountStorageKey(email, "user"));
+    sessionStorage.removeItem("streamhub_access_token");
+    sessionStorage.removeItem("streamhub_user");
+    sessionStorage.removeItem("streamhub_profile_id");
+
+    setAccounts(nextAccounts);
+    setCurrentUser(null);
+    setCurrentProfile(null);
+    setProfiles([]);
+    setMyRatings({});
+    setRatingStatus({});
+    setProfileError("");
+    setScreen("home");
+  }
+
+  function handleRemoveAccount(account) {
+    const email = account.email.trim().toLowerCase();
+    const nextAccounts = accounts.filter(
+      (savedAccount) => savedAccount.email.trim().toLowerCase() !== email
+    );
+
+    try {
+      localStorage.setItem(ACCOUNTS_STORAGE_KEY, JSON.stringify(nextAccounts));
+      localStorage.removeItem(profileStorageKey({ email }));
+    } catch (error) {
+      console.error("Could not remove saved account:", error);
+      setProfileError(
+        "This account could not be removed from this browser. No session was changed."
+      );
+      return;
+    }
+
+    sessionStorage.removeItem(accountStorageKey(email, "access_token"));
+    sessionStorage.removeItem(accountStorageKey(email, "user"));
+    setAccounts(nextAccounts);
+    setProfileError("");
+
+    if (email === currentUser?.email?.trim().toLowerCase()) {
+      sessionStorage.removeItem("streamhub_access_token");
+      sessionStorage.removeItem("streamhub_user");
+      sessionStorage.removeItem("streamhub_profile_id");
+      setCurrentUser(null);
+      setCurrentProfile(null);
+      setProfiles([]);
+      setMyRatings({});
+      setRatingStatus({});
+
+      if (nextAccounts.length > 0) {
+        handleAccountSelect(nextAccounts[0]);
+      } else {
+        setScreen("home");
+      }
+    }
   }
 
   // Submit a rating from 1 to 5 stars.
@@ -308,8 +624,44 @@ async function submitRating(titleId, rating) {
   }
 }
 
-  // Video player screen.
-  if (screen === "watch") {
+if (screen === "profiles") {
+  return (
+    <ProfileChooser
+      profiles={profiles}
+      accounts={accounts}
+      accountName={
+        currentUser?.full_name ||
+        currentUser?.name ||
+        currentUser?.email ||
+        "your account"
+      }
+      accountEmail={currentUser?.email || ""}
+      error={profileError}
+      onProfilesChange={handleProfilesChange}
+      onSelectProfile={handleProfileSelect}
+      onAddAccount={() => {
+        setLoginEmail("");
+        setScreen("addAccount");
+      }}
+      onSelectAccount={handleAccountSelect}
+      onRemoveAccount={handleRemoveAccount}
+    />
+  );
+}
+
+if (currentProfile?.isKid && screen !== "watch") {
+  return (
+    <KidsPage
+      profile={currentProfile}
+      movie={movies.find((movie) => movie.id === 5)}
+      onSwitchProfile={showProfiles}
+      onWatchMovie={(movie) => playMovie(movie.id)}
+    />
+  );
+}
+
+// Video player screen.
+if (screen === "watch") {
     return (
       <WatchPage
         titleId={watchTitleId}
@@ -386,14 +738,18 @@ async function submitRating(titleId, rating) {
       <div className="app">
         <Navbar
           currentUser={currentUser}
+          currentProfile={currentProfile}
           onHome={goHome}
           onScreenChange={setScreen}
+          onSwitchProfile={showProfiles}
           onLogout={handleLogout}
         />
         <ProfilePage
           user={currentUser}
+          error={profileError}
           onNavigate={setScreen}
           onLogout={handleLogout}
+          onSignOut={handleSignOut}
         />
       </div>
     );
@@ -444,13 +800,28 @@ async function submitRating(titleId, rating) {
     );
   }
 
+  if (screen === "addAccount") {
+    return (
+      <Login
+        key={`add-account-${loginEmail}`}
+        initialEmail={loginEmail}
+        addingAccount
+        onBack={currentUser ? showProfiles : goHome}
+        onLoggedIn={handleLogin}
+        onForgotPassword={() => setScreen("forgot")}
+      />
+    );
+  }
+
   if (screen === "movies") {
     return (
       <div className="app">
         <Navbar
           currentUser={currentUser}
+          currentProfile={currentProfile}
           onHome={goHome}
           onScreenChange={setScreen}
+          onSwitchProfile={showProfiles}
           onLogout={handleLogout}
         />
         <main>
@@ -479,8 +850,10 @@ if (screen === "series") {
     <div className="app">
       <Navbar
         currentUser={currentUser}
+        currentProfile={currentProfile}
         onHome={goHome}
         onScreenChange={setScreen}
+        onSwitchProfile={showProfiles}
         onLogout={handleLogout}
       />
       <main>
@@ -523,8 +896,10 @@ if (screen === "series") {
     <div className="app">
       <Navbar
         currentUser={currentUser}
+        currentProfile={currentProfile}
         onHome={goHome}
         onScreenChange={setScreen}
+        onSwitchProfile={showProfiles}
         onLogout={handleLogout}
       />
 
