@@ -1,0 +1,335 @@
+.profile-chooser {
+  position: relative;
+  min-height: 100vh;
+  padding: 38px 28px 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background:
+    radial-gradient(ellipse at 50% 40%, #171a2a 0%, transparent 48%),
+    #0d0e13;
+  color: #f4f4f8;
+}
+
+.profile-chooser-brand {
+  position: absolute;
+  top: 28px;
+  left: max(28px, calc((100vw - 1200px) / 2));
+  color: #c3a2ff;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.profile-chooser-brand span {
+  margin-right: 7px;
+}
+
+.profile-chooser-heading {
+  margin-top: 40px;
+  text-align: center;
+}
+
+.profile-chooser-eyebrow {
+  color: #b89af7;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+}
+
+.profile-chooser-heading h1 {
+  margin: 10px 0;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(29px, 5vw, 42px);
+}
+
+.profile-chooser-heading > p:last-child {
+  color: #a9a8b7;
+  font-size: 14px;
+}
+
+.profile-edit-toggle {
+  position: absolute;
+  top: 45px;
+  right: max(28px, calc((100vw - 1200px) / 2));
+  border: 0;
+  background: transparent;
+  color: #d3d1dc;
+  font-weight: 600;
+}
+
+.profile-chooser-list {
+  width: min(100%, 820px);
+  margin: 88px auto 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 34px;
+}
+
+.profile-chooser-item,
+.profile-add-choice {
+  width: 142px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 13px;
+}
+
+.profile-choice-avatar,
+.profile-add-icon {
+  width: 116px;
+  height: 116px;
+  display: grid;
+  place-items: center;
+  border: 3px solid transparent;
+  border-radius: 50%;
+  color: white;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 48px;
+  font-weight: 700;
+  transition: transform 160ms ease, border-color 160ms ease;
+}
+
+.profile-choice-avatar:not(:disabled) {
+  cursor: pointer;
+}
+
+.profile-choice-avatar:not(:disabled):hover {
+  transform: scale(1.06);
+  border-color: #f7f3ff;
+}
+
+.profile-choice-avatar:disabled {
+  cursor: default;
+}
+
+.profile-avatar-color-0 {
+  background: linear-gradient(140deg, #00a9f5, #7437e8);
+}
+
+.profile-avatar-color-1 {
+  background: linear-gradient(140deg, #4f62f5, #ed0a9c);
+}
+
+.profile-avatar-color-2 {
+  background: linear-gradient(140deg, #00a88f, #1673d1);
+}
+
+.profile-avatar-color-3 {
+  background: linear-gradient(140deg, #e17436, #c82b76);
+}
+
+.profile-avatar-color-4 {
+  background: linear-gradient(140deg, #7d55d9, #d13d92);
+}
+
+.profile-kids-mark {
+  font-size: 26px;
+  letter-spacing: -1px;
+}
+
+.profile-choice-name,
+.profile-add-choice > span:last-child {
+  color: #c5c6d1;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.profile-add-choice {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.profile-add-icon {
+  border: 0;
+  background: #252733;
+  font-family: "DM Sans", sans-serif;
+  font-size: 46px;
+  font-weight: 400;
+}
+
+.profile-add-choice:hover .profile-add-icon {
+  background: #353747;
+}
+
+.profile-current-account {
+  color: #aaa7b7;
+  font-size: 11px;
+}
+
+.profile-choice-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.profile-choice-actions button,
+.profile-editor-actions button {
+  padding: 8px 11px;
+  border: 1px solid #474451;
+  border-radius: 7px;
+  background: #1b1b25;
+  color: #f4f4f8;
+  font-size: 12px;
+}
+
+.profile-choice-actions button:disabled {
+  opacity: 0.45;
+}
+
+.account-removal-overlay {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: #07070bd9;
+}
+
+.account-removal-dialog {
+  width: min(100%, 430px);
+  padding: 26px;
+  border: 1px solid #454151;
+  border-radius: 16px;
+  background: #1b1a24;
+  box-shadow: 0 24px 80px #0009;
+}
+
+.account-removal-dialog h2 {
+  margin: 0 0 10px;
+  font-family: "Space Grotesk", sans-serif;
+}
+
+.account-removal-dialog p {
+  color: #c2bfcc;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.account-removal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.account-removal-actions button {
+  padding: 10px 14px;
+  border: 1px solid #504b5e;
+  border-radius: 8px;
+  background: #25232f;
+  color: #f4f4f8;
+}
+
+.account-removal-actions .account-removal-confirm {
+  border-color: #b94d60;
+  background: #9c3549;
+}
+
+.profile-editor {
+  width: min(100%, 380px);
+  margin-top: 36px;
+  padding: 24px;
+  display: grid;
+  gap: 12px;
+  border: 1px solid #34313f;
+  border-radius: 14px;
+  background: #181821;
+}
+
+.profile-editor h2 {
+  margin: 0 0 4px;
+  font-size: 20px;
+}
+
+.profile-editor > label:not(.profile-kids-option) {
+  color: #c9c7d2;
+  font-size: 13px;
+}
+
+.profile-editor > input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #454351;
+  border-radius: 8px;
+  background: #252634;
+  color: white;
+  font: inherit;
+}
+
+.profile-kids-option {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #dedce7;
+  font-size: 14px;
+}
+
+.profile-kids-option input {
+  accent-color: #a45bff;
+}
+
+.profile-editor-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+.profile-editor-actions button:first-child {
+  border-color: #9862f5;
+  background: #8957e8;
+}
+
+.profile-editor-actions button:disabled {
+  opacity: 0.5;
+}
+
+.profile-limit-message,
+.profile-chooser-error {
+  color: #f5b5b5;
+  font-size: 13px;
+}
+
+@media (max-width: 600px) {
+  .profile-chooser {
+    padding: 80px 18px 48px;
+  }
+
+  .profile-chooser-brand {
+    top: 22px;
+    left: 18px;
+  }
+
+  .profile-edit-toggle {
+    top: 23px;
+    right: 18px;
+  }
+
+  .profile-chooser-heading {
+    margin-top: 18px;
+  }
+
+  .profile-chooser-list {
+    margin-top: 52px;
+    gap: 26px 15px;
+  }
+
+  .profile-chooser-item,
+  .profile-add-choice {
+    width: 112px;
+  }
+
+  .profile-choice-avatar,
+  .profile-add-icon {
+    width: 92px;
+    height: 92px;
+    font-size: 38px;
+  }
+
+  .profile-kids-mark {
+    font-size: 21px;
+  }
+}
