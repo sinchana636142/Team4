@@ -23,6 +23,10 @@
   background: #2b2240 !important;
 }
 
+.switch-profile-button {
+  border-color: #51466a !important;
+}
+
 @media (max-width: 900px) {
   .navbar {
     flex-wrap: wrap;
