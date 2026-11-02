@@ -74,15 +74,18 @@
   background: #08070c;
 }
 
-.movie-player-video-panel video,
 .movie-player-video-panel iframe {
   display: block;
   width: 100%;
-  max-height: 70vh;
   aspect-ratio: 16 / 9;
   border: 0;
   border-radius: 0;
   background: #000;
+}
+
+.movie-player-video-panel .stream-player {
+  width: 100%;
+  max-height: 70vh;
 }
 
 .movie-player-message {

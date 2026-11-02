@@ -5,6 +5,7 @@ import { getPlayback } from "./playbackApi";
 import useResume from "./useResume";
 import { recordView } from "./historyApi";
 import VideoPlayer from "./VideoPlayer";
+import { resolveMediaUrl } from "../api";
 import "./WatchPage.css";
 
 export default function WatchPage({ titleId, movie, onBack }) {
@@ -62,9 +63,11 @@ export default function WatchPage({ titleId, movie, onBack }) {
     playerContent = (
       <>
         <VideoPlayer
-          src={info.video_url}
+          src={resolveMediaUrl(movie?.videoUrl || info.video_url)}
           videoRef={videoRef}
           onStartupMeasured={handleStartupMeasured}
+          title={info.title || movie?.title || "StreamHub video"}
+          poster={movie?.poster}
         />
       </>
     );

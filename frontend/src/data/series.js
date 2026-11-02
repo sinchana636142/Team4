@@ -17,7 +17,7 @@ export const series = [
         id: 1,
         title: "Chapter One: The Vanishing of Will Byers",
         duration: "48 min",
-        videoUrl: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+        videoUrl: "/static/uploads/videos/vid.mkv",
       },
       {
         id: 2,

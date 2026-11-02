@@ -1,4 +1,6 @@
 import "./EpisodesPage.css";
+import VideoPlayer from "../playback/VideoPlayer";
+import { resolveMediaUrl } from "../api";
 
 export default function EpisodesPage({ seriesPlayer, onClose, onSelectEpisode }) {
   if (!seriesPlayer) return null;
@@ -32,7 +34,11 @@ export default function EpisodesPage({ seriesPlayer, onClose, onSelectEpisode })
                 allowFullScreen
               />
             ) : selectedEpisode?.videoUrl ? (
-              <video className="episodes-video" controls autoPlay src={selectedEpisode.videoUrl} />
+              <VideoPlayer
+                src={resolveMediaUrl(selectedEpisode.videoUrl)}
+                title={`${series.title} — ${selectedEpisode.title}`}
+                poster={series.poster}
+              />
             ) : (
               <div className="episodes-empty-state">
                 <h3>No video available</h3>

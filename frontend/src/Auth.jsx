@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./Auth.css";
 
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "http://127.0.0.1:8001";
 
 export default function Auth({ onVerified, onBack }) {
     const [step, setStep] = useState("register");
@@ -59,7 +59,7 @@ export default function Auth({ onVerified, onBack }) {
 
             setMessage(
                 error.message === "Failed to fetch"
-                    ? "Cannot reach the backend on port 8000. Check that the server is running and CORS is configured."
+                    ? "Cannot reach the backend on port 8001. Check that the server is running and CORS is configured."
                     : error.message || "Registration failed."
             );
         } finally {
@@ -110,7 +110,7 @@ export default function Auth({ onVerified, onBack }) {
 
             setMessage(
                 error.message === "Failed to fetch"
-                    ? "Cannot reach the backend on port 8000. Check the server and CORS settings."
+                    ? "Cannot reach the backend on port 8001. Check the server and CORS settings."
                     : error.message || "OTP verification failed."
             );
         } finally {
@@ -152,7 +152,7 @@ export default function Auth({ onVerified, onBack }) {
 
             setMessage(
                 error.message === "Failed to fetch"
-                    ? "Cannot reach the backend on port 8000. Check the server and CORS settings."
+                    ? "Cannot reach the backend on port 8001. Check the server and CORS settings."
                     : error.message
             );
         } finally {

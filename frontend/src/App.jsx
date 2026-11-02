@@ -51,6 +51,22 @@ const finishIntro = () => {
     }
   });
 
+  useEffect(() => {
+    function handleSessionExpired() {
+      setCurrentUser(null);
+      setMyRatings({});
+      setRatingStatus({});
+      setScreen("login");
+    }
+
+    window.addEventListener("streamhub:session-expired", handleSessionExpired);
+    return () =>
+      window.removeEventListener(
+        "streamhub:session-expired",
+        handleSessionExpired
+      );
+  }, []);
+
   const [catalogMovies, setCatalogMovies] = useState(movies);
   const featuredTitles = useMemo(() => {
     const titles = [...catalogMovies, ...series];
@@ -74,6 +90,9 @@ const finishIntro = () => {
             title: t.title,
             genre: t.genre || "Action",
             year: t.year || 2024,
+            videoUrl:
+              movies.find((movie) => movie.id === t.id)?.videoUrl ||
+              t.video_url,
             poster:
               t.poster_url ||
               "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",

@@ -721,9 +721,18 @@ The backend currently has **no `/api` prefix**. Routes that need login expect th
 | `POST` | `/watchlist/{title_id}` | Add a title (adding twice is harmless) | #10 |
 | `DELETE` | `/watchlist/{title_id}` | Remove a title | #10 |
 
+### Adding videos for playback
+
+- Put local video files in `backend/app/static/uploads/videos/`. The backend serves them under `/static/uploads/videos/`.
+- For a movie, enter `/static/uploads/videos/<filename>.mp4` in the Admin Dashboard's **Video Stream URL / File** field and save the title. Or use that field's file picker to upload the file.
+- Alternatively, add `videoUrl: "/static/uploads/videos/<filename>.mp4"` to that movie's entry in `frontend/src/data/movies.js`. This frontend URL takes precedence over the catalog URL for playback.
+- For a series episode, set that episode's `videoUrl` in `frontend/src/data/series.js`, for example `"/static/uploads/videos/show-s01e01.mp4"`.
+- Each movie title and episode needs its own URL. Select a movie or episode in the UI to play its linked video.
+- For this local setup, media URLs are resolved against the backend at `http://127.0.0.1:8001`.
+
 ### Not implemented yet
 
-`/catalog` and `/admin` are placeholders that only return a status message. Ratings, plans, payment checkout and admin upload are still to be built.
+Series episode metadata and episode video URLs are currently configured in `frontend/src/data/series.js`; the Admin Dashboard manages movie/title records, not episodes.
 
 ### Error format
 

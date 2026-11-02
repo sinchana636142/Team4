@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./ForgotPassword.css";
 
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "http://127.0.0.1:8001";
 
 function ForgotPassword({ onBack }) {
   const [step, setStep] = useState(1);
@@ -49,7 +49,7 @@ function ForgotPassword({ onBack }) {
     } catch (err) {
       setError(
         err.message === "Failed to fetch"
-          ? "Cannot connect to the backend. Check that it is running on port 8000."
+          ? "Cannot connect to the backend. Check that it is running on port 8001."
           : err.message
       );
     } finally {
@@ -91,7 +91,7 @@ function ForgotPassword({ onBack }) {
     } catch (err) {
       setError(
         err.message === "Failed to fetch"
-          ? "Cannot connect to the backend. Check that it is running on port 8000."
+          ? "Cannot connect to the backend. Check that it is running on port 8001."
           : err.message
       );
     } finally {
@@ -153,7 +153,7 @@ function ForgotPassword({ onBack }) {
     } catch (err) {
       setError(
         err.message === "Failed to fetch"
-          ? "Cannot connect to the backend. Check that it is running on port 8000."
+          ? "Cannot connect to the backend. Check that it is running on port 8001."
           : err.message
       );
     } finally {
