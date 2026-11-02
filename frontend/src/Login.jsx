@@ -3,8 +3,14 @@ import "./Auth.css";
 
 const API_URL = "http://127.0.0.1:8001";
 
-export default function Login({ onBack, onLoggedIn, onForgotPassword }) {
-    const [email, setEmail] = useState("");
+export default function Login({
+    onBack,
+    onLoggedIn,
+    onForgotPassword,
+    initialEmail = "",
+    addingAccount = false,
+}) {
+    const [email, setEmail] = useState(initialEmail);
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [message, setMessage] = useState("");
@@ -73,7 +79,7 @@ export default function Login({ onBack, onLoggedIn, onForgotPassword }) {
             setMessage("Login successful!");
 
             if (typeof onLoggedIn === "function") {
-                onLoggedIn(data.user);
+                onLoggedIn(data.user, data.access_token);
             }
         } catch (error) {
             const msg =
@@ -145,10 +151,12 @@ export default function Login({ onBack, onLoggedIn, onForgotPassword }) {
             <section className="auth-card">
                 <h1>StreamHub</h1>
 
-                <h2>Welcome back</h2>
+                <h2>{addingAccount ? "Add another account" : "Welcome back"}</h2>
 
                 <p>
-                    Sign in to continue exploring your favorite movies.
+                    {addingAccount
+                        ? "Log in with the account you want to add."
+                        : "Sign in to continue exploring your favorite movies."}
                 </p>
 
                 <form onSubmit={handleLogin}>
@@ -241,7 +249,7 @@ export default function Login({ onBack, onLoggedIn, onForgotPassword }) {
                     onClick={onBack}
                     disabled={loading}
                 >
-                    Back to homepage
+                    {addingAccount ? "Back to profiles" : "Back to homepage"}
                 </button>
             </section>
         </main>
