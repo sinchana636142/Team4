@@ -4,23 +4,28 @@ import "./Auth.css";
 const API_URL = "http://127.0.0.1:8000";
 
 export default function Login({ onBack, onLoggedIn, onForgotPassword }) {
-    const [emailUsername, setEmailUsername] = useState("");
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
     const [needsVerification, setNeedsVerification] = useState(false);
 
-    // Automatically append Gmail domain.
-    const email = `${emailUsername.trim()}@gmail.com`;
-
     async function handleLogin(event) {
         event.preventDefault();
         setMessage("");
         setNeedsVerification(false);
 
-        if (!emailUsername.trim()) {
-            setMessage("Please enter your Gmail username.");
+        const normalizedEmail = email.trim().toLowerCase();
+
+        if (!normalizedEmail) {
+            setMessage("Please enter your email address.");
+            return;
+        }
+
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(normalizedEmail)) {
+            setMessage("Please enter a valid email address.");
             return;
         }
 
@@ -33,7 +38,7 @@ export default function Login({ onBack, onLoggedIn, onForgotPassword }) {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    email,
+                    email: normalizedEmail,
                     password,
                 }),
             });
@@ -87,8 +92,16 @@ export default function Login({ onBack, onLoggedIn, onForgotPassword }) {
     }
 
     async function handleResendVerification() {
-        if (!emailUsername.trim()) {
-            setMessage("Please enter your Gmail username.");
+        const normalizedEmail = email.trim().toLowerCase();
+
+        if (!normalizedEmail) {
+            setMessage("Please enter your email address.");
+            return;
+        }
+
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(normalizedEmail)) {
+            setMessage("Please enter a valid email address.");
             return;
         }
 
@@ -101,7 +114,7 @@ export default function Login({ onBack, onLoggedIn, onForgotPassword }) {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ email }),
+                body: JSON.stringify({ email: normalizedEmail }),
             });
 
             const data = await response.json();
@@ -140,30 +153,18 @@ export default function Login({ onBack, onLoggedIn, onForgotPassword }) {
 
                 <form onSubmit={handleLogin}>
                     <label htmlFor="login-email">
-                        Gmail address
+                        Email address
                     </label>
 
-                    <div className="gmail-input-group">
-                        <input
-                            id="login-email"
-                            type="text"
-                            placeholder="Enter Gmail username"
-                            value={emailUsername}
-                            onChange={(event) =>
-                                setEmailUsername(
-                                    event.target.value
-                                        .replace(/\s/g, "")
-                                        .replace(/@.*$/, "")
-                                )
-                            }
-                            autoComplete="username"
-                            required
-                        />
-
-                        <span className="gmail-suffix">
-                            @gmail.com
-                        </span>
-                    </div>
+                    <input
+                        id="login-email"
+                        type="email"
+                        placeholder="Enter your email address"
+                        value={email}
+                        onChange={(event) => setEmail(event.target.value)}
+                        autoComplete="email"
+                        required
+                    />
 
                     <label htmlFor="login-password">
                         Password
