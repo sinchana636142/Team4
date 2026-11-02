@@ -1,6 +1,12 @@
 import "./ProfilePage.css";
 
-export default function ProfilePage({ user, onNavigate, onLogout }) {
+export default function ProfilePage({
+  user,
+  error,
+  onNavigate,
+  onLogout,
+  onSignOut,
+}) {
   const displayName =
     user?.full_name || user?.name || user?.username || "StreamHub Viewer";
   const email = user?.email || "";
@@ -89,9 +95,25 @@ export default function ProfilePage({ user, onNavigate, onLogout }) {
         </div>
       </section>
 
-      <button className="profile-logout" type="button" onClick={onLogout}>
-        Log out
-      </button>
+      {error && <p className="profile-account-error" role="alert">{error}</p>}
+
+      <div className="profile-session-actions">
+        <button className="profile-logout" type="button" onClick={onLogout}>
+          Log out
+        </button>
+        <button
+          className="profile-sign-out"
+          type="button"
+          onClick={() => {
+            const confirmed = window.confirm(
+              "Are you sure you want to sign out and forget this account from this browser? This does not delete your StreamHub account."
+            );
+            if (confirmed) onSignOut();
+          }}
+        >
+          Sign out
+        </button>
+      </div>
     </main>
   );
 }
