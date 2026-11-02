@@ -57,6 +57,7 @@ export default function MovieDetailsPage({
   movie,
   onClose,
   onWatchMovie,
+  isKidsPreview = false,
 }) {
   const [showTrailer, setShowTrailer] = useState(false);
 
@@ -70,8 +71,7 @@ export default function MovieDetailsPage({
     movie.description ||
     movie.overview ||
     movieDescriptions[title] ||
-    `${title} is a ${movie.genre || "popular"} movie released in ${
-      movie.year || "an earlier year"
+    `${title} is a ${movie.genre || "popular"} movie released in ${movie.year || "an earlier year"
     }. Discover its story, characters, and memorable moments.`;
 
   const trailerId = trailerLinks[title];
@@ -112,6 +112,7 @@ export default function MovieDetailsPage({
         aria-label={`${title} details`}
         onClick={(event) => event.stopPropagation()}
       >
+
         <button
           type="button"
           className="movie-details-close"
@@ -122,10 +123,13 @@ export default function MovieDetailsPage({
         </button>
 
         {showTrailer ? (
+
           <div className="movie-trailer-view">
+
             <div className="trailer-header">
               <div>
                 <h2>{title} — Official Trailer</h2>
+
                 <p>
                   Watch the trailer without leaving StreamHub.
                 </p>
@@ -149,9 +153,13 @@ export default function MovieDetailsPage({
                 allowFullScreen
               />
             </div>
+
           </div>
+
         ) : (
+
           <>
+
             <div className="movie-details-poster">
               <img
                 src={movie.poster || movie.image || ""}
@@ -160,6 +168,7 @@ export default function MovieDetailsPage({
             </div>
 
             <div className="movie-details-content">
+
               <span className="movie-details-badge">
                 STREAMHUB ORIGINALS
               </span>
@@ -193,6 +202,7 @@ export default function MovieDetailsPage({
               </div>
 
               <div className="movie-details-actions">
+
                 <button
                   type="button"
                   className="movie-watch-button"
@@ -208,19 +218,26 @@ export default function MovieDetailsPage({
                 >
                   ▷ Watch Trailer
                 </button>
-                <WatchlistButton
-                  titleId={movie.id}
-                  className="movie-trailer-button"
-                />
+
+                {!isKidsPreview && (
+                  <WatchlistButton
+                    titleId={movie.id}
+                    className="movie-trailer-button"
+                  />
+                )}
+
               </div>
 
               <p className="movie-details-note">
                 Discover more movies and enjoy your StreamHub
                 experience.
               </p>
+
             </div>
+
           </>
         )}
+
       </section>
     </div>
   );
