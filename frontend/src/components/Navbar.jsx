@@ -2,8 +2,10 @@ import "./Navbar.css";
 
 export default function Navbar({
   currentUser,
+  currentProfile,
   onHome,
   onScreenChange,
+  onSwitchProfile,
 }) {
   return (
     <header className="navbar">
@@ -49,12 +51,21 @@ export default function Navbar({
 
       {currentUser ? (
         <div className="profile-actions">
+          {currentProfile && (
+            <button
+              type="button"
+              className="switch-profile-button"
+              onClick={onSwitchProfile}
+            >
+              Switch profile
+            </button>
+          )}
           <button
             type="button"
             className="profile-icon-button"
             onClick={() => onScreenChange("profile")}
             aria-label="Open profile"
-            title={currentUser.full_name || currentUser.name || currentUser.email || "Profile"}
+            title={currentProfile?.name || currentUser.full_name || currentUser.name || currentUser.email || "Profile"}
           >
             <span aria-hidden="true">♙</span>
           </button>
