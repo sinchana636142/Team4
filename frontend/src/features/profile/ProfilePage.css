@@ -141,17 +141,42 @@
   font-size: 26px;
 }
 
-.profile-logout {
+.profile-session-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
   margin-top: 26px;
+}
+
+.profile-logout,
+.profile-sign-out {
   padding: 11px 20px;
-  border: 1px solid #e35d68;
   border-radius: 9px;
   background: transparent;
-  color: #ff8c95;
+}
+
+.profile-logout {
+  border: 1px solid #81778f;
+  color: #ddd4eb;
 }
 
 .profile-logout:hover {
+  background: #ffffff10;
+}
+
+.profile-sign-out {
+  border: 1px solid #e35d68;
+  color: #ff8c95;
+}
+
+.profile-sign-out:hover {
   background: #e35d6818;
+}
+
+.profile-account-error {
+  margin: 20px 0 0;
+  color: #ff9da5;
+  font-size: 14px;
 }
 
 @media (max-width: 650px) {
