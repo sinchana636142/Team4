@@ -100,5 +100,7 @@ async def razorpay_webhook(
             detail="Invalid JSON payload.",
         ) from exc
 
-    processed = process_webhook_payload(db, payload)
-    return {"status": "success", "processed": processed}
+    result = process_webhook_payload(db, payload)
+    if isinstance(result, dict):
+        return result
+    return {"status": "processed", "processed": bool(result)}
