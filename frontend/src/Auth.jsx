@@ -6,22 +6,26 @@ const API_URL = "http://127.0.0.1:8001";
 export default function Auth({ onVerified, onBack }) {
     const [step, setStep] = useState("register");
     const [fullName, setFullName] = useState("");
-    const [emailUsername, setEmailUsername] = useState("");
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [otp, setOtp] = useState("");
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
 
-    // The backend continues to receive a complete email address.
-    const email = `${emailUsername.trim()}@gmail.com`;
+    const normalizedEmail = email.trim().toLowerCase();
 
     async function handleRegister(event) {
         event.preventDefault();
         setMessage("");
 
-        if (!emailUsername.trim()) {
-            setMessage("Please enter your Gmail username.");
+        if (!normalizedEmail) {
+            setMessage("Please enter your email address.");
+            return;
+        }
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(normalizedEmail)) {
+            setMessage("Please enter a valid email address.");
             return;
         }
 
@@ -35,7 +39,7 @@ export default function Auth({ onVerified, onBack }) {
                 },
                 body: JSON.stringify({
                     full_name: fullName.trim(),
-                    email,
+                    email: normalizedEmail,
                     password,
                 }),
             });
@@ -79,7 +83,7 @@ export default function Auth({ onVerified, onBack }) {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    email,
+                    email: normalizedEmail,
                     otp,
                 }),
             });
@@ -119,8 +123,13 @@ export default function Auth({ onVerified, onBack }) {
     }
 
     async function handleResendOtp() {
-        if (!emailUsername.trim()) {
-            setMessage("Please enter your Gmail username.");
+        if (!normalizedEmail) {
+            setMessage("Please enter your email address.");
+            return;
+        }
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(normalizedEmail)) {
+            setMessage("Please enter a valid email address.");
             return;
         }
 
@@ -195,26 +204,17 @@ export default function Auth({ onVerified, onBack }) {
                                 required
                             />
 
-                            <label htmlFor="emailUsername">Gmail address</label>
+                            <label htmlFor="auth-email">Email address</label>
 
-                            <div className="gmail-input-group">
-                                <input
-                                    id="emailUsername"
-                                    type="text"
-                                    value={emailUsername}
-                                    onChange={(event) =>
-                                        setEmailUsername(
-                                            event.target.value
-                                                .replace(/\s/g, "")
-                                                .replace(/@.*$/, "")
-                                        )
-                                    }
-                                    placeholder="Enter Gmail username"
-                                    autoComplete="username"
-                                    required
-                                />
-                                <span className="gmail-suffix">@gmail.com</span>
-                            </div>
+                            <input
+                                id="auth-email"
+                                type="email"
+                                value={email}
+                                onChange={(event) => setEmail(event.target.value)}
+                                placeholder="Enter your email address"
+                                autoComplete="email"
+                                required
+                            />
 
                             <label htmlFor="password">Password</label>
 

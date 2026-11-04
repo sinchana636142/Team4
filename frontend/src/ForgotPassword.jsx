@@ -5,7 +5,7 @@ const API_URL = "http://127.0.0.1:8001";
 
 function ForgotPassword({ onBack }) {
   const [step, setStep] = useState(1);
-  const [emailUsername, setEmailUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -16,19 +16,31 @@ function ForgotPassword({ onBack }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const email = `${emailUsername.trim()}@gmail.com`;
+  const normalizedEmail = email.trim().toLowerCase();
 
   async function requestReset(event) {
     event.preventDefault();
     setError("");
     setMessage("");
+
+    if (!normalizedEmail) {
+      setError("Please enter your email address.");
+      return;
+    }
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(normalizedEmail)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const response = await fetch(`${API_URL}/auth/forgot-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: normalizedEmail }),
       });
 
       const data = await response.json();
@@ -69,7 +81,7 @@ function ForgotPassword({ onBack }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email,
+          email: normalizedEmail,
           otp: verificationCode,
         }),
       });
@@ -126,7 +138,7 @@ function ForgotPassword({ onBack }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email,
+          email: normalizedEmail,
           otp: verificationCode,
           new_password: newPassword,
         }),
@@ -184,9 +196,9 @@ function ForgotPassword({ onBack }) {
 
         <p className="reset-description">
           {step === 1
-            ? "Enter your Gmail username to begin the password-reset process."
+            ? "Enter your email address to begin the password-reset process."
             : step === 2
-              ? `Enter the verification code sent to ${email}.`
+              ? `Enter the verification code sent to ${normalizedEmail}.`
               : "Your password has been changed successfully. You can now return to StreamHub and sign in with your new password."}
         </p>
 
@@ -204,31 +216,22 @@ function ForgotPassword({ onBack }) {
 
         {step === 1 && (
           <form onSubmit={requestReset}>
-            <label htmlFor="reset-email">Gmail address</label>
+            <label htmlFor="reset-email">Email address</label>
 
-            <div className="gmail-input-group">
-              <input
-                id="reset-email"
-                type="text"
-                placeholder="yourusername"
-                value={emailUsername}
-                onChange={(event) =>
-                  setEmailUsername(
-                    event.target.value
-                      .replace(/@gmail\.com$/i, "")
-                      .replace(/\s/g, "")
-                  )
-                }
-                autoComplete="username"
-                required
-              />
-              <span className="gmail-suffix">@gmail.com</span>
-            </div>
+            <input
+              id="reset-email"
+              type="email"
+              placeholder="Enter your email address"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              autoComplete="email"
+              required
+            />
 
             <button
               type="submit"
               className="reset-button"
-              disabled={loading || !emailUsername.trim()}
+              disabled={loading || !email.trim()}
             >
               {loading ? "Requesting..." : "Request password reset"}
             </button>

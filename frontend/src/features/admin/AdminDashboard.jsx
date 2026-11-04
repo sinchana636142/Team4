@@ -448,9 +448,10 @@ export default function AdminDashboard({ onBack }) {
                     <th style={{ padding: "0.75rem", borderBottom: "1px solid #444" }}>Full Name</th>
                     <th style={{ padding: "0.75rem", borderBottom: "1px solid #444" }}>Email</th>
                     <th style={{ padding: "0.75rem", borderBottom: "1px solid #444" }}>Role</th>
-                    <th style={{ padding: "0.75rem", borderBottom: "1px solid #444" }}>Verified</th>
-                    <th style={{ padding: "0.75rem", borderBottom: "1px solid #444" }}>Subscription</th>
+                    <th style={{ padding: "0.75rem", borderBottom: "1px solid #444" }}>Membership</th>
                     <th style={{ padding: "0.75rem", borderBottom: "1px solid #444" }}>Plan</th>
+                    <th style={{ padding: "0.75rem", borderBottom: "1px solid #444" }}>Status</th>
+                    <th style={{ padding: "0.75rem", borderBottom: "1px solid #444" }}>Last Payment</th>
                     <th style={{ padding: "0.75rem", borderBottom: "1px solid #444" }}>Expiry Date</th>
                   </tr>
                 </thead>
@@ -480,8 +481,18 @@ export default function AdminDashboard({ onBack }) {
                           </span>
                         </td>
                         <td style={{ padding: "0.75rem" }}>
-                          {u.is_verified ? "✅ Yes" : "⏳ Pending"}
+                          <span style={{
+                            padding: "0.2rem 0.5rem",
+                            borderRadius: "4px",
+                            fontSize: "0.75rem",
+                            fontWeight: "bold",
+                            background: u.membership === "premium" ? "#103d15" : u.membership === "basic" ? "#0e2a47" : "#222",
+                            color: u.membership === "premium" ? "#2ecc71" : u.membership === "basic" ? "#3498db" : "#aaa",
+                          }}>
+                            {(u.membership || "free").toUpperCase()}
+                          </span>
                         </td>
+                        <td style={{ padding: "0.75rem" }}>{u.plan_name || "—"}</td>
                         <td style={{ padding: "0.75rem" }}>
                           <span style={{
                             padding: "0.25rem 0.6rem",
@@ -494,7 +505,15 @@ export default function AdminDashboard({ onBack }) {
                             {u.subscription_status.toUpperCase()}
                           </span>
                         </td>
-                        <td style={{ padding: "0.75rem" }}>{u.plan_name || "—"}</td>
+                        <td style={{ padding: "0.75rem", fontSize: "0.85rem" }}>
+                          {u.payment_amount ? (
+                            <span>
+                              ₹{Math.round(u.payment_amount / 100)} <span style={{ color: "#aaa" }}>({u.payment_status || "captured"})</span>
+                            </span>
+                          ) : (
+                            <span style={{ color: "#777" }}>—</span>
+                          )}
+                        </td>
                         <td style={{ padding: "0.75rem" }}>{u.expiry_date || "—"}</td>
                       </tr>
                     );

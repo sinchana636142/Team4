@@ -1,11 +1,43 @@
+import { useEffect, useState } from "react";
 import "./ProfilePage.css";
+import { getSubscriptionStatus } from "../subscription/subscriptionApi";
 
 export default function ProfilePage({ user, onNavigate, onLogout }) {
+  const [subStatus, setSubStatus] = useState(null);
+
+  useEffect(() => {
+    getSubscriptionStatus()
+      .then(setSubStatus)
+      .catch(() => {});
+  }, []);
+
   const displayName =
     user?.full_name || user?.name || user?.username || "StreamHub Viewer";
   const email = user?.email || "";
   const initial = displayName.trim().charAt(0).toUpperCase() || "V";
-  const isAdmin = Boolean(user?.is_admin || user?.role === "admin");
+  const isAdmin = Boolean(user?.is_admin || user?.role === "admin" || subStatus?.is_admin);
+
+  let membershipBadge = "FREE VIEWER";
+  let badgeColor = "#aaa";
+  let badgeBg = "#222";
+
+  if (isAdmin) {
+    membershipBadge = "ADMINISTRATOR";
+    badgeColor = "#f39c12";
+    badgeBg = "#3d2d10";
+  } else if (subStatus?.active && subStatus?.membership === "premium") {
+    membershipBadge = "PREMIUM MEMBER";
+    badgeColor = "#2ecc71";
+    badgeBg = "#103d15";
+  } else if (subStatus?.active && subStatus?.membership === "basic") {
+    membershipBadge = "BASIC MEMBER";
+    badgeColor = "#3498db";
+    badgeBg = "#0e2a47";
+  } else if (subStatus?.status === "expired") {
+    membershipBadge = "EXPIRED";
+    badgeColor = "#e74c3c";
+    badgeBg = "#3d1010";
+  }
 
   const actions = [
     {
@@ -22,7 +54,7 @@ export default function ProfilePage({ user, onNavigate, onLogout }) {
     },
     {
       title: "My Subscription",
-      description: "View your current subscription status.",
+      description: "View your current subscription and access tier.",
       icon: "✦",
       screen: "account",
     },
@@ -54,7 +86,7 @@ export default function ProfilePage({ user, onNavigate, onLogout }) {
       <header className="profile-page-heading">
         <p className="profile-page-eyebrow">YOUR ACCOUNT</p>
         <h1>Profile</h1>
-        <p>Manage your StreamHub account and viewing activity.</p>
+        <p>Manage your StreamHub account, membership and viewing activity.</p>
       </header>
 
       <section className="profile-summary" aria-label="Account details">
@@ -62,7 +94,22 @@ export default function ProfilePage({ user, onNavigate, onLogout }) {
         <div className="profile-identity">
           <h2>{displayName}</h2>
           {email && <p>{email}</p>}
-          {isAdmin && <span className="profile-role">Administrator</span>}
+          <div style={{ marginTop: "0.5rem" }}>
+            <span
+              style={{
+                display: "inline-block",
+                padding: "0.25rem 0.75rem",
+                borderRadius: "12px",
+                fontSize: "0.8rem",
+                fontWeight: "bold",
+                background: badgeBg,
+                color: badgeColor,
+                border: `1px solid ${badgeColor}33`,
+              }}
+            >
+              {membershipBadge}
+            </span>
+          </div>
         </div>
       </section>
 
