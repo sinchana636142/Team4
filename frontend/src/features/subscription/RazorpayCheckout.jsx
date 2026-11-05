@@ -28,7 +28,6 @@ export default function RazorpayCheckout({ onSubscriptionUpdated }) {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [infoMessage, setInfoMessage] = useState("");
-  const [pendingOrder, setPendingOrder] = useState(null);
 
   const currentUser = (() => {
     try {
@@ -51,8 +50,8 @@ export default function RazorpayCheckout({ onSubscriptionUpdated }) {
               const parsed = JSON.parse(savedPlan);
               const matched = data.find(
                 (p) =>
-                  p.name.toLowerCase() === (parsed.name || "").toLowerCase() ||
-                  p.id === parsed.id
+                  p.id === parsed.id ||
+                  p.name.toLowerCase() === (parsed.name || "").toLowerCase()
               );
               if (matched) {
                 initialPlanId = matched.id;
@@ -73,46 +72,50 @@ export default function RazorpayCheckout({ onSubscriptionUpdated }) {
     if (!selectedPlanId) return;
 
     setLoading(true);
-    setLoadingText("Initiating hosted checkout order...");
+    setLoadingText("Initiating Razorpay checkout order...");
     setErrorMessage("");
     setSuccessMessage("");
     setInfoMessage("");
-    setPendingOrder(null);
 
     try {
       const order = await createCheckoutOrder(selectedPlanId);
-      setPendingOrder(order);
 
       const scriptLoaded = await loadRazorpayScript();
       if (!scriptLoaded || !window.Razorpay) {
-        setInfoMessage(
-          "Razorpay checkout script could not be loaded directly from CDN. You can complete verification in test mode below."
+        setErrorMessage(
+          "Razorpay checkout script could not be loaded. Please check your internet connection and reload."
         );
         setLoading(false);
         return;
       }
 
-      setLoadingText("Opening Razorpay Hosted Checkout...");
+      setLoadingText("Opening Razorpay Secure Checkout...");
 
       const options = {
         key: order.key_id,
         amount: order.amount,
-        currency: order.currency,
-        name: "StreamHub",
-        description: `${order.plan_name} Subscription Plan`,
+        currency: order.currency || "INR",
+        name: "StreamHub OTT",
+        description: `${order.plan_name} Membership (${order.amount / 100} INR)`,
         order_id: order.order_id,
         handler: async function (response) {
+          if (!response.razorpay_payment_id || !response.razorpay_signature) {
+            setErrorMessage("Checkout completed without payment credentials. Verification cannot proceed.");
+            setLoading(false);
+            return;
+          }
+
           setLoading(true);
           setLoadingText("Verifying payment signature with StreamHub server...");
+
           try {
             const result = await verifyPayment({
               orderId: response.razorpay_order_id || order.order_id,
-              paymentId: response.razorpay_payment_id || "pay_rzp_mock",
-              signature: response.razorpay_signature || "sig_valid_mock",
+              paymentId: response.razorpay_payment_id,
+              signature: response.razorpay_signature,
             });
             setSuccessMessage("Payment verified successfully! Your subscription is now active.");
-            setPendingOrder(null);
-            if (onSubscriptionUpdated) {
+                    if (onSubscriptionUpdated) {
               onSubscriptionUpdated(result.subscription);
             }
           } catch (err) {
@@ -124,7 +127,7 @@ export default function RazorpayCheckout({ onSubscriptionUpdated }) {
         modal: {
           ondismiss: function () {
             setLoading(false);
-            setInfoMessage("Checkout was cancelled. No charge was processed.");
+            setInfoMessage("Checkout was closed. You can retry payment whenever you are ready.");
           },
         },
         prefill: {
@@ -139,49 +142,25 @@ export default function RazorpayCheckout({ onSubscriptionUpdated }) {
       try {
         const rzp = new window.Razorpay(options);
         rzp.on("payment.failed", function (resp) {
-          setErrorMessage("Payment failed: " + (resp.error?.description || "Transaction rejected."));
+          const reason = resp.error?.description || resp.error?.reason || "Transaction was declined by provider.";
+          setErrorMessage(`Payment failed: ${reason}`);
           setLoading(false);
         });
         rzp.open();
         setLoading(false);
       } catch (err) {
-        setInfoMessage(
-          "Test/Sandbox notice: Checkout modal not rendered (" + err.message + "). You can verify using test checkout below."
-        );
+        setErrorMessage("Could not launch Razorpay modal: " + err.message);
         setLoading(false);
       }
     } catch (err) {
-      setErrorMessage("Checkout failed: " + err.message);
-      setLoading(false);
-    }
-  }
-
-  async function handleSimulatedVerification() {
-    if (!pendingOrder) return;
-    setLoading(true);
-    setLoadingText("Verifying test payment signature with StreamHub server...");
-    setErrorMessage("");
-    try {
-      const result = await verifyPayment({
-        orderId: pendingOrder.order_id,
-        paymentId: `pay_test_${Date.now().toString(36)}`,
-        signature: "sig_valid_mock",
-      });
-      setSuccessMessage("Test payment verified successfully! Your subscription is now active.");
-      setPendingOrder(null);
-      if (onSubscriptionUpdated) {
-        onSubscriptionUpdated(result.subscription);
-      }
-    } catch (err) {
-      setErrorMessage("Payment verification failed: " + err.message);
-    } finally {
+      setErrorMessage("Checkout order creation failed: " + err.message);
       setLoading(false);
     }
   }
 
   return (
     <div className="checkout-container" style={{ marginTop: "1.5rem" }}>
-      <h3 style={{ marginBottom: "1rem" }}>Choose a Subscription Plan</h3>
+      <h3 style={{ marginBottom: "1rem" }}>Select Membership Plan</h3>
 
       {errorMessage && (
         <div role="alert" className="feature-error" style={{ marginBottom: "1rem", padding: "0.75rem", background: "#3d1010", border: "1px solid #e50914", borderRadius: "4px" }}>
@@ -204,12 +183,13 @@ export default function RazorpayCheckout({ onSubscriptionUpdated }) {
       <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginBottom: "1.5rem" }}>
         {plans.map((p) => {
           const isSelected = selectedPlanId === p.id;
+          const isPremium = (p.name || "").toLowerCase().includes("premium");
           return (
             <div
               key={p.id}
               onClick={() => setSelectedPlanId(p.id)}
               style={{
-                flex: "1 1 200px",
+                flex: "1 1 220px",
                 padding: "1.25rem",
                 borderRadius: "8px",
                 border: isSelected ? "2px solid #e50914" : "1px solid #444",
@@ -218,18 +198,38 @@ export default function RazorpayCheckout({ onSubscriptionUpdated }) {
                 transition: "all 0.2s ease",
               }}
             >
-              <h4 style={{ margin: "0 0 0.5rem 0", color: isSelected ? "#e50914" : "#fff" }}>
-                {p.name}
-              </h4>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+                <h4 style={{ margin: 0, color: isSelected ? "#e50914" : "#fff", fontSize: "1.2rem" }}>
+                  {p.name}
+                </h4>
+                {isPremium && (
+                  <span style={{ fontSize: "0.7rem", background: "#e50914", color: "#fff", padding: "2px 6px", borderRadius: "4px", fontWeight: "bold" }}>
+                    POPULAR
+                  </span>
+                )}
+              </div>
               <div style={{ fontSize: "1.5rem", fontWeight: "bold", marginBottom: "0.5rem" }}>
                 ₹{p.price}
                 <span style={{ fontSize: "0.85rem", color: "#aaa" }}> / 30 days</span>
               </div>
-              <ul style={{ paddingLeft: "1.2rem", margin: "0.5rem 0", fontSize: "0.9rem", color: "#ccc" }}>
-                <li>Stream in Full HD</li>
-                <li>Unlimited playback on desktop & tablet</li>
-                <li>Watchlist & resume playback</li>
-                {p.name === "Premium" && <li>Ultra 4K quality & priority streaming</li>}
+              <ul style={{ paddingLeft: "1.2rem", margin: "0.5rem 0", fontSize: "0.9rem", color: "#ccc", lineHeight: "1.6" }}>
+                {isPremium ? (
+                  <>
+                    <li><strong>4K Ultra HD</strong> streaming (where available)</li>
+                    <li>Watch on up to <strong>4 registered devices</strong></li>
+                    <li>Full movies & series catalogue</li>
+                    <li>Ad-free experience & priority releases</li>
+                    <li>No preview limits</li>
+                  </>
+                ) : (
+                  <>
+                    <li><strong>Full HD 1080p</strong> streaming</li>
+                    <li>Watch on <strong>1 registered device</strong></li>
+                    <li>Full movies & series catalogue</li>
+                    <li>Standard playback</li>
+                    <li>No preview limits</li>
+                  </>
+                )}
               </ul>
             </div>
           );
@@ -245,37 +245,19 @@ export default function RazorpayCheckout({ onSubscriptionUpdated }) {
             background: "#e50914",
             color: "#fff",
             border: "none",
-            padding: "0.75rem 1.5rem",
+            padding: "0.85rem 1.75rem",
             fontSize: "1rem",
             fontWeight: "bold",
             borderRadius: "4px",
             cursor: loading ? "not-allowed" : "pointer",
           }}
         >
-          {loading ? loadingText : "Pay with Razorpay"}
+          {loading ? loadingText : `Pay with Razorpay (₹${plans.find((p) => p.id === selectedPlanId)?.price || "—"})`}
         </button>
-
-        {pendingOrder && (
-          <button
-            type="button"
-            onClick={handleSimulatedVerification}
-            disabled={loading}
-            style={{
-              background: "#333",
-              color: "#2ecc71",
-              border: "1px solid #2ecc71",
-              padding: "0.75rem 1.25rem",
-              borderRadius: "4px",
-              cursor: "pointer",
-            }}
-          >
-            Verify Test Checkout (Order #{pendingOrder.order_id.slice(-6)})
-          </button>
-        )}
       </div>
 
       <p style={{ fontSize: "0.8rem", color: "#888", marginTop: "1rem" }}>
-        🔒 Payments are securely hosted and verified by Razorpay. Card details are never handled or stored on StreamHub servers (OTT-SR-004).
+        🔒 Payments are securely hosted and verified by Razorpay. Card and UPI details are never processed or stored on StreamHub servers.
       </p>
     </div>
   );

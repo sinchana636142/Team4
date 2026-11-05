@@ -3,7 +3,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
-from app.models.subscription import Plan, Subscription
+from app.models.subscription import Payment, Plan, Subscription
 from app.models.title import Title
 from app.models.user import User
 from app.schemas.admin import TitleCreateRequest, TitleUpdateRequest, UserAdminItem
@@ -19,6 +19,10 @@ def create_title(db: Session, request: TitleCreateRequest) -> Title:
         synopsis=request.synopsis.strip() if request.synopsis else None,
         poster_url=request.poster_url.strip() if request.poster_url else None,
         video_url=request.video_url.strip() if request.video_url else None,
+        trailer_url=request.trailer_url.strip() if request.trailer_url else None,
+        preview_url=request.preview_url.strip() if request.preview_url else None,
+        video_url_4k=request.video_url_4k.strip() if request.video_url_4k else None,
+        max_quality=request.max_quality or "1080p",
         is_published=request.is_published,
     )
     db.add(title)
@@ -98,6 +102,15 @@ def list_users_and_subscriptions(
     items = []
     for u in users:
         sub_info = build_status(db, u.id)
+        latest_payment = (
+            db.query(Payment)
+            .filter(Payment.user_id == u.id)
+            .order_by(Payment.id.desc())
+            .first()
+        )
+        pay_amount = (latest_payment.amount // 100) if latest_payment else None
+        pay_status = latest_payment.status if latest_payment else None
+
         items.append(
             UserAdminItem(
                 id=u.id,
@@ -106,11 +119,13 @@ def list_users_and_subscriptions(
                 is_verified=u.is_verified,
                 is_admin=getattr(u, "is_admin", False),
                 role=getattr(u, "role", "viewer"),
+                membership=sub_info.get("membership", "free"),
                 created_at=u.created_at,
                 subscription_status=sub_info.get("status", "none"),
                 plan_name=sub_info.get("plan_name"),
                 expiry_date=sub_info.get("expiry_date"),
-
+                payment_amount=pay_amount,
+                payment_status=pay_status,
             )
         )
 

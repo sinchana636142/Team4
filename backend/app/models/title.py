@@ -19,4 +19,8 @@ class Title(Base):
     synopsis: Mapped[str | None] = mapped_column(Text, nullable=True)
     poster_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     video_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    trailer_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    preview_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    video_url_4k: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    max_quality: Mapped[str | None] = mapped_column(String(20), nullable=True, default="1080p")
     is_published: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)

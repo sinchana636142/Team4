@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from pydantic import BaseModel, Field, HttpUrl, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class TitleCreateRequest(BaseModel):
@@ -9,6 +9,10 @@ class TitleCreateRequest(BaseModel):
     synopsis: str | None = Field(default=None, max_length=5000)
     poster_url: str | None = Field(default=None, max_length=500)
     video_url: str | None = Field(default=None, max_length=500)
+    trailer_url: str | None = Field(default=None, max_length=500)
+    preview_url: str | None = Field(default=None, max_length=500)
+    video_url_4k: str | None = Field(default=None, max_length=500)
+    max_quality: str | None = Field(default="1080p", max_length=20)
     is_published: bool = Field(default=True)
 
     @field_validator("title")
@@ -27,6 +31,10 @@ class TitleUpdateRequest(BaseModel):
     synopsis: str | None = Field(default=None, max_length=5000)
     poster_url: str | None = Field(default=None, max_length=500)
     video_url: str | None = Field(default=None, max_length=500)
+    trailer_url: str | None = Field(default=None, max_length=500)
+    preview_url: str | None = Field(default=None, max_length=500)
+    video_url_4k: str | None = Field(default=None, max_length=500)
+    max_quality: str | None = Field(default=None, max_length=20)
     is_published: bool | None = None
 
 
@@ -38,6 +46,10 @@ class TitleAdminResponse(BaseModel):
     synopsis: str | None = None
     poster_url: str | None = None
     video_url: str | None = None
+    trailer_url: str | None = None
+    preview_url: str | None = None
+    video_url_4k: str | None = None
+    max_quality: str | None = "1080p"
     is_published: bool
 
     model_config = {"from_attributes": True}
@@ -50,10 +62,13 @@ class UserAdminItem(BaseModel):
     is_verified: bool
     is_admin: bool
     role: str
+    membership: str = "free"  # free, basic, premium, admin
     created_at: datetime | None = None
-    subscription_status: str
+    subscription_status: str  # none, pending, active, expired, cancelled
     plan_name: str | None = None
     expiry_date: date | None = None
+    payment_amount: int | None = None  # in whole rupees
+    payment_status: str | None = None  # captured, failed, pending
 
 
 class PaginatedUsersResponse(BaseModel):

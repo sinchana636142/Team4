@@ -117,17 +117,26 @@ SAMPLE_VIDEO = (
     "https://interactive-examples.mdn.mozilla.net/"
     "media/cc0-videos/flower.mp4"
 )
+SAMPLE_TRAILER = (
+    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
+)
+SAMPLE_PREVIEW = (
+    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4"
+)
+SAMPLE_4K = (
+    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+)
 
 
 def seed_plans(db):
     """Create default subscription plans if they do not exist."""
 
     plans = [
-        (1, "Basic", 199),
-        (2, "Premium", 499),
+        (1, "Basic", 199, "1080p", 1, "Full HD streaming on 1 device"),
+        (2, "Premium", 499, "4k", 4, "4K Ultra HD streaming on 4 devices, ad-free"),
     ]
 
-    for plan_id, name, price in plans:
+    for plan_id, name, price, max_quality, device_limit, description in plans:
         existing = db.get(Plan, plan_id)
 
         if existing is None:
@@ -136,8 +145,16 @@ def seed_plans(db):
                     id=plan_id,
                     name=name,
                     price=price,
+                    max_quality=max_quality,
+                    device_limit=device_limit,
+                    description=description,
                 )
             )
+        else:
+            existing.price = price
+            existing.max_quality = max_quality
+            existing.device_limit = device_limit
+            existing.description = description
 
     db.commit()
 
@@ -220,12 +237,23 @@ def seed_admin_user(db):
 
 
 def seed_catalog(db):
-    """Insert missing sample movie records."""
+    """Insert missing sample movie records with trailers and previews."""
 
     for movie in INITIAL_TITLES:
         existing_title = db.get(Title, movie["id"])
+        is_4k = movie["genre"] in ("Sci-Fi", "Action")
+        max_q = "4k" if is_4k else "1080p"
+        v_4k = SAMPLE_4K if is_4k else None
 
         if existing_title is not None:
+            if not existing_title.trailer_url:
+                existing_title.trailer_url = SAMPLE_TRAILER
+            if not existing_title.preview_url:
+                existing_title.preview_url = SAMPLE_PREVIEW
+            if not existing_title.max_quality:
+                existing_title.max_quality = max_q
+            if is_4k and not existing_title.video_url_4k:
+                existing_title.video_url_4k = v_4k
             continue
 
         db.add(
@@ -236,6 +264,10 @@ def seed_catalog(db):
                 year=movie["year"],
                 poster_url=movie["poster"],
                 video_url=SAMPLE_VIDEO,
+                trailer_url=SAMPLE_TRAILER,
+                preview_url=SAMPLE_PREVIEW,
+                video_url_4k=v_4k,
+                max_quality=max_q,
                 synopsis=(
                     f"StreamHub streaming presentation "
                     f"of {movie['title']}."

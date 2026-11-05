@@ -1,7 +1,7 @@
 from app.models.premium_code import PremiumCodeRedemption
 from app.models.user import User
 from app.models.title import Title
-from app.models.subscription import Plan, Subscription
+from app.models.subscription import Plan, Subscription, Payment, WebhookEvent, UserDevice
 from app.models.playback import PlaybackProgress, WatchHistory
 from app.models.watchlist import WatchlistItem
 from app.models.rating import Rating
@@ -11,10 +11,12 @@ __all__ = [
     "Title",
     "Plan",
     "Subscription",
+    "Payment",
+    "WebhookEvent",
+    "UserDevice",
     "PlaybackProgress",
     "WatchHistory",
     "WatchlistItem",
     "Rating",
     "PremiumCodeRedemption",
-
 ]

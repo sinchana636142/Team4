@@ -1,47 +1,48 @@
-
 import React, { useState } from "react";
 import "./SubscriptionPlans.css";
 import PremiumCodeRedeemer from "./components/PremiumCodeRedeemer";
 
 const plans = [
   {
-    id: "basic",
+    id: 0,
+    name: "Free Viewer",
+    price: 0,
+    period: "forever",
+    description: "Included with every registered StreamHub account.",
+    features: [
+      "Browse complete movies & web series catalog",
+      "Watch full trailers in HD",
+      "2-minute preview of all movies & episodes",
+      "Personalized watchlist & watch history",
+      "Upgrade to Basic or Premium anytime",
+    ],
+  },
+  {
+    id: 1,
     name: "Basic",
-    price: 149,
+    price: 199,
     period: "month",
-    description: "Perfect for casual viewers.",
+    description: "Full streaming on your personal screen.",
     features: [
-      "HD streaming",
-      "Watch on 1 device",
-      "Movies and TV shows",
+      "Full movies & web series access (no preview limit)",
+      "Maximum streaming quality: Full HD 1080p",
+      "Watch on 1 registered device",
+      "Standard playback & full catalog access",
       "Cancel anytime",
     ],
   },
   {
-    id: "standard",
-    name: "Standard",
-    price: 299,
-    period: "month",
-    description: "More entertainment for everyone.",
-    features: [
-      "Full HD streaming",
-      "Watch on 2 devices",
-      "Movies and TV shows",
-      "Ad-free experience",
-      "Cancel anytime",
-    ],
-  },
-  {
-    id: "premium",
+    id: 2,
     name: "Premium",
     price: 499,
     period: "month",
-    description: "The ultimate streaming experience.",
+    description: "The ultimate 4K entertainment experience.",
+    badge: "POPULAR",
     features: [
-      "4K Ultra HD streaming",
-      "Watch on 4 devices",
-      "Movies and TV shows",
-      "Ad-free experience",
+      "Full movies & web series access (no preview limit)",
+      "Up to 4K Ultra HD streaming (where supported)",
+      "Watch on up to 4 registered devices",
+      "Ad-free viewing experience",
       "Priority access to new releases",
       "Cancel anytime",
     ],
@@ -54,7 +55,7 @@ export default function SubscriptionPlans({
   currentPlan,
 }) {
   const [selectedPlan, setSelectedPlan] = useState(
-    currentPlan || "standard"
+    currentPlan || 1
   );
 
   const handleSelectPlan = (plan) => {
@@ -83,7 +84,7 @@ export default function SubscriptionPlans({
         <h1>Choose Your Plan</h1>
 
         <p className="plans-subtitle">
-          Great entertainment starts with the plan that suits you.
+          Great entertainment starts with the plan that suits you. Upgrade anytime to unlock Full HD or 4K.
         </p>
       </header>
 
@@ -93,6 +94,7 @@ export default function SubscriptionPlans({
       >
         {plans.map((plan) => {
           const isSelected = selectedPlan === plan.id;
+          const isFree = plan.id === 0;
 
           return (
             <article
@@ -101,8 +103,8 @@ export default function SubscriptionPlans({
               }`}
               key={plan.id}
             >
-              {plan.id === "standard" && (
-                <span className="plan-badge">POPULAR</span>
+              {plan.badge && (
+                <span className="plan-badge">{plan.badge}</span>
               )}
 
               <h2>{plan.name}</h2>
@@ -138,7 +140,9 @@ export default function SubscriptionPlans({
                 onClick={() => handleSelectPlan(plan)}
                 aria-pressed={isSelected}
               >
-                {isSelected
+                {isFree
+                  ? "Included / Free Access"
+                  : isSelected
                   ? "Selected"
                   : `Choose ${plan.name}`}
               </button>
@@ -151,8 +155,7 @@ export default function SubscriptionPlans({
       <PremiumCodeRedeemer />
 
       <p className="plans-footer">
-        Select a plan to continue. Prices shown are demonstration prices.
-        Payment processing is not included in this component.
+        🔒 All payments are processed securely in INR via Razorpay. Cancel anytime.
       </p>
     </main>
   );

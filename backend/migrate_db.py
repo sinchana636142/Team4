@@ -1,5 +1,10 @@
+import os
 import sys
-sys.path.insert(0, r"C:\Users\vivek\Team4\backend")
+
+backend_dir = os.path.dirname(os.path.abspath(__file__))
+if backend_dir not in sys.path:
+    sys.path.insert(0, backend_dir)
+
 from sqlalchemy import text, inspect
 from app.database import engine, Base
 import app.models
@@ -42,6 +47,27 @@ def migrate():
                 "CREATE INDEX IF NOT EXISTS ix_subscriptions_razorpay_payment_id ON subscriptions (razorpay_payment_id);",
             ]
             for stmt in sub_statements:
+                conn.execute(text(stmt))
+
+        if inspector.has_table("titles"):
+            title_statements = [
+                "ALTER TABLE titles ADD COLUMN IF NOT EXISTS trailer_url VARCHAR(500);",
+                "ALTER TABLE titles ADD COLUMN IF NOT EXISTS preview_url VARCHAR(500);",
+                "ALTER TABLE titles ADD COLUMN IF NOT EXISTS video_url_4k VARCHAR(500);",
+                "ALTER TABLE titles ADD COLUMN IF NOT EXISTS max_quality VARCHAR(20) DEFAULT '1080p';",
+            ]
+            for stmt in title_statements:
+                conn.execute(text(stmt))
+
+        if inspector.has_table("plans"):
+            plan_statements = [
+                "ALTER TABLE plans ADD COLUMN IF NOT EXISTS max_quality VARCHAR(20) DEFAULT '1080p';",
+                "ALTER TABLE plans ADD COLUMN IF NOT EXISTS device_limit INTEGER DEFAULT 1;",
+                "ALTER TABLE plans ADD COLUMN IF NOT EXISTS description VARCHAR(255);",
+                "UPDATE plans SET max_quality = '1080p', device_limit = 1 WHERE name = 'Basic';",
+                "UPDATE plans SET max_quality = '4k', device_limit = 4 WHERE name = 'Premium';",
+            ]
+            for stmt in plan_statements:
                 conn.execute(text(stmt))
 
     print("Running Base.metadata.create_all...")

@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.routers.profile import get_current_user
 from app.schemas.playback import ResumeRequest
-from app.services.playback_service import get_playable_title
+from app.services.playback_service import check_title_access, get_playable_title
 from app.services.history_service import (
     clear_history,
     delete_history_entry,
@@ -80,12 +80,56 @@ def put_resume_position(
     return {"position_seconds": saved}
 
 
-@router.get("/{title_id}")
-def play_title(
+@router.get("/{title_id}/access")
+def get_title_playback_access(
     title_id: int,
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """OTT-F-020: give the browser the video URL; the HTML5 player streams it from storage."""
-    title = get_playable_title(db, current_user.id, title_id)
-    return {"title_id": title.id, "title": title.title, "video_url": title.video_url}
+    """Check user's permissions and available streaming qualities/previews for a title."""
+    return check_title_access(db, current_user.id, title_id)
+
+
+@router.get("/{title_id}/preview")
+def play_title_preview(
+    title_id: int,
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """OTT-F-020: First 2 minutes of movie preview for Free viewers."""
+    return get_playable_title(db, current_user.id, title_id, kind="preview")
+
+
+@router.get("/{title_id}/trailer")
+def play_title_trailer(
+    title_id: int,
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """OTT-F-020: Full trailer stream for a movie."""
+    return get_playable_title(db, current_user.id, title_id, kind="trailer")
+
+
+@router.get("/{title_id}")
+def play_title(
+    title_id: int,
+    kind: str = Query(default="full"),
+    quality: str = Query(default="1080p"),
+    device_id: str | None = Query(default=None),
+    details: bool = Query(default=False),
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """OTT-F-020: give the browser the authorized video URL."""
+    result = get_playable_title(
+        db,
+        current_user.id,
+        title_id,
+        kind=kind,
+        requested_quality=quality,
+        device_id=device_id,
+    )
+    if not details and kind == "full" and quality == "1080p":
+        # Backwards compatible response for existing tests expecting exact 3 keys
+        return {"title_id": result["title_id"], "title": result["title"], "video_url": result["video_url"]}
+    return result

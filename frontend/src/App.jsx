@@ -369,6 +369,7 @@ function App() {
         titleId={watchTitleId}
         movie={catalogMovies.find((movie) => movie.id === watchTitleId)}
         onBack={goHome}
+        onNavigatePlans={() => setScreen("plans")}
       />
     );
   }
@@ -463,6 +464,10 @@ function App() {
       <SubscriptionPlans
         onBack={goHome}
         onSelectPlan={(plan) => {
+          if (plan.id === 0) {
+            goHome();
+            return;
+          }
           sessionStorage.setItem(
             "streamhub_selected_plan",
             JSON.stringify(plan)

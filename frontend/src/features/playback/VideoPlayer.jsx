@@ -103,20 +103,20 @@ function PlayerIcon({ name, size = 22 }) {
     case "fullscreen":
       return (
         <svg {...sharedProps}>
-          <path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M3 16v3a2 2 0 0 0 2 2h3" />
+          <path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3" />
         </svg>
       );
     case "exitFullscreen":
       return (
         <svg {...sharedProps}>
-          <path d="M8 3v5H3M16 3v5h5M3 16h5v5M21 16h-5v5" />
+          <path d="M4 14h6v6M20 14h-6v6M4 10h6V4M20 10h-6V4" />
         </svg>
       );
     case "settings":
       return (
         <svg {...sharedProps}>
           <circle cx="12" cy="12" r="3" />
-          <path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.7a8 8 0 0 1-1.7 1l-.3 1.8h-2.8l-.3-1.8a8 8 0 0 1-1.7-1l-1.7.7-1.4-2.4 1.4-1.1a7 7 0 0 1 0-2l-1.4-1.1 1.4-2.4 1.7.7a8 8 0 0 1 1.7-1l.3-1.8h2.8l.3 1.8a8 8 0 0 1 1.7 1l1.7-.7 1.4 2.4-1.4 1.1a7 7 0 0 1 0 2Z" />
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
         </svg>
       );
     default:
@@ -134,6 +134,13 @@ export default function VideoPlayer({
   onStartupMeasured,
   title = "StreamHub video",
   poster,
+  isPreview = false,
+  maxPreviewSeconds = 120,
+  onPreviewEnd,
+  onUpgradeClick,
+  onPlayTrailer,
+  qualityBadge = "1080p",
+  qualityNotice = "",
 }) {
   const youtubeId = getYouTubeId(src);
   const playerRef = useRef(null);
@@ -154,6 +161,7 @@ export default function VideoPlayer({
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [error, setError] = useState("");
   const [centerFeedback, setCenterFeedback] = useState(null);
+  const [previewEnded, setPreviewEnded] = useState(false);
 
   const setVideoElement = useCallback(
     (video) => {
@@ -171,6 +179,7 @@ export default function VideoPlayer({
     setBuffered(0);
     setError("");
     setPlaybackRate(1);
+    setPreviewEnded(false);
   }, [src]);
 
   useEffect(() => {
@@ -182,25 +191,27 @@ export default function VideoPlayer({
     return () => document.removeEventListener("fullscreenchange", syncFullscreen);
   }, []);
 
-  useEffect(
-    () => () => {
-      window.clearTimeout(hideControlsTimer.current);
-      window.clearTimeout(feedbackTimer.current);
-      if (videoRef) videoRef.current = null;
-    },
-    [videoRef]
-  );
+  const updateBuffered = useCallback((event) => {
+    const video = event.currentTarget;
+    if (!video.buffered || video.buffered.length === 0 || !Number.isFinite(video.duration)) {
+      setBuffered(0);
+      return;
+    }
+    const end = video.buffered.end(video.buffered.length - 1);
+    setBuffered(Math.min(100, Math.max(0, (end / video.duration) * 100)));
+  }, []);
 
-  const showCenterFeedback = useCallback((feedback) => {
-    window.clearTimeout(feedbackTimer.current);
-    setCenterFeedback({ type: feedback, id: feedbackId.current + 1 });
+  const showCenterFeedback = useCallback((type) => {
     feedbackId.current += 1;
+    setCenterFeedback({ id: feedbackId.current, type });
+    window.clearTimeout(feedbackTimer.current);
     feedbackTimer.current = window.setTimeout(() => {
       setCenterFeedback(null);
     }, 850);
   }, []);
 
   const togglePlayback = useCallback(() => {
+    if (previewEnded) return;
     const video = internalVideoRef.current;
     if (!video) return;
 
@@ -211,17 +222,19 @@ export default function VideoPlayer({
       showCenterFeedback("pause");
       video.pause();
     }
-  }, [showCenterFeedback]);
+  }, [showCenterFeedback, previewEnded]);
 
   const seekBy = useCallback((amount) => {
     const video = internalVideoRef.current;
     if (!video || !Number.isFinite(video.duration)) return;
-    video.currentTime = Math.min(
-      video.duration,
+    const maxAllowed = isPreview ? maxPreviewSeconds : video.duration;
+    const nextTime = Math.min(
+      maxAllowed,
       Math.max(0, video.currentTime + amount)
     );
+    video.currentTime = nextTime;
     showCenterFeedback(amount < 0 ? `rewind-${Math.abs(amount)}` : `forward-${amount}`);
-  }, [showCenterFeedback]);
+  }, [showCenterFeedback, isPreview, maxPreviewSeconds]);
 
   const toggleFullscreen = useCallback(() => {
     if (document.fullscreenElement) {
@@ -259,44 +272,33 @@ export default function VideoPlayer({
         event.preventDefault();
         togglePlayback();
         break;
+      case "f":
+        event.preventDefault();
+        toggleFullscreen();
+        break;
       case "arrowleft":
         event.preventDefault();
-        seekBy(-5);
+        seekBy(-10);
         break;
       case "arrowright":
         event.preventDefault();
-        seekBy(5);
+        seekBy(10);
         break;
-      case "m": {
-        const video = internalVideoRef.current;
-        if (video) video.muted = !video.muted;
-        break;
-      }
-      case "f":
-        toggleFullscreen();
+      case "m":
+        event.preventDefault();
+        if (internalVideoRef.current) {
+          internalVideoRef.current.muted = !internalVideoRef.current.muted;
+        }
         break;
       default:
         break;
     }
   }
 
-  function updateBuffered() {
-    const video = internalVideoRef.current;
-    if (!video || !video.duration || video.buffered.length === 0) {
-      setBuffered(0);
-      return;
-    }
-
-    setBuffered(
-      Math.min(100, (video.buffered.end(video.buffered.length - 1) / video.duration) * 100)
-    );
-  }
-
   function handleVolumeChange(event) {
     const nextVolume = Number(event.target.value);
     const video = internalVideoRef.current;
     if (!video) return;
-
     video.volume = nextVolume;
     video.muted = nextVolume === 0;
   }
@@ -304,9 +306,13 @@ export default function VideoPlayer({
   function handleSeek(event) {
     const video = internalVideoRef.current;
     if (!video || !Number.isFinite(video.duration)) return;
-    const nextTime = Number(event.target.value);
+    const maxAllowed = isPreview ? maxPreviewSeconds : video.duration;
+    const nextTime = Math.min(maxAllowed, Number(event.target.value));
     video.currentTime = nextTime;
     setCurrentTime(nextTime);
+    if (previewEnded && nextTime < maxPreviewSeconds) {
+      setPreviewEnded(false);
+    }
   }
 
   function changePlaybackRate(rate) {
@@ -333,6 +339,13 @@ export default function VideoPlayer({
       />
     );
   }
+
+  const effectiveDuration = isPreview
+    ? Math.min(duration || maxPreviewSeconds, maxPreviewSeconds)
+    : duration;
+  const progressPercent = effectiveDuration > 0
+    ? Math.min(100, (currentTime / effectiveDuration) * 100)
+    : 0;
 
   return (
     <div
@@ -380,7 +393,18 @@ export default function VideoPlayer({
           setIsPlaying(false);
           setControlsVisible(true);
         }}
-        onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
+        onTimeUpdate={(event) => {
+          const t = event.currentTarget.currentTime;
+          setCurrentTime(t);
+          if (isPreview && t >= maxPreviewSeconds) {
+            event.currentTarget.pause();
+            event.currentTarget.currentTime = maxPreviewSeconds;
+            setIsPlaying(false);
+            setPreviewEnded(true);
+            setControlsVisible(true);
+            if (onPreviewEnd) onPreviewEnd();
+          }
+        }}
         onDurationChange={(event) => setDuration(event.currentTarget.duration || 0)}
         onProgress={updateBuffered}
         onVolumeChange={(event) => {
@@ -392,6 +416,73 @@ export default function VideoPlayer({
           setIsLoading(false);
         }}
       />
+
+      {/* Free 2-Minute Preview Indicator Badge */}
+      {isPreview && (
+        <div
+          style={{
+            position: "absolute",
+            top: "16px",
+            left: "16px",
+            zIndex: 10,
+            background: "rgba(15, 15, 25, 0.85)",
+            border: "1px solid #e50914",
+            padding: "6px 14px",
+            borderRadius: "20px",
+            fontSize: "13px",
+            fontWeight: "bold",
+            color: "#fff",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            backdropFilter: "blur(4px)",
+          }}
+        >
+          <span style={{ color: "#e50914" }}>⏱</span> Free Preview: {formatTime(currentTime)} / {formatTime(maxPreviewSeconds)}
+        </div>
+      )}
+
+      {/* Quality Badge */}
+      {qualityBadge && (
+        <div
+          style={{
+            position: "absolute",
+            top: "16px",
+            right: "16px",
+            zIndex: 10,
+            background: "rgba(0, 0, 0, 0.7)",
+            border: "1px solid #444",
+            padding: "4px 10px",
+            borderRadius: "14px",
+            fontSize: "12px",
+            fontWeight: "bold",
+            color: qualityBadge.toUpperCase() === "4K" ? "#f39c12" : "#3498db",
+          }}
+        >
+          {qualityBadge.toUpperCase()}
+        </div>
+      )}
+
+      {/* Quality Notice Banner */}
+      {qualityNotice && (
+        <div
+          style={{
+            position: "absolute",
+            top: "54px",
+            right: "16px",
+            zIndex: 10,
+            background: "rgba(20, 20, 30, 0.9)",
+            border: "1px solid #f39c12",
+            color: "#ffc107",
+            padding: "6px 12px",
+            borderRadius: "6px",
+            fontSize: "12px",
+            maxWidth: "320px",
+          }}
+        >
+          {qualityNotice}
+        </div>
+      )}
 
       {isLoading && !error && (
         <div className="stream-player-loading" role="status" aria-label="Loading video">
@@ -406,7 +497,71 @@ export default function VideoPlayer({
         </div>
       )}
 
-      {!isPlaying && !isLoading && !error && (
+      {/* 2-Minute Preview Ended Overlay Modal */}
+      {previewEnded && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: "rgba(10, 10, 18, 0.95)",
+            zIndex: 20,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            textAlign: "center",
+            padding: "2rem",
+          }}
+        >
+          <span style={{ fontSize: "3rem", marginBottom: "0.75rem" }}>🎬</span>
+          <h2 style={{ fontSize: "1.75rem", marginBottom: "0.5rem", color: "#fff" }}>
+            2-Minute Preview Completed
+          </h2>
+          <p style={{ color: "#aaa", maxWidth: "480px", marginBottom: "1.5rem", lineHeight: "1.6", fontSize: "0.95rem" }}>
+            You have reached the end of the free 2-minute preview for <strong>{title}</strong>. Upgrade to <strong>Basic (₹199/month)</strong> or <strong>Premium (₹499/month)</strong> to watch the full movie in Full HD or 4K.
+          </p>
+          <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", justifyContent: "center" }}>
+            {onUpgradeClick && (
+              <button
+                type="button"
+                onClick={onUpgradeClick}
+                style={{
+                  background: "#e50914",
+                  color: "#fff",
+                  border: "none",
+                  padding: "0.85rem 1.75rem",
+                  borderRadius: "4px",
+                  fontWeight: "bold",
+                  fontSize: "1rem",
+                  cursor: "pointer",
+                }}
+              >
+                View Subscription Plans
+              </button>
+            )}
+            {onPlayTrailer && (
+              <button
+                type="button"
+                onClick={onPlayTrailer}
+                style={{
+                  background: "#24232f",
+                  color: "#fff",
+                  border: "1px solid #555",
+                  padding: "0.85rem 1.5rem",
+                  borderRadius: "4px",
+                  fontWeight: "bold",
+                  fontSize: "1rem",
+                  cursor: "pointer",
+                }}
+              >
+                Watch Full Trailer
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {!isPlaying && !isLoading && !error && !previewEnded && (
         <button
           type="button"
           className="stream-player-center-play"
@@ -428,51 +583,39 @@ export default function VideoPlayer({
               centerFeedback.type === "play"
                 ? "play"
                 : centerFeedback.type === "pause"
-                  ? "pause"
-                  : centerFeedback.type.startsWith("rewind")
-                    ? "back"
-                    : "forward"
+                ? "pause"
+                : centerFeedback.type.startsWith("rewind")
+                ? "back"
+                : "forward"
             }
-            size={28}
+            size={36}
           />
-          {centerFeedback.type.startsWith("rewind") && (
-            <span>{centerFeedback.type.slice("rewind-".length)} sec</span>
-          )}
-          {centerFeedback.type.startsWith("forward") && (
-            <span>{centerFeedback.type.slice("forward-".length)} sec</span>
-          )}
         </div>
       )}
 
-      <div className={`stream-player-controls${controlsVisible ? " visible" : ""}`}>
-        <div className="stream-player-progress">
-          <div className="stream-player-track">
-            <span className="stream-player-buffered" style={{ width: `${buffered}%` }} />
-            <span
-              className="stream-player-progress-fill"
-              style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }}
-            />
-          </div>
+      <div className="stream-player-controls" onClick={(event) => event.stopPropagation()}>
+        <div className="stream-player-progress-container">
           <input
             type="range"
             min="0"
-            max={duration || 0}
+            max={effectiveDuration || 0}
             step="0.1"
-            value={Math.min(currentTime, duration || 0)}
+            value={Math.min(currentTime, effectiveDuration || 0)}
             onChange={handleSeek}
-            aria-label="Seek video"
-            className="stream-player-seek"
+            className="stream-player-progress"
+            aria-label="Seek slider"
             style={{
-              "--seek-progress": `${duration ? (currentTime / duration) * 100 : 0}%`,
+              "--progress-percent": `${progressPercent}%`,
+              "--buffered-percent": `${buffered}%`,
             }}
           />
         </div>
 
-        <div className="stream-player-toolbar">
+        <div className="stream-player-bar">
           <div className="stream-player-control-group">
             <button
               type="button"
-              className="stream-player-button primary"
+              className="stream-player-button"
               onClick={togglePlayback}
               aria-label={isPlaying ? "Pause video" : "Play video"}
               title={isPlaying ? "Pause (Space)" : "Play (Space)"}
@@ -481,23 +624,23 @@ export default function VideoPlayer({
             </button>
             <button
               type="button"
-              className="stream-player-button skip-button"
-              onClick={() => seekBy(-5)}
-              aria-label="Rewind 5 seconds"
-              title="Rewind 5 seconds (←)"
+              className="stream-player-button"
+              onClick={() => seekBy(-10)}
+              aria-label="Rewind 10 seconds"
+              title="Rewind 10s (Left Arrow)"
             >
               <PlayerIcon name="back" />
-              <span>5</span>
+              <span>10</span>
             </button>
             <button
               type="button"
-              className="stream-player-button skip-button"
-              onClick={() => seekBy(5)}
-              aria-label="Forward 5 seconds"
-              title="Forward 5 seconds (→)"
+              className="stream-player-button"
+              onClick={() => seekBy(10)}
+              aria-label="Fast forward 10 seconds"
+              title="Fast forward 10s (Right Arrow)"
             >
               <PlayerIcon name="forward" />
-              <span>5</span>
+              <span>10</span>
             </button>
             <div className="stream-player-volume">
               <button
@@ -525,7 +668,7 @@ export default function VideoPlayer({
               />
             </div>
             <span className="stream-player-time">
-              {formatTime(currentTime)} <span>/</span> {formatTime(duration)}
+              {formatTime(currentTime)} <span>/</span> {formatTime(effectiveDuration)}
             </span>
           </div>
 
