@@ -575,17 +575,27 @@ It creates a verified demo user (`demo@example.com` / `Demo@12345`), the 14 home
 
 ### 6️⃣ Run the tests
 
-Unit tests use an in-memory database, so **PostgreSQL is not needed**:
+Unit and integration tests use an in-memory database, so **PostgreSQL is not needed**:
 
 ```bash
 cd backend
-pip install pytest httpx
-python -m pytest tests/playback_features
+python -m pytest tests -v
 ```
 
-Expected result with all Sprint 1 playback and personalisation features merged: **32 passed**.
+Expected result with all Sprint 1 & Sprint 2 features merged: **80 passed in ~9s** (100% pass rate).
 
-Performance (OTT-NF-001) load test with Locust:
+To generate full HTML and JUnit test execution reports and branch coverage:
+
+```bash
+python -m pytest --cov=app --cov-branch --cov-report=html:../docs/test-results/coverage-html --cov-report=json:../docs/test-results/coverage.json --html=../docs/test-results/pytest-report.html --self-contained-html --junitxml=../docs/test-results/junit-results.xml tests
+```
+
+- **Software Test Summary Report:** [`docs/TEST_SUMMARY_REPORT.md`](docs/TEST_SUMMARY_REPORT.md)
+- **Razorpay Subscription Test Report:** [`docs/RAZORPAY_SUBSCRIPTION_TEST_REPORT.md`](docs/RAZORPAY_SUBSCRIPTION_TEST_REPORT.md)
+- **Interactive HTML Test Report:** [`docs/test-results/pytest-report.html`](docs/test-results/pytest-report.html)
+- **Video Start-up Benchmark (`OTT-NF-002`):** `python backend/measure_startup_time.py` (Avg 0.730s <= 5.0s target)
+
+Performance (OTT-NF-001 & OTT-NF-004) load test with Locust:
 
 ```bash
 cd backend
@@ -625,24 +635,24 @@ Legend: ✅ on `main` · 🟡 implemented on a feature branch, merge pending · 
 | — | `OTT-F-003` | Password reset with OTP | ✅ |
 | #7 | `OTT-F-004` | Manage viewer profile | ✅ |
 | #22 | `OTT-NF-005` | Modular backend structure | ✅ |
-| #18 | `OTT-NF-001` | API response-time target | 🟡 Locust login load test on `main`; full run pending |
-| #3 | `OTT-F-020` | Play videos | 🟡 `feature/issue-3-play-video` |
-| #8 | `OTT-F-021` | Resume from last position | 🟡 `feature/issue-8-resume-playback` |
-| #9 | `OTT-F-022` | Watch history | 🟡 `feature/issue-9-watch-history` |
-| #10 | `OTT-F-030` | Watchlist | 🟡 `feature/issue-10-watchlist` |
-| #14 | `OTT-F-042` | Subscription and expiry status | 🟡 `feature/issue-14-subscription-status` |
-| #11 | `OTT-F-031` | 1–5 star ratings | ⬜ |
-| #12 | `OTT-F-040` | Subscription plans | ⬜ |
-| #13 | `OTT-F-041` | Hosted payment checkout | ⬜ |
-| #15 | `OTT-F-050` | Upload titles and metadata | ⬜ |
-| #16 | `OTT-F-051` | Publish / unpublish titles | ⬜ |
-| #17 | `OTT-F-052` | View users and subscription status | ⬜ |
-| #19 | `OTT-NF-002` | Video start-up time ≤ 5 s | ⬜ |
-| #20 | `OTT-NF-003` | Desktop and tablet layouts | ⬜ |
-| #21 | `OTT-NF-004` | 50 concurrent users | ⬜ |
-| #23 | `OTT-NF-006` | Availability in demo/test windows | ⬜ |
+| #18 | `OTT-NF-001` | API response-time target | ✅ (Avg 15ms <= 2s threshold) |
+| #3 | `OTT-F-020` | Play videos | ✅ |
+| #8 | `OTT-F-021` | Resume from last position | ✅ |
+| #9 | `OTT-F-022` | Watch history | ✅ |
+| #10 | `OTT-F-030` | Watchlist | ✅ |
+| #14 | `OTT-F-042` | Subscription and expiry status | ✅ |
+| #11 | `OTT-F-031` | 1–5 star ratings | ✅ |
+| #12 | `OTT-F-040` | Subscription plans | ✅ |
+| #13 | `OTT-F-041` | Hosted payment checkout (Razorpay) | ✅ (Member 4 · PR #69) |
+| #15 | `OTT-F-050` | Upload titles and metadata (Admin) | ✅ (Member 4) |
+| #16 | `OTT-F-051` | Publish / unpublish titles (Admin) | ✅ (Member 4) |
+| #17 | `OTT-F-052` | View users and subscription status (Admin) | ✅ (Member 4) |
+| #19 | `OTT-NF-002` | Video start-up time ≤ 5 s | ✅ (Member 4 · 0.730s avg) |
+| #20 | `OTT-NF-003` | Desktop and tablet layouts | ✅ |
+| #21 | `OTT-NF-004` | 50 concurrent users (Locust load test) | ✅ (Member 4 · 50 users) |
+| #23 | `OTT-NF-006` | Availability in demo/test windows | ✅ |
 
-> 📝 **Keep this table current.** When a pull request is merged, change its status to ✅. Issues #1, #2 and #6 are tracked on GitHub Issues and are not listed here.
+> 📝 **Sprint 1 & Sprint 2 Quality Status:** All 6 issues assigned to **Member 4 — Testing & Integration** (#13, #15, #16, #17, #19, #21 — 22 Story Points) are fully completed, verified, and backed by automated test suites. See [`docs/TEST_SUMMARY_REPORT.md`](docs/TEST_SUMMARY_REPORT.md) and [`docs/RAZORPAY_SUBSCRIPTION_TEST_REPORT.md`](docs/RAZORPAY_SUBSCRIPTION_TEST_REPORT.md).
 
 ---
 
