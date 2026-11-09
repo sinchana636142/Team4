@@ -58,3 +58,4 @@ To prevent accidental credential leakage:
 - `.env`, `.env.*` (except `.env.example`) are registered in `.gitignore`.
 - Binary coverage databases (`.coverage`, `.coverage.*`) and runtime log files (`*.log`) are ignored.
 - Media upload assets (`backend/app/static/uploads/`) are ignored to avoid repository bloat.
+

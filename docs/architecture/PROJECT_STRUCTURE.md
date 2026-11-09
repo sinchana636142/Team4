@@ -120,3 +120,4 @@ $$\text{HTTP Request} \longrightarrow \mathbf{Router} \xrightarrow{\text{Pydanti
 - **Rule 1:** Routers do not perform direct database queries; they delegate all database interactions to dedicated service classes.
 - **Rule 2:** Services do not manipulate HTTP request/response objects directly; they accept clean Python types and return domain models.
 - **Rule 3:** Models represent pure database table structures and relationships; they do not contain business logic or HTTP awareness.
+

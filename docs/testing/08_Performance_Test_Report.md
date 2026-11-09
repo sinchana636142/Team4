@@ -112,3 +112,4 @@ This report evaluates the performance, latency, and scalability characteristics 
 
 The complete interactive Locust load testing HTML report is archived at:  
 [`docs/testing/evidence/locust-report.html`](evidence/locust-report.html)
+

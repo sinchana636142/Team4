@@ -212,3 +212,4 @@ erDiagram
 ### 3.8 `playback_progress` & `watch_history` Tables
 - `playback_progress`: Single row per user and title with `UNIQUE(user_id, title_id)`. Tracks current `position_seconds`.
 - `watch_history`: Append-only log of viewing sessions with UTC timestamps (`watched_at`).
+

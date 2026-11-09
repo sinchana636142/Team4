@@ -258,3 +258,4 @@ sequenceDiagram
         UI-->>Admin: Update toggle state to "Published" (Green badge)
     end
 ```
+

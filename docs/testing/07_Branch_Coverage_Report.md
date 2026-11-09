@@ -91,3 +91,4 @@ Unlike statement coverage, which only checks whether a line was executed, branch
 ## 5. Conclusion
 
 Branch coverage for core access control, Razorpay payment verification, and administrative authorization exceeds **90%**. All critical security branches (rejection of forged signatures, cross-user tampering, unverified account blocking, and device capping) are thoroughly traversed and verified.
+

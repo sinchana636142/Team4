@@ -87,3 +87,4 @@ To establish a gold-standard academic testing deliverable under `docs/testing/`:
    Run Locust with 50 concurrent virtual users against the running backend and generate `docs/testing/evidence/locust-report.html`.
 4. **Preserve Application Integrity:**  
    Strictly respect the restriction to never modify `backend/app/` or `frontend/src/` application source code.
+

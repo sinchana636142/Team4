@@ -104,3 +104,4 @@ python -m pytest tests -v --cov=app --cov-branch --cov-report=term-missing --cov
 ## 7. Conclusion
 
 All 80 unit test cases executed cleanly with zero failures or errors. Component-level behavior, input validation, and security boundaries meet the requirements of the Software Test Plan.
+

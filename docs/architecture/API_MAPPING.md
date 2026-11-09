@@ -65,3 +65,4 @@ The following table maps every user-facing feature and React component to its un
 ### 2.2 Client-Side Data Handling
 - **Web Series Episode Configuration:**  
   Movie records are dynamically served from the database (`titles` table). Web series episodes currently leverage metadata definitions in `frontend/src/data/series.js` with playback URLs dynamically routed through `/playback/{title_id}`.
+

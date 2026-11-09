@@ -31,3 +31,4 @@ This directory catalogs UI execution screenshots and screen captures demonstrati
 ## 3. Preservation Notice
 
 Screenshots are captured from the active React SPA (`http://localhost:5173`) interacting with the live FastAPI backend (`http://127.0.0.1:8001`). Video walkthrough demos are archived at `sprint-02_demo.mp4` and `sprint1_demo.mp4`.
+

@@ -81,3 +81,4 @@ For progressive streaming and startup-time benchmarking without heavy local stor
 | `watched_seconds` | `>= 0` | `-5` | `422 Watched seconds >= 0` |
 | `rating` | `1` to `5` | `0`, `6`, `-1`, `10` | `422 Rating must be between 1 and 5` |
 | `release_year` | `1888` to `2100` | `1800`, `2200`, `"year"` | `422 Invalid release year` |
+

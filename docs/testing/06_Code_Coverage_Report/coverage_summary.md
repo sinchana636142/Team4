@@ -105,3 +105,4 @@ Overall Coverage Percentage: 67.79%
 
 The interactive HTML report with line-by-line coverage visualization is available at:
 [`docs/testing/06_Code_Coverage_Report/index.html`](index.html)
+
