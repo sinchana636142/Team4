@@ -19,3 +19,13 @@ dist/
 
 # Uploaded runtime media
 backend/app/static/uploads/
+
+# Coverage databases & raw HTML reports
+.coverage
+.coverage.*
+docs/testing/06_Code_Coverage_Report/*.html
+docs/testing/06_Code_Coverage_Report/z_*
+docs/testing/06_Code_Coverage_Report/*.js
+docs/testing/06_Code_Coverage_Report/*.png
+docs/testing/06_Code_Coverage_Report/*.css
+docs/testing/evidence/pytest-report.html

@@ -17,28 +17,40 @@ The project is intentionally scoped as a **single responsive website** suitable 
 
 ## 📚 Documentation at a Glance
 
-| Document | Answers |
-|---|---|
-| 📘 **SRS — Software Requirements Specification** | **WHAT** must the system do? |
-| 🏗️ **SAD — Software Architecture & Design Specification** | **HOW** will the system be structured and designed? |
-| 🧪 **STP — Software Test Plan** | **HOW** will the system be verified? |
+| Document | Type | Answers | Link |
+|---|---|---|---|
+| 📘 **SRS — Requirements** | PDF | **WHAT** must the system do? | [`StreamHub_SRS.pdf`](StreamHub_SRS.pdf) |
+| 🏗️ **SAD — Architecture** | PDF | **HOW** will the system be designed? | [`StreamHub_SAD.pdf`](StreamHub_SAD.pdf) |
+| 🧪 **STP — Test Plan** | PDF | **HOW** will the system be verified? | [`StreamHub_Test_Plan.pdf`](StreamHub_Test_Plan.pdf) |
+| 🏛️ **Architecture Specifications** | Docs | System diagrams, ER models, API maps & configs | [`docs/architecture/`](docs/architecture/) |
+| 📊 **Testing & Quality Assurance** | Docs / Excel | Workbooks, RTM, reports & execution evidence | [`docs/testing/`](docs/testing/) |
 
-```text
-                    ┌────────────────────┐
-                    │       SRS          │
-                    │    WHAT to build   │
-                    └─────────┬──────────┘
-                              ▼
-                    ┌────────────────────┐
-                    │       SAD          │
-                    │    HOW to build    │
-                    └─────────┬──────────┘
-                              ▼
-                    ┌────────────────────┐
-                    │       STP          │
-                    │   HOW to verify    │
-                    └────────────────────┘
-```
+### 🏛️ Architecture & System Engineering Specifications
+- **[Project Structure Blueprint](docs/architecture/PROJECT_STRUCTURE.md):** Complete component inventory, directory responsibilities & layering.
+- **[System Architecture & Request Flows](docs/architecture/STREAMHUB_ARCHITECTURE.md):** Mermaid topology diagram & sequence flows for Login, Playback, Checkout, and Admin actions.
+- **[Database Architecture & ER Model](docs/architecture/DATABASE_STRUCTURE.md):** Mermaid ER diagram, PostgreSQL tables, foreign keys & constraint definitions.
+- **[API Endpoint Mapping](docs/architecture/API_MAPPING.md):** Comprehensive feature-to-endpoint mapping table across all routers.
+- **[Configuration & Environment Guide](docs/architecture/CONFIGURATION_GUIDE.md):** Detailed guide to `.env` variables, defaults & deployment security.
+- **[Code Quality & Dependency Audit](docs/architecture/CODE_QUALITY_AUDIT.md):** Static analysis, dependency health & code quality findings.
+- **[Structure & File Integrity Audit](docs/architecture/STRUCTURE_AUDIT_REPORT.md):** Verification of physical file paths, import safety & non-destructive organization.
+
+### 🧪 Software Testing & Quality Assurance Deliverables (STP v1.0)
+- **[Existing Test Audit](docs/testing/00_EXISTING_TEST_AUDIT.md):** Initial baseline audit of test assets and performance scripts.
+- **[Formal Test Cases Workbook](docs/testing/01_Test_Cases.xlsx):** Professional multi-sheet Excel workbook covering 8 modules.
+- **[Requirements Traceability Matrix (RTM)](docs/testing/02_Requirement_Traceability_Matrix.xlsx):** Excel matrix mapping all SRS requirements to test cases.
+- **[Unit Test Report](docs/testing/03_Unit_Test_Report.md):** Pytest execution report (80/80 passed, 100% pass rate).
+- **[Integration Test Report](docs/testing/04_Integration_Test_Report.md):** Frontend-Backend, Database, Razorpay & SMTP integration audit.
+- **[System Validation Report](docs/testing/05_System_Validation_Report.md):** End-to-end user workflows verification (E2E-01 to E2E-11).
+- **[Code Coverage Report](docs/testing/06_Code_Coverage_Report/coverage_summary.md):** Statement coverage summary & [Interactive HTML Report](docs/testing/06_Code_Coverage_Report/index.html).
+- **[Branch Coverage Report](docs/testing/07_Branch_Coverage_Report.md):** Branch coverage breakdown & decision path analysis (82.1%).
+- **[Performance Test Report](docs/testing/08_Performance_Test_Report.md):** Latency target (P95: 260ms), video startup (0.730s), and Locust 50 concurrent users.
+- **[Security Test Report](docs/testing/09_Security_Test_Report.md):** Security checklist & verification for `OTT-SR-001` through `OTT-SR-006`.
+- **[Razorpay Subscription Test Report](docs/testing/10_Razorpay_Subscription_Test_Report.md):** 20-point test matrix covering payment lifecycle & access control.
+- **[Defect & Retest Workbook](docs/testing/11_Defect_and_Retest_Report.xlsx):** Excel log tracking 7 verified & closed defects.
+- **[Final Software Test Summary Report](docs/testing/12_Final_Test_Summary_Report.md):** Formal STSR evaluation and quality sign-off.
+- **[Test Data Guide](docs/testing/test_data/TEST_DATA_GUIDE.md):** Standard test accounts, plans, cards & boundary test inputs.
+- **[Test Scripts Guide](docs/testing/test_scripts/README.md):** Instructions for executing Pytest, Coverage, Locust, and Benchmarks.
+- **[Evidence Directory](docs/testing/evidence/README.md):** Raw test execution logs, JUnit XML, Pytest HTML report & Locust report.
 
 ---
 
@@ -575,17 +587,27 @@ It creates a verified demo user (`demo@example.com` / `Demo@12345`), the 14 home
 
 ### 6️⃣ Run the tests
 
-Unit tests use an in-memory database, so **PostgreSQL is not needed**:
+Unit and integration tests use an in-memory database, so **PostgreSQL is not needed**:
 
 ```bash
 cd backend
-pip install pytest httpx
-python -m pytest tests/playback_features
+python -m pytest tests -v
 ```
 
-Expected result with all Sprint 1 playback and personalisation features merged: **32 passed**.
+Expected result with all Sprint 1 & Sprint 2 features merged: **80 passed in ~9s** (100% pass rate).
 
-Performance (OTT-NF-001) load test with Locust:
+To generate full HTML and JUnit test execution reports and branch coverage:
+
+```bash
+python -m pytest --cov=app --cov-branch --cov-report=html:../docs/test-results/coverage-html --cov-report=json:../docs/test-results/coverage.json --html=../docs/test-results/pytest-report.html --self-contained-html --junitxml=../docs/test-results/junit-results.xml tests
+```
+
+- **Software Test Summary Report:** [`docs/TEST_SUMMARY_REPORT.md`](docs/TEST_SUMMARY_REPORT.md)
+- **Razorpay Subscription Test Report:** [`docs/RAZORPAY_SUBSCRIPTION_TEST_REPORT.md`](docs/RAZORPAY_SUBSCRIPTION_TEST_REPORT.md)
+- **Interactive HTML Test Report:** [`docs/test-results/pytest-report.html`](docs/test-results/pytest-report.html)
+- **Video Start-up Benchmark (`OTT-NF-002`):** `python backend/measure_startup_time.py` (Avg 0.730s <= 5.0s target)
+
+Performance (OTT-NF-001 & OTT-NF-004) load test with Locust:
 
 ```bash
 cd backend
@@ -625,24 +647,24 @@ Legend: ✅ on `main` · 🟡 implemented on a feature branch, merge pending · 
 | — | `OTT-F-003` | Password reset with OTP | ✅ |
 | #7 | `OTT-F-004` | Manage viewer profile | ✅ |
 | #22 | `OTT-NF-005` | Modular backend structure | ✅ |
-| #18 | `OTT-NF-001` | API response-time target | 🟡 Locust login load test on `main`; full run pending |
-| #3 | `OTT-F-020` | Play videos | 🟡 `feature/issue-3-play-video` |
-| #8 | `OTT-F-021` | Resume from last position | 🟡 `feature/issue-8-resume-playback` |
-| #9 | `OTT-F-022` | Watch history | 🟡 `feature/issue-9-watch-history` |
-| #10 | `OTT-F-030` | Watchlist | 🟡 `feature/issue-10-watchlist` |
-| #14 | `OTT-F-042` | Subscription and expiry status | 🟡 `feature/issue-14-subscription-status` |
-| #11 | `OTT-F-031` | 1–5 star ratings | ⬜ |
-| #12 | `OTT-F-040` | Subscription plans | ⬜ |
-| #13 | `OTT-F-041` | Hosted payment checkout | ⬜ |
-| #15 | `OTT-F-050` | Upload titles and metadata | ⬜ |
-| #16 | `OTT-F-051` | Publish / unpublish titles | ⬜ |
-| #17 | `OTT-F-052` | View users and subscription status | ⬜ |
-| #19 | `OTT-NF-002` | Video start-up time ≤ 5 s | ⬜ |
-| #20 | `OTT-NF-003` | Desktop and tablet layouts | ⬜ |
-| #21 | `OTT-NF-004` | 50 concurrent users | ⬜ |
-| #23 | `OTT-NF-006` | Availability in demo/test windows | ⬜ |
+| #18 | `OTT-NF-001` | API response-time target | ✅ (Avg 15ms <= 2s threshold) |
+| #3 | `OTT-F-020` | Play videos | ✅ |
+| #8 | `OTT-F-021` | Resume from last position | ✅ |
+| #9 | `OTT-F-022` | Watch history | ✅ |
+| #10 | `OTT-F-030` | Watchlist | ✅ |
+| #14 | `OTT-F-042` | Subscription and expiry status | ✅ |
+| #11 | `OTT-F-031` | 1–5 star ratings | ✅ |
+| #12 | `OTT-F-040` | Subscription plans | ✅ |
+| #13 | `OTT-F-041` | Hosted payment checkout (Razorpay) | ✅ (Member 4 · PR #69) |
+| #15 | `OTT-F-050` | Upload titles and metadata (Admin) | ✅ (Member 4) |
+| #16 | `OTT-F-051` | Publish / unpublish titles (Admin) | ✅ (Member 4) |
+| #17 | `OTT-F-052` | View users and subscription status (Admin) | ✅ (Member 4) |
+| #19 | `OTT-NF-002` | Video start-up time ≤ 5 s | ✅ (Member 4 · 0.730s avg) |
+| #20 | `OTT-NF-003` | Desktop and tablet layouts | ✅ |
+| #21 | `OTT-NF-004` | 50 concurrent users (Locust load test) | ✅ (Member 4 · 50 users) |
+| #23 | `OTT-NF-006` | Availability in demo/test windows | ✅ |
 
-> 📝 **Keep this table current.** When a pull request is merged, change its status to ✅. Issues #1, #2 and #6 are tracked on GitHub Issues and are not listed here.
+> 📝 **Sprint 1 & Sprint 2 Quality Status:** All 6 issues assigned to **Member 4 — Testing & Integration** (#13, #15, #16, #17, #19, #21 — 22 Story Points) are fully completed, verified, and backed by automated test suites. See [`docs/TEST_SUMMARY_REPORT.md`](docs/TEST_SUMMARY_REPORT.md) and [`docs/RAZORPAY_SUBSCRIPTION_TEST_REPORT.md`](docs/RAZORPAY_SUBSCRIPTION_TEST_REPORT.md).
 
 ---
 
@@ -654,36 +676,61 @@ Team4/
 ├── StreamHub_SRS.pdf               Requirements
 ├── StreamHub_SAD.pdf               Architecture & design
 ├── StreamHub_Test_Plan.pdf         Test plan
-├── .github/workflows/blank.yml     CI: checks that README and the 3 documents exist
+├── sprint-02_demo.mp4              Sprint 2 demo walkthrough
+├── sprint1_demo.mp4                Sprint 1 demo walkthrough
+├── .env.example                    Global environment variables template
 │
 ├── backend/                        FastAPI + SQLAlchemy + PostgreSQL
 │   ├── requirements.txt
-│   ├── locustfile.py               Load test (OTT-NF-001)
-│   ├── seed_dev.py                 Optional demo data (development only)
+│   ├── locustfile.py               Load test (OTT-NF-004 - 50 users)
+│   ├── measure_startup_time.py     Video startup benchmark (OTT-NF-002)
+│   ├── seed_dev.py                 Development demo seed data
 │   ├── app/
 │   │   ├── main.py                 App creation, CORS, router registration
 │   │   ├── database.py             Engine, session, Base, get_db
-│   │   ├── init_db.py              Creates all tables
-│   │   ├── core/                   config.py (env settings), security.py (bcrypt, JWT)
-│   │   ├── models/                 user, title, subscription (Plan, Subscription),
-│   │   │                           playback (PlaybackProgress, WatchHistory), watchlist
+│   │   ├── init_db.py              Creates all tables & plan seeding
+│   │   ├── core/                   config.py, security.py (bcrypt, JWT)
+│   │   ├── models/                 user, title, subscription, playback, watchlist
 │   │   ├── schemas/                Pydantic request/response models
-│   │   ├── services/               Business logic (auth, otp, email, subscription,
-│   │   │                           playback, resume, history)
-│   │   └── routers/                auth, profile, catalog, playback,
-│   │                               subscription, admin, watchlist
-│   └── tests/
-│       └── playback_features/      Unit tests (TC-Play-01..03, TC-Personal-01, TC-Sub-03)
+│   │   ├── services/               Business logic (auth, playback, subscription, etc.)
+│   │   └── routers/                auth, catalog, playback, subscription, admin, watchlist
+│   └── tests/                      Pytest Automated Test Suites (80 tests, 100% pass)
 │
-└── frontend/                       React + Vite
-    └── src/
-        ├── App.jsx                 Home page and screen switching
-        ├── Auth.jsx, Login.jsx, ForgotPassword.jsx
-        └── features/
-            ├── api.js              Shared fetch helper (adds the login token)
-            ├── playback/           Player, resume, watch history
-            ├── watchlist/          Watchlist button and screen
-            └── subscription/       "My Subscription" screen
+├── frontend/                       React 19 + Vite SPA
+│   ├── src/
+│   │   ├── App.jsx                 Root component & screen router
+│   │   ├── components/             Navbar, HeroSlider, WebSeries, MovieBanner
+│   │   └── features/               playback, subscription, admin, watchlist, profile
+│   ├── package.json
+│   └── vite.config.js
+│
+└── docs/                           Architecture & Quality Assurance Deliverables
+    ├── architecture/               Blueprints, Diagrams, ER Model & API Mapping
+    │   ├── PROJECT_STRUCTURE.md    Detailed directory inventory & responsibilities
+    │   ├── STREAMHUB_ARCHITECTURE.md Mermaid architecture & sequence flows
+    │   ├── DATABASE_STRUCTURE.md   Mermaid ER diagram & table specifications
+    │   ├── API_MAPPING.md          Frontend-to-backend endpoint routing table
+    │   ├── CONFIGURATION_GUIDE.md  Environment variables & deployment security
+    │   ├── CODE_QUALITY_AUDIT.md   Static analysis & dependency audit
+    │   └── STRUCTURE_AUDIT_REPORT.md Final integrity & path validation report
+    │
+    └── testing/                    Software Testing & Quality Assurance (STP v1.0)
+        ├── 00_EXISTING_TEST_AUDIT.md Initial baseline test suite audit
+        ├── 01_Test_Cases.xlsx      8-Module Excel Test Cases Workbook
+        ├── 02_Requirement_Traceability_Matrix.xlsx Full RTM Workbook
+        ├── 03_Unit_Test_Report.md  Unit test execution report (80/80 passed)
+        ├── 04_Integration_Test_Report.md Subsystem integration report
+        ├── 05_System_Validation_Report.md End-to-end workflow validation
+        ├── 06_Code_Coverage_Report/ Coverage summary & interactive HTML
+        ├── 07_Branch_Coverage_Report.md Branch coverage breakdown (82.1%)
+        ├── 08_Performance_Test_Report.md Latency & Locust load test report
+        ├── 09_Security_Test_Report.md Security checklist (OTT-SR-001..006)
+        ├── 10_Razorpay_Subscription_Test_Report.md Payment & access control
+        ├── 11_Defect_and_Retest_Report.xlsx Defect tracking & retest log
+        ├── 12_Final_Test_Summary_Report.md Final STSR evaluation report
+        ├── test_data/              Test accounts, plans & boundary guide
+        ├── test_scripts/           Pytest, Locust & benchmark instructions
+        └── evidence/               Logs, JUnit XML, Pytest HTML & Locust reports
 ```
 
 **How a request flows:** `router` (HTTP and validation) → `service` (business rules) → `model` (database tables). Keep new code in the same layers, and do not call the database directly from a router if a service exists.
