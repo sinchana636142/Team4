@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 import pytest
 from app.models import User
 from app.routers.auth import router
+from app.core.security import verify_password
 from app.services.otp_service import hash_otp
 
 
@@ -281,3 +282,75 @@ def test_login_succeeds_after_verification(make_client, db, monkeypatch):
     assert "access_token" in data
     assert data["token_type"] == "bearer"
     assert data["user"]["is_verified"] is True
+
+
+def test_password_reset_flow_succeeds_with_sqlite_timestamps(
+    make_client, db, monkeypatch
+):
+    sent_otps = []
+    monkeypatch.setattr(
+        "app.routers.auth.send_otp_email",
+        lambda email, otp: sent_otps.append((email, otp)),
+    )
+    client = make_client(router, user_id=None)
+    user = User(
+        full_name="Reset Tester",
+        email="reset.tester@example.com",
+        password_hash="old-password-hash",
+        is_verified=True,
+    )
+    db.add(user)
+    db.commit()
+
+    request_res = client.post(
+        "/auth/forgot-password",
+        json={"email": "RESET.TESTER@example.com"},
+    )
+    assert request_res.status_code == 200
+    assert sent_otps[0][0] == "reset.tester@example.com"
+    otp = sent_otps[0][1]
+
+    verify_res = client.post(
+        "/auth/verify-reset-otp",
+        json={"email": user.email, "otp": otp},
+    )
+    assert verify_res.status_code == 200
+
+    reset_res = client.post(
+        "/auth/reset-password",
+        json={
+            "email": user.email,
+            "otp": otp,
+            "new_password": "NewPassword123!",
+        },
+    )
+    assert reset_res.status_code == 200
+
+    db.refresh(user)
+    assert verify_password("NewPassword123!", user.password_hash)
+    assert user.reset_otp_hash is None
+    assert user.reset_otp_expires_at is None
+    assert user.reset_otp_verified_until is None
+
+
+def test_password_reset_rejects_expired_code(make_client, db):
+    client = make_client(router, user_id=None)
+    user = User(
+        full_name="Expired Reset Tester",
+        email="expired.reset@example.com",
+        password_hash="old-password-hash",
+        is_verified=True,
+        reset_otp_hash=hash_otp("123456"),
+        reset_otp_expires_at=datetime.now(timezone.utc) - timedelta(minutes=1),
+        reset_otp_attempts=0,
+    )
+    db.add(user)
+    db.commit()
+
+    response = client.post(
+        "/auth/verify-reset-otp",
+        json={"email": user.email, "otp": "123456"},
+    )
+
+    assert response.status_code == 400
+    assert "invalid or expired" in response.json()["detail"].lower()

@@ -1,11 +1,10 @@
 import { useState } from "react";
 import "./ForgotPassword.css";
-
-const API_URL = "http://127.0.0.1:8001";
+import { API_URL } from "./features/api";
 
 function ForgotPassword({ onBack }) {
   const [step, setStep] = useState(1);
-  const [email, setEmail] = useState("");
+  const [emailAddress, setEmailAddress] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -16,7 +15,7 @@ function ForgotPassword({ onBack }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const normalizedEmail = email.trim().toLowerCase();
+  const email = emailAddress.trim();
 
   async function requestReset(event) {
     event.preventDefault();
@@ -196,7 +195,7 @@ function ForgotPassword({ onBack }) {
 
         <p className="reset-description">
           {step === 1
-            ? "Enter your email address to begin the password-reset process."
+            ? "Enter the email address associated with your account to begin the password-reset process."
             : step === 2
               ? `Enter the verification code sent to ${normalizedEmail}.`
               : "Your password has been changed successfully. You can now return to StreamHub and sign in with your new password."}
@@ -217,13 +216,12 @@ function ForgotPassword({ onBack }) {
         {step === 1 && (
           <form onSubmit={requestReset}>
             <label htmlFor="reset-email">Email address</label>
-
             <input
               id="reset-email"
               type="email"
-              placeholder="Enter your email address"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              placeholder="you@example.com"
+              value={emailAddress}
+              onChange={(event) => setEmailAddress(event.target.value)}
               autoComplete="email"
               required
             />
@@ -231,7 +229,7 @@ function ForgotPassword({ onBack }) {
             <button
               type="submit"
               className="reset-button"
-              disabled={loading || !email.trim()}
+              disabled={loading || !emailAddress.trim()}
             >
               {loading ? "Requesting..." : "Request password reset"}
             </button>

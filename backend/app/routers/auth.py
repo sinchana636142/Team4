@@ -41,6 +41,12 @@ logger = logging.getLogger(__name__)
 bearer_scheme = HTTPBearer(auto_error=False)
 
 
+def _as_utc(value: datetime) -> datetime:
+    if value.tzinfo is None:
+        return value.replace(tzinfo=timezone.utc)
+    return value.astimezone(timezone.utc)
+
+
 @router.post(
     "/register",
     status_code=status.HTTP_201_CREATED,
@@ -204,11 +210,16 @@ def verify_reset_otp(
         )
 
     now = datetime.now(timezone.utc)
+    expires_at = (
+        _as_utc(user.reset_otp_expires_at)
+        if user.reset_otp_expires_at
+        else None
+    )
 
     if (
         not user.reset_otp_hash
-        or not user.reset_otp_expires_at
-        or user.reset_otp_expires_at <= now
+        or expires_at is None
+        or expires_at <= now
         or (user.reset_otp_attempts or 0) >= 5
     ):
         raise HTTPException(
@@ -247,13 +258,23 @@ def reset_password(
         )
 
     now = datetime.now(timezone.utc)
+    expires_at = (
+        _as_utc(user.reset_otp_expires_at)
+        if user.reset_otp_expires_at
+        else None
+    )
+    verified_until = (
+        _as_utc(user.reset_otp_verified_until)
+        if user.reset_otp_verified_until
+        else None
+    )
 
     if (
         not user.reset_otp_hash
-        or not user.reset_otp_expires_at
-        or user.reset_otp_expires_at <= now
-        or not user.reset_otp_verified_until
-        or user.reset_otp_verified_until <= now
+        or expires_at is None
+        or expires_at <= now
+        or verified_until is None
+        or verified_until <= now
         or (user.reset_otp_attempts or 0) >= 5
         or hash_otp(request.otp) != user.reset_otp_hash
     ):
